@@ -6,10 +6,9 @@ const { type } = Astro.props;
 const meta = TYPE_META[type];
 const iconSrc = `${import.meta.env.BASE_URL}${meta.icon}`;
 ---
-<div class="type-badge" data-role="type-badge" aria-label={`Tipo ${type}`}>
+<div class="type-badge" data-role="type-badge" aria-label={`Tipo ${type}`} title={type}>
   <span class="type-symbol" aria-hidden="true">
     <span class="type-symbol-fallback" data-role="type-symbol">{meta.symbol}</span>
     <img class="type-icon" data-role="type-icon" src={iconSrc} alt="" onerror="this.style.display='none'" />
   </span>
-  <span class="type-name" data-role="type-name">{type}</span>
 </div>

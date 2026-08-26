@@ -76,15 +76,20 @@ function pickLanguage<T extends { language: { name: string } }>(entries: T[]): T
     ?? entries[0];
 }
 
+function roundStatToTen(value: number, max = Number.POSITIVE_INFINITY) {
+  const rounded = Math.max(0, Math.round((value || 0) / 10) * 10);
+  return Math.min(max, rounded);
+}
+
 function statsFromPokemon(pokemon: PokemonResponse): OfficialStats {
   const byName = Object.fromEntries(pokemon.stats.map((item) => [item.stat.name, item.base_stat]));
   return {
-    hp: byName.hp ?? 0,
-    attack: byName.attack ?? 0,
-    defense: byName.defense ?? 0,
-    specialAttack: byName['special-attack'] ?? 0,
-    specialDefense: byName['special-defense'] ?? 0,
-    speed: byName.speed ?? 0,
+    hp: roundStatToTen(byName.hp ?? 0, 300),
+    attack: roundStatToTen(byName.attack ?? 0),
+    defense: roundStatToTen(byName.defense ?? 0),
+    specialAttack: roundStatToTen(byName['special-attack'] ?? 0),
+    specialDefense: roundStatToTen(byName['special-defense'] ?? 0),
+    speed: roundStatToTen(byName.speed ?? 0),
   };
 }
 
@@ -129,8 +134,6 @@ export async function loadPokemonEditorData(identifier: string | number, signal?
       previousEvolution: previousEvolution ? titleCasePokemon(previousEvolution) : '',
       previousEvolutionImage,
       stage: stageFromDepth(position?.depth ?? 0),
-      isLegendary: species.is_legendary,
-      isMythical: species.is_mythical,
       suggestedType,
     },
     officialStats: statsFromPokemon(pokemon),

@@ -3,23 +3,23 @@ import type { PokemonCardData } from '../../types/card';
 interface Props { card: PokemonCardData }
 const { card } = Astro.props;
 const stats = [
-  ['HP', 'hp', card.hp, 'hp'], ['ATK', 'attack', card.attack, 'attack'], ['DEF', 'defense', card.defense, 'defense'],
-  ['SPA', 'specialAttack', card.specialAttack, 'specialAttack'], ['SPD', 'specialDefense', card.specialDefense, 'specialDefense'], ['VEL', 'speed', card.speed, 'speed'],
+  ['HP', 'hp', card.hp, 'hp', 300], ['ATK', 'attack', card.attack, 'attack', null], ['DEF', 'defense', card.defense, 'defense', null],
+  ['SPA', 'specialAttack', card.specialAttack, 'specialAttack', null], ['SPD', 'specialDefense', card.specialDefense, 'specialDefense', null], ['VEL', 'speed', card.speed, 'speed', null],
 ] as const;
 ---
 <details class="editor-section" open>
-  <summary><span class="section-index">05</span><span><strong>Status</strong><small>Valores exclusivos do seu jogo</small></span><i aria-hidden="true">⌄</i></summary>
+  <summary><span class="section-index">05</span><span><strong>Status</strong><small>Escala em dezenas; HP máximo 300</small></span><i aria-hidden="true">⌄</i></summary>
   <div class="section-body">
     <div class="stats-editor-grid">
-      {stats.map(([label, field, value, ref]) => (
+      {stats.map(([label, field, value, ref, max]) => (
         <label class="stat-input">
           <span>{label}</span>
-          <input type="number" min="0" step="1" inputmode="numeric" value={value} data-field={field} />
-          <small>Base oficial: <b data-reference-stat={ref}>—</b></small>
+          <input type="number" min="0" max={max ?? undefined} step="10" inputmode="numeric" value={value} data-field={field} />
+          <small>Base API arredondada: <b data-reference-stat={ref}>—</b></small>
         </label>
       ))}
     </div>
-    <button class="button subtle full" type="button" data-action="use-official-stats" disabled>Usar valores da PokéAPI</button>
-    <p class="section-note">Os valores oficiais aparecem apenas como referência e nunca substituem os seus automaticamente.</p>
+    <button class="button subtle full" type="button" data-action="use-official-stats" disabled>Usar valores arredondados da PokéAPI</button>
+    <p class="section-note">Todos os atributos são mantidos em múltiplos de 10. O HP é limitado a 300.</p>
   </div>
 </details>

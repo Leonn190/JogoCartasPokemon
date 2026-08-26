@@ -1,0 +1,49 @@
+---
+import type { ChampionCardData } from '../../types/card';
+interface Props { card: ChampionCardData }
+const { card } = Astro.props;
+---
+<div class="editor-kind" data-editor-kind="champion" hidden>
+  <details class="editor-section" open>
+    <summary><span class="section-index">01</span><span><strong>Campeão</strong><small>Identidade e condições pessoais</small></span><i aria-hidden="true">⌄</i></summary>
+    <div class="section-body grid-2">
+      <div class="field span-2"><label for="champion-name">Nome</label><input id="champion-name" data-field="name" value={card.name} maxlength="34" /></div>
+      <div class="field span-2"><label for="victory-condition">Forma de Vitória</label><textarea id="victory-condition" data-field="victoryCondition" rows="4" maxlength="360">{card.victoryCondition}</textarea></div>
+      <div class="field span-2"><label for="defeat-condition">Forma de Derrota</label><textarea id="defeat-condition" data-field="defeatCondition" rows="4" maxlength="360">{card.defeatCondition}</textarea></div>
+    </div>
+  </details>
+
+  <details class="editor-section" open>
+    <summary><span class="section-index">02</span><span><strong>Passiva</strong><small>Permanece ativa durante a Jornada</small></span><i aria-hidden="true">⌄</i></summary>
+    <div class="section-body grid-2">
+      <div class="field span-2"><label for="passive-name">Nome da Passiva</label><input id="passive-name" data-field="passiveName" value={card.passiveName} maxlength="34" /></div>
+      <div class="field span-2"><label for="passive-description">Descrição</label><textarea id="passive-description" data-field="passiveDescription" rows="4" maxlength="360">{card.passiveDescription}</textarea></div>
+    </div>
+  </details>
+
+  <details class="editor-section" open>
+    <summary><span class="section-index">03</span><span><strong>Habilidade Inicial</strong><small>Resolvida durante a preparação</small></span><i aria-hidden="true">⌄</i></summary>
+    <div class="section-body grid-2">
+      <div class="field span-2"><label for="initial-ability-name">Nome</label><input id="initial-ability-name" data-field="initialAbilityName" value={card.initialAbilityName} maxlength="34" /></div>
+      <div class="field span-2"><label for="initial-ability-description">Descrição</label><textarea id="initial-ability-description" data-field="initialAbilityDescription" rows="4" maxlength="360">{card.initialAbilityDescription}</textarea></div>
+    </div>
+  </details>
+
+  <details class="editor-section" open>
+    <summary><span class="section-index">04</span><span><strong>Configuração Inicial</strong><small>Compras extras determinadas pelo Campeão</small></span><i aria-hidden="true">⌄</i></summary>
+    <div class="section-body grid-3">
+      <div class="field"><label for="initial-pokemon-count">Pokémon</label><input id="initial-pokemon-count" data-field="initialPokemonCount" type="number" min="0" max="12" step="1" value={card.initialPokemonCount} /></div>
+      <div class="field"><label for="initial-attack-count">Ataques</label><input id="initial-attack-count" data-field="initialAttackCount" type="number" min="0" max="12" step="1" value={card.initialAttackCount} /></div>
+      <div class="field"><label for="initial-trainer-count">Treinadores</label><input id="initial-trainer-count" data-field="initialTrainerCount" type="number" min="0" max="12" step="1" value={card.initialTrainerCount} /></div>
+    </div>
+  </details>
+
+  <details class="editor-section">
+    <summary><span class="section-index">05</span><span><strong>Carta</strong><small>Numeração e coleção</small></span><i aria-hidden="true">⌄</i></summary>
+    <div class="section-body grid-2">
+      <div class="field"><label for="champion-card-number">Número da carta</label><input id="champion-card-number" data-field="cardNumber" type="number" min="1" max="150" value={card.cardNumber} /></div>
+      <div class="field"><label>Total da coleção</label><input value={card.setTotal} readonly /></div>
+      <div class="field span-2"><label for="champion-set-code">Sigla da coleção</label><input id="champion-set-code" data-field="setCode" value={card.setCode} maxlength="8" spellcheck="false" /></div>
+    </div>
+  </details>
+</div>

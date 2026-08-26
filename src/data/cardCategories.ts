@@ -27,6 +27,10 @@ export const CARD_CATEGORY_META: Record<Exclude<CardType, 'pokemon'>, CategoryMe
     label: 'Item', symbol: '◆', accent: '#438fc3', deep: '#245578', surface: '#d8dde1',
     ribbonStart: '#68add7', ribbonEnd: '#327aa8',
   },
+  rareItem: {
+    label: 'Item Raro', symbol: '✦', accent: '#df6fa8', deep: '#873557', surface: '#e3d9df',
+    ribbonStart: '#f39ac6', ribbonEnd: '#c9538d',
+  },
   tool: {
     label: 'Ferramenta', symbol: '⬡', accent: '#8a61b6', deep: '#51356f', surface: '#ddd9e1',
     ribbonStart: '#a985d0', ribbonEnd: '#70489b',
@@ -52,6 +56,6 @@ export const UTILITY_META: Record<UtilityCardType, (typeof CARD_CATEGORY_META)[U
   stadium: CARD_CATEGORY_META.stadium,
   supporter: CARD_CATEGORY_META.supporter,
   item: CARD_CATEGORY_META.item,
+  rareItem: CARD_CATEGORY_META.rareItem,
   tool: CARD_CATEGORY_META.tool,
-  champion: CARD_CATEGORY_META.champion,
 };

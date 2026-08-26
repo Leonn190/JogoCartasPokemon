@@ -1,4 +1,4 @@
-export const CARD_TYPES = ['pokemon', 'attack', 'stadium', 'supporter', 'item', 'tool', 'champion'] as const;
+export const CARD_TYPES = ['pokemon', 'attack', 'stadium', 'supporter', 'item', 'rareItem', 'tool', 'champion'] as const;
 export type CardType = (typeof CARD_TYPES)[number];
 
 export const CARD_TYPE_LABELS: Record<CardType, string> = {
@@ -7,18 +7,41 @@ export const CARD_TYPE_LABELS: Record<CardType, string> = {
   stadium: 'Estádio',
   supporter: 'Apoiador',
   item: 'Item',
+  rareItem: 'Item Raro',
   tool: 'Ferramenta',
   champion: 'Campeão',
 };
 
-export const UTILITY_CARD_TYPES = ['stadium', 'supporter', 'item', 'tool', 'champion'] as const;
+export const TRAINER_CARD_TYPES = ['stadium', 'supporter', 'item', 'rareItem', 'tool', 'champion'] as const;
+export type TrainerCardType = (typeof TRAINER_CARD_TYPES)[number];
+
+export const UTILITY_CARD_TYPES = ['stadium', 'supporter', 'item', 'rareItem', 'tool'] as const;
 export type UtilityCardType = (typeof UTILITY_CARD_TYPES)[number];
 
-export const CARD_FORMS = ['Normal', 'EX', 'Mega', 'Radiante', 'Gigantamax', 'Lendário'] as const;
+export const CARD_FORMS = ['Normal', 'EX', 'Mega', 'Radiante', 'Gigantamax'] as const;
 export type PokemonForm = (typeof CARD_FORMS)[number];
 
 export const CARD_STAGES = ['BÁSICO', 'ESTÁGIO 1', 'ESTÁGIO 2', 'FINAL'] as const;
 export type PokemonStage = (typeof CARD_STAGES)[number];
+
+export const POKEMON_RARITIES = [
+  'common',
+  'uncommon',
+  'rare',
+  'ultraRare',
+  'illustrationRare',
+  'illustrationRareUltra',
+] as const;
+export type PokemonRarity = (typeof POKEMON_RARITIES)[number];
+
+export const POKEMON_RARITY_LABELS: Record<PokemonRarity, string> = {
+  common: 'Comum',
+  uncommon: 'Incomum',
+  rare: 'Raro',
+  ultraRare: 'Ultra Raro',
+  illustrationRare: 'Ilustração Rara',
+  illustrationRareUltra: 'Ilustração Rara Ultra',
+};
 
 export const GAME_TYPES = [
   'Fogo', 'Água', 'Planta', 'Elétrico', 'Gelo', 'Lutador',
@@ -46,7 +69,7 @@ export interface BaseCardData {
   artwork: string;
   artworkTransform: ArtworkTransform;
   cardNumber: number;
-  setTotal: 150;
+  setTotal: number;
   setCode: string;
 }
 
@@ -55,6 +78,7 @@ export interface PokemonCardData extends BaseCardData, CardStats {
   pokemonId: number | null;
   pokemonName: string;
   form: PokemonForm;
+  rarity: PokemonRarity;
   type: GameType;
   stage: PokemonStage;
   previousEvolution: string;
@@ -68,8 +92,6 @@ export interface PokemonCardData extends BaseCardData, CardStats {
   abilityName: string;
   abilityDescription: string;
   flavorText: string;
-  isLegendary: boolean;
-  isMythical: boolean;
 }
 
 export interface CompatiblePokemon {
@@ -80,12 +102,15 @@ export interface CompatiblePokemon {
 
 export type AttackCompatibilityMode = 'specific' | 'type';
 export type AttackKind = 'normal' | 'special';
+export type AttackPower = 0 | 50 | 100 | 150 | 200;
 
 export interface AttackCardData extends BaseCardData {
   cardType: 'attack';
   attackKind: AttackKind;
   attackName: string;
   attackDescription: string;
+  power: AttackPower;
+  type: GameType;
   compatibilityMode: AttackCompatibilityMode;
   compatiblePokemon: CompatiblePokemon[];
   compatibleType: GameType;
@@ -98,7 +123,21 @@ export interface UtilityCardData extends BaseCardData {
   usageText: string;
 }
 
-export type CardData = PokemonCardData | AttackCardData | UtilityCardData;
+export interface ChampionCardData extends BaseCardData {
+  cardType: 'champion';
+  name: string;
+  victoryCondition: string;
+  defeatCondition: string;
+  passiveName: string;
+  passiveDescription: string;
+  initialAbilityName: string;
+  initialAbilityDescription: string;
+  initialPokemonCount: number;
+  initialAttackCount: number;
+  initialTrainerCount: number;
+}
+
+export type CardData = PokemonCardData | AttackCardData | UtilityCardData | ChampionCardData;
 
 export interface OfficialStats extends CardStats {}
 

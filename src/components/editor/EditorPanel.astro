@@ -1,6 +1,6 @@
 ---
 import type { PokemonCardData } from '../../types/card';
-import { DEFAULT_ATTACK_CARD, createUtilityCard } from '../../data/defaultCard';
+import { DEFAULT_ATTACK_CARD, DEFAULT_CHAMPION_CARD, createUtilityCard } from '../../data/defaultCard';
 import CardTypeSelector from './CardTypeSelector.astro';
 import PokemonForm from './PokemonForm.astro';
 import EvolutionEditor from './EvolutionEditor.astro';
@@ -11,6 +11,7 @@ import AbilityEditor from './AbilityEditor.astro';
 import CardMetadataEditor from './CardMetadataEditor.astro';
 import AttackEditor from './AttackEditor.astro';
 import UtilityEditor from './UtilityEditor.astro';
+import ChampionEditor from './ChampionEditor.astro';
 interface Props { card: PokemonCardData }
 const { card } = Astro.props;
 ---
@@ -37,5 +38,6 @@ const { card } = Astro.props;
 
   <AttackEditor card={DEFAULT_ATTACK_CARD} />
   <UtilityEditor card={createUtilityCard('stadium')} />
+  <ChampionEditor card={DEFAULT_CHAMPION_CARD} />
   <ArtworkControls card={card} />
 </aside>

@@ -1,0 +1,62 @@
+---
+import type { ChampionCardData } from '../../types/card';
+import { CARD_CATEGORY_META } from '../../data/cardCategories';
+import SharedArtwork from './SharedArtwork.astro';
+interface Props { card: ChampionCardData }
+const { card } = Astro.props;
+const meta = CARD_CATEGORY_META.champion;
+const number = String(card.cardNumber).padStart(3, '0');
+---
+<article
+  class="game-card trainer-card champion-card"
+  data-role="card-template"
+  data-card-template="champion"
+  style={`--accent:${meta.accent};--accent-deep:${meta.deep};--utility-surface:${meta.surface};--ribbon-start:${meta.ribbonStart};--ribbon-end:${meta.ribbonEnd};`}
+>
+  <div class="champion-shell card-shell">
+    <header class="tcg-title-rail">
+      <div class="tcg-subtype-ribbon"><strong>Campeão</strong></div>
+      <div class="tcg-major-label">TREINADOR</div>
+    </header>
+
+    <div class="tcg-name-row">
+      <h2 data-role="champion-name">{card.name}</h2>
+      <span class="tcg-name-glint" aria-hidden="true"></span>
+    </div>
+
+    <SharedArtwork artwork={card.artwork} name={card.name} />
+
+    <section class="champion-rules-panel">
+      <div class="champion-rule champion-victory">
+        <span>FORMA DE VITÓRIA</span>
+        <p data-role="champion-victory">{card.victoryCondition}</p>
+      </div>
+      <div class="champion-rule champion-defeat">
+        <span>FORMA DE DERROTA</span>
+        <p data-role="champion-defeat">{card.defeatCondition}</p>
+      </div>
+      <div class="champion-rule">
+        <span>PASSIVA</span>
+        <h3 data-role="champion-passive-name">{card.passiveName}</h3>
+        <p data-role="champion-passive-description">{card.passiveDescription}</p>
+      </div>
+      <div class="champion-rule">
+        <span>HABILIDADE INICIAL</span>
+        <h3 data-role="champion-initial-ability-name">{card.initialAbilityName}</h3>
+        <p data-role="champion-initial-ability-description">{card.initialAbilityDescription}</p>
+      </div>
+      <div class="champion-starting-config">
+        <strong>CONFIGURAÇÃO INICIAL</strong>
+        <span><b data-role="champion-initial-pokemon">{card.initialPokemonCount}</b> Pokémon</span>
+        <span><b data-role="champion-initial-attack">{card.initialAttackCount}</b> Ataques</span>
+        <span><b data-role="champion-initial-trainer">{card.initialTrainerCount}</b> Treinadores</span>
+      </div>
+    </section>
+
+    <footer class="simple-footer tcg-footer">
+      <span class="set-stamp" data-role="set-code">{card.setCode}</span>
+      <span class="collector-number"><strong data-role="card-number">{number}</strong><em>/</em><span data-role="set-total">{card.setTotal}</span></span>
+      <span class="edition-mark">CF • 01</span>
+    </footer>
+  </div>
+</article>

@@ -360,9 +360,6 @@
 .pokemon-card[data-form="Radiante"] .card-shell { background: color-mix(in srgb,var(--type) 30%,#e8ddd9); }
 .pokemon-card[data-form="Gigantamax"] { background: repeating-linear-gradient(135deg,rgba(255,255,255,.12) 0 1px,rgba(0,0,0,.04) 1px 3px), linear-gradient(145deg,#c9b0be,#9b758a 52%,#bea2b1); }
 .pokemon-card[data-form="Gigantamax"] .card-shell { background: color-mix(in srgb,var(--type) 42%,#ccb6c5); }
-.pokemon-card[data-form="Lendário"] { background: repeating-linear-gradient(135deg,rgba(255,255,255,.17) 0 1px,rgba(91,63,11,.045) 1px 3px), linear-gradient(145deg,#e7d28d,#b88f32 48%,#e1c873); }
-.pokemon-card[data-form="Lendário"] .card-shell { background: color-mix(in srgb,var(--type) 32%,#e3d5a7); }
-.pokemon-card[data-form="Lendário"] .form-mark { color:#65450f; }
 
 /* Full Art real: o quadro da imagem deixa de participar da composição. */
 .pokemon-card.is-expanded { background: #d2c7a0; color: #fff; }
@@ -723,11 +720,6 @@
 }
 .tcg-footer .set-stamp { background:rgba(255,255,255,.48); }
 
-/* Campeão: por enquanto só identidade cromática, mantendo a mesma família. */
-.utility-card[data-utility-type="champion"] .tcg-major-label { color:#75633c; }
-.utility-card[data-utility-type="champion"] .tcg-title-rail {
-  box-shadow: inset 0 1px 0 white, inset 0 -2px 5px rgba(0,0,0,.12), 0 2px 3px rgba(0,0,0,.12), 0 0 9px rgba(205,157,54,.12);
-}
 
 /* Ataque --------------------------------------------------------------- */
 .attack-card[data-attack-kind="special"] {
@@ -890,7 +882,6 @@
 .pokemon-card.is-expanded[data-form="Mega"] { background:#bebfc2; }
 .pokemon-card.is-expanded[data-form="Radiante"] { background:#d9d7ce; }
 .pokemon-card.is-expanded[data-form="Gigantamax"] { background:#b79aa9; }
-.pokemon-card.is-expanded[data-form="Lendário"] { background:#c6a85d; }
 .pokemon-card.is-expanded .stat-flag span,
 .pokemon-card.is-expanded .stat-flag strong {
   -webkit-text-stroke:.35px rgba(5,7,9,.72);
@@ -1094,7 +1085,6 @@
 .utility-card[data-utility-type="supporter"] { --accent:#eb7a3f; --accent-deep:#8f3f18; --ribbon-start:#ff9d62; --ribbon-end:#cf592d; }
 .utility-card[data-utility-type="item"] { --accent:#438fc3; --accent-deep:#245578; --ribbon-start:#68add7; --ribbon-end:#327aa8; }
 .utility-card[data-utility-type="tool"] { --accent:#8a61b6; --accent-deep:#51356f; --ribbon-start:#a985d0; --ribbon-end:#70489b; }
-.utility-card[data-utility-type="champion"] { --accent:#d6ac2e; --accent-deep:#73590c; --ribbon-start:#f0ca4c; --ribbon-end:#b88a16; }
 
 /* Ataque Normal vermelho; Ataque Especial roxo. */
 .attack-card[data-attack-kind="normal"] { --accent:#cc484b; --accent-deep:#752429; --ribbon-start:#e86364; --ribbon-end:#a93239; }
@@ -1175,3 +1165,261 @@
   background: linear-gradient(145deg, color-mix(in srgb,var(--accent) 45%,white), var(--accent));
   border-color: color-mix(in srgb,var(--accent-deep) 58%,#4e5356);
 }
+
+/* ----------------------------------------------------------------------
+   Ajustes Jornada: raridade, tipagem de Ataques e acabamento Pokémon
+   ---------------------------------------------------------------------- */
+
+/* Moldura Pokémon consistentemente prateada, sem alterar a cor principal do tipo. */
+.pokemon-card::before {
+  content:"";
+  position:absolute;
+  inset:8px;
+  z-index:1;
+  pointer-events:none;
+  border:2px solid #b9c0c4;
+  border-radius:21px;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.88),
+    inset 0 0 0 1px rgba(74,82,87,.34),
+    0 0 12px rgba(230,235,238,.2);
+}
+.pokemon-card .card-shell {
+  border:1px solid rgba(205,212,216,.76);
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.34),
+    inset 0 0 30px color-mix(in srgb, var(--type-deep) 20%, transparent),
+    0 0 0 1px rgba(91,99,104,.24);
+}
+.card-header::after {
+  content:"";
+  position:absolute;
+  left:5px;
+  right:5px;
+  bottom:-2px;
+  height:1px;
+  background:linear-gradient(90deg,transparent,#c7cdd0 12%,#f5f6f6 50%,#aab2b6 88%,transparent);
+  opacity:.72;
+}
+
+/* Pokémon: o tipo é comunicado somente pelo ícone e ele ganha mais presença. */
+.type-zone { min-width:58px; }
+.type-badge { min-width:0; width:56px; justify-content:center; gap:0; }
+.type-symbol { width:52px; height:52px; flex-basis:52px; }
+.type-icon { inset:-2px; width:56px; height:56px; filter:drop-shadow(0 2px 2px rgba(0,0,0,.32)); }
+.type-symbol-fallback { width:48px; height:48px; font-size:21px; }
+.type-name { display:none !important; }
+
+/* A faixa de dados da espécie fica discretamente mais baixa/compacta. */
+.artwork-inner { inset:0 0 22px; }
+.pokemon-info {
+  height:22px;
+  padding:3px 9px 0;
+  border-top:1px solid rgba(190,198,202,.92);
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.94),color-mix(in srgb,var(--type-light) 16%,#e5e7e6));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.78);
+}
+
+/* Habilidade recebe uma tonalidade própria baseada no tipo, mantendo filetes prata. */
+.ability-block {
+  border:1px solid #aeb7bb;
+  background:
+    repeating-linear-gradient(180deg,rgba(255,255,255,.075) 0 1px,transparent 1px 5px),
+    linear-gradient(155deg,
+      color-mix(in srgb,var(--type-light) 38%,#f1f2ef) 0%,
+      color-mix(in srgb,var(--type) 32%,#e4e6e3) 53%,
+      color-mix(in srgb,var(--type-deep) 18%,#d8dcda) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.84),
+    inset 0 -1px 0 rgba(80,87,91,.22),
+    0 0 0 1px rgba(244,247,248,.46);
+}
+.ability-kicker { color:color-mix(in srgb,var(--type-deep) 86%,#1b1e20); }
+.pokemon-card[data-pokemon-type="Sombrio"] .ability-block {
+  color:#f6f7f7;
+  border-color:#9ea6aa;
+  background:
+    repeating-linear-gradient(180deg,rgba(255,255,255,.04) 0 1px,transparent 1px 5px),
+    linear-gradient(155deg,#373941,#22242a 55%,#111318);
+}
+
+/* Símbolos de raridade no rodapé Pokémon. */
+.rarity-mark {
+  min-width:32px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  margin-left:auto;
+  color:#232629;
+  font-size:15px;
+  line-height:1;
+  font-weight:950;
+  letter-spacing:-.08em;
+  text-shadow:0 1px 0 rgba(255,255,255,.7);
+}
+.rarity-mark[data-rarity="common"] { font-size:12px; }
+.rarity-mark[data-rarity="uncommon"] { font-size:13px; }
+.rarity-mark[data-rarity="rare"] { font-size:14px; text-shadow:0 1px 0 #fff,0 0 3px rgba(255,255,255,.65); }
+.rarity-mark[data-rarity="ultraRare"],
+.rarity-mark[data-rarity="illustrationRare"],
+.rarity-mark[data-rarity="illustrationRareUltra"] {
+  color:#b88719;
+  text-shadow:0 1px 0 #fff3ba,0 0 3px rgba(173,121,17,.35);
+}
+.pokemon-card[data-pokemon-type="Sombrio"] .rarity-mark { color:#f5f6f7; text-shadow:0 1px 2px #000; }
+.pokemon-card[data-pokemon-type="Sombrio"] .rarity-mark[data-rarity="ultraRare"],
+.pokemon-card[data-pokemon-type="Sombrio"] .rarity-mark[data-rarity="illustrationRare"],
+.pokemon-card[data-pokemon-type="Sombrio"] .rarity-mark[data-rarity="illustrationRareUltra"] { color:#f3cf61; }
+
+/* Item Raro é o subtipo rosa solicitado. */
+.utility-card[data-utility-type="rareItem"] {
+  --accent:#df6fa8;
+  --accent-deep:#873557;
+  --ribbon-start:#f39ac6;
+  --ribbon-end:#c9538d;
+}
+
+/* Tipagem e potência próprias no cabeçalho dos Ataques. */
+.attack-name-row { padding-right:104px; }
+.attack-name-row h2 { max-width:410px; }
+.attack-name-meta {
+  position:absolute;
+  right:14px;
+  top:50%;
+  transform:translateY(-50%);
+  z-index:3;
+  display:flex;
+  align-items:center;
+  gap:7px;
+}
+.attack-power-badge {
+  min-width:48px;
+  height:29px;
+  display:grid;
+  place-items:center;
+  padding:0 7px;
+  border:1px solid color-mix(in srgb,var(--accent-deep) 70%,#5e6264);
+  border-radius:15px;
+  background:linear-gradient(180deg,rgba(255,255,255,.88),color-mix(in srgb,var(--accent) 20%,#d8dcde));
+  color:var(--accent-deep);
+  font-size:12px;
+  font-weight:950;
+  box-shadow:inset 0 1px 0 #fff,0 1px 2px rgba(0,0,0,.14);
+}
+.attack-type-badge {
+  position:relative;
+  width:39px;
+  height:39px;
+  flex:0 0 39px;
+  display:grid;
+  place-items:center;
+}
+.attack-type-badge img {
+  position:absolute;
+  inset:-1px;
+  width:41px;
+  height:41px;
+  object-fit:contain;
+  filter:drop-shadow(0 1px 1px rgba(0,0,0,.25));
+}
+.attack-type-fallback {
+  width:35px;
+  height:35px;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  background:var(--attack-type-deep);
+  color:#fff;
+  font-size:16px;
+  font-weight:950;
+}
+
+/* Campeão possui estrutura própria em vez da caixa genérica de Treinador. */
+.champion-card {
+  --accent:#d6ac2e;
+  --accent-deep:#73590c;
+  --ribbon-start:#f0ca4c;
+  --ribbon-end:#b88a16;
+}
+.champion-shell {
+  display:grid;
+  grid-template-rows:50px 55px 238px 408px 55px;
+  gap:4px;
+  padding:10px 11px;
+  background:
+    repeating-linear-gradient(180deg,rgba(88,78,42,.04) 0 1px,transparent 1px 5px),
+    linear-gradient(90deg,#cfd2d3 0%,#f6f4e9 11%,#ddded8 48%,#f5f2e4 86%,#c5c9c9 100%);
+  box-shadow:inset 0 0 24px rgba(69,70,69,.15),inset 0 0 0 1px rgba(255,255,255,.38);
+}
+.champion-card .shared-artwork {
+  margin:0 8px;
+  border:2px solid #aab1b5;
+  box-shadow:0 0 0 1px rgba(255,255,255,.9),0 3px 6px rgba(0,0,0,.21),inset 0 0 0 1px rgba(71,76,79,.17);
+}
+.champion-rules-panel {
+  position:relative;
+  min-height:0;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  grid-template-rows:112px 170px 96px;
+  gap:7px;
+  padding:8px 9px;
+  border-left:1px solid rgba(94,96,95,.2);
+  border-right:1px solid rgba(94,96,95,.2);
+  background:
+    repeating-linear-gradient(180deg,rgba(90,92,91,.05) 0 1px,transparent 1px 6px),
+    linear-gradient(90deg,rgba(206,208,207,.8),rgba(250,249,242,.97) 9%,rgba(247,245,235,.98) 90%,rgba(198,201,200,.78));
+}
+.champion-rule {
+  min-width:0;
+  overflow:hidden;
+  padding:9px 10px;
+  border:1px solid rgba(111,104,78,.24);
+  border-radius:8px;
+  background:rgba(255,255,255,.43);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.72);
+}
+.champion-rule > span {
+  display:block;
+  margin-bottom:5px;
+  color:var(--accent-deep);
+  font-size:7px;
+  font-weight:950;
+  letter-spacing:.14em;
+}
+.champion-rule h3 {
+  margin:0 0 4px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:13px;
+  line-height:1.05;
+}
+.champion-rule p {
+  margin:0;
+  display:-webkit-box;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:5;
+  overflow:hidden;
+  font-size:10px;
+  line-height:1.31;
+}
+.champion-victory { border-color:rgba(64,137,86,.38); background:rgba(224,242,229,.52); }
+.champion-defeat { border-color:rgba(169,73,73,.34); background:rgba(245,226,226,.5); }
+.champion-starting-config {
+  grid-column:1 / -1;
+  display:grid;
+  grid-template-columns:1.3fr repeat(3,1fr);
+  align-items:center;
+  gap:7px;
+  padding:9px 12px;
+  border:1px solid rgba(115,89,12,.3);
+  border-radius:10px;
+  background:linear-gradient(180deg,rgba(255,255,255,.78),rgba(240,202,76,.16));
+}
+.champion-starting-config strong { color:var(--accent-deep); font-size:8px; letter-spacing:.12em; }
+.champion-starting-config span { text-align:center; font-size:9px; font-weight:700; }
+.champion-starting-config b { display:block; color:var(--accent-deep); font-size:18px; line-height:1; }
+.pokemon-card .card-identity { grid-template-columns:1fr auto auto 1fr; column-gap:10px; }
+.pokemon-card .rarity-mark { margin-left:0; justify-self:center; }

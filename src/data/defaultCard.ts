@@ -1,10 +1,19 @@
-import type { AttackCardData, CardData, CardType, PokemonCardData, UtilityCardData, UtilityCardType } from '../types/card';
+import type {
+  AttackCardData,
+  CardData,
+  CardType,
+  ChampionCardData,
+  PokemonCardData,
+  UtilityCardData,
+  UtilityCardType,
+} from '../types/card';
 
 export const DEFAULT_POKEMON_CARD: PokemonCardData = {
   cardType: 'pokemon',
   pokemonId: 6,
   pokemonName: 'Charizard',
   form: 'Normal',
+  rarity: 'rare',
   type: 'Fogo',
   stage: 'ESTÁGIO 2',
   previousEvolution: 'Charmeleon',
@@ -17,20 +26,18 @@ export const DEFAULT_POKEMON_CARD: PokemonCardData = {
   height: '1,7 m',
   weight: '90,5 kg',
   region: 'Kanto',
-  hp: 10,
-  attack: 8,
-  defense: 6,
-  specialAttack: 9,
-  specialDefense: 7,
-  speed: 7,
+  hp: 100,
+  attack: 80,
+  defense: 60,
+  specialAttack: 90,
+  specialDefense: 70,
+  speed: 70,
   abilityName: 'Chamas Imperiais',
-  abilityDescription: 'Uma vez por Momento, quando este Pokémon usar um ataque de Fogo, ele recebe +1 de poder.',
+  abilityDescription: 'Uma vez por Momento, quando este Pokémon usar um ataque de Fogo, ele recebe +10 de poder.',
   flavorText: 'Diz-se que seu fogo queima ainda mais intensamente após grandes batalhas.',
   cardNumber: 6,
   setTotal: 150,
   setCode: 'CKT',
-  isLegendary: false,
-  isMythical: false,
 };
 
 export const EMPTY_POKEMON_CARD: PokemonCardData = {
@@ -38,6 +45,7 @@ export const EMPTY_POKEMON_CARD: PokemonCardData = {
   pokemonId: null,
   pokemonName: 'Novo Pokémon',
   form: 'Normal',
+  rarity: 'common',
   type: 'Fogo',
   stage: 'BÁSICO',
   previousEvolution: '',
@@ -61,8 +69,6 @@ export const EMPTY_POKEMON_CARD: PokemonCardData = {
   flavorText: 'Adicione uma breve descrição para o rodapé da carta.',
   cardNumber: 1,
   setCode: 'CKT',
-  isLegendary: false,
-  isMythical: false,
 };
 
 export const DEFAULT_ATTACK_CARD: AttackCardData = {
@@ -70,6 +76,8 @@ export const DEFAULT_ATTACK_CARD: AttackCardData = {
   attackKind: 'normal',
   attackName: 'Aqua Jet',
   attackDescription: 'Descreva aqui o efeito completo deste ataque durante a partida.',
+  power: 100,
+  type: 'Água',
   compatibilityMode: 'specific',
   compatiblePokemon: [],
   compatibleType: 'Água',
@@ -84,33 +92,52 @@ const UTILITY_COPY: Record<UtilityCardType, { name: string; effect: string; usag
   stadium: {
     name: 'Arena Central',
     effect: 'Escreva aqui o efeito que este Estádio produz enquanto estiver em jogo.',
-    usage: 'Explique aqui como este Estádio entra em jogo e por quanto tempo seu efeito permanece.',
+    usage: 'Posicione em uma das quatro áreas entre dois jogadores. Afeta apenas os dois jogadores conectados. Pode ser combinado com 1 Ferramenta na mesma ação, mas nunca com outro Estádio.',
     number: 114,
   },
   supporter: {
     name: 'Parceiro de Jornada',
     effect: 'Escreva aqui o efeito concedido por este Apoiador.',
-    usage: 'Explique aqui quando e como este Apoiador pode ser utilizado.',
+    usage: 'Use somente na Janela de Apoiadores/Confronto, depois da Revelação e antes da resolução por VEL. Máximo de 1 Apoiador por jogador por Rodada.',
     number: 122,
   },
   item: {
     name: 'Kit de Campo',
     effect: 'Escreva aqui o efeito produzido por este Item.',
-    usage: 'Explique aqui quando este Item pode ser utilizado.',
+    usage: 'Use como uma ação. Uma única ação de Item pode empilhar até 2 Itens normais. Depois do uso, descarte-os salvo efeito em contrário.',
     number: 132,
+  },
+  rareItem: {
+    name: 'Relíquia de Jornada',
+    effect: 'Escreva aqui o efeito especial produzido por este Item Raro.',
+    usage: 'Ocupa uma ação sozinho. Não pode ser empilhado com outro Item Raro, Item normal, Ferramenta ou Estádio na mesma ação.',
+    number: 140,
   },
   tool: {
     name: 'Insígnia de Aço',
     effect: 'Escreva aqui o efeito concedido por esta Ferramenta.',
-    usage: 'Explique aqui como esta Ferramenta é utilizada em jogo.',
+    usage: 'Equipe em um Pokémon válido. Cada Pokémon pode ter 1 Ferramenta. Uma ação pode conter até 2 Ferramentas ou 1 Ferramenta + 1 Estádio.',
     number: 148,
   },
-  champion: {
-    name: 'Campeão da Liga',
-    effect: 'Escreva aqui o efeito concedido por este Campeão.',
-    usage: 'Explique aqui quando e como esta carta de Campeão pode ser utilizada.',
-    number: 150,
-  },
+};
+
+export const DEFAULT_CHAMPION_CARD: ChampionCardData = {
+  cardType: 'champion',
+  name: 'Campeão da Liga',
+  victoryCondition: 'Defina aqui a condição pessoal de Vitória deste Campeão.',
+  defeatCondition: 'Defina aqui a condição específica de Derrota deste Campeão.',
+  passiveName: 'Presença de Campeão',
+  passiveDescription: 'Descreva a Passiva que permanece ativa durante a Jornada.',
+  initialAbilityName: 'Preparação Especial',
+  initialAbilityDescription: 'Descreva a Habilidade Inicial resolvida durante a preparação da partida.',
+  initialPokemonCount: 2,
+  initialAttackCount: 1,
+  initialTrainerCount: 3,
+  artwork: '',
+  artworkTransform: { scale: 1, x: 0, y: 0 },
+  cardNumber: 150,
+  setTotal: 150,
+  setCode: 'CKT',
 };
 
 export function createUtilityCard(cardType: UtilityCardType): UtilityCardData {
@@ -128,9 +155,14 @@ export function createUtilityCard(cardType: UtilityCardType): UtilityCardData {
   };
 }
 
+export function createChampionCard(): ChampionCardData {
+  return structuredClone(DEFAULT_CHAMPION_CARD);
+}
+
 export function createEmptyCard(cardType: CardType): CardData {
   if (cardType === 'pokemon') return structuredClone(EMPTY_POKEMON_CARD);
   if (cardType === 'attack') return structuredClone(DEFAULT_ATTACK_CARD);
+  if (cardType === 'champion') return createChampionCard();
   return createUtilityCard(cardType);
 }
 

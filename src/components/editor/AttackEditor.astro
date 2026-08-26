@@ -6,11 +6,24 @@ const { card } = Astro.props;
 ---
 <div class="editor-kind" data-editor-kind="attack" hidden>
   <details class="editor-section" open>
-    <summary><span class="section-index">01</span><span><strong>Ataque</strong><small>Nome exibido na carta</small></span><i aria-hidden="true">⌄</i></summary>
+    <summary><span class="section-index">01</span><span><strong>Ataque</strong><small>Nome, tipagem e potência</small></span><i aria-hidden="true">⌄</i></summary>
     <div class="section-body grid-2">
       <div class="field span-2">
         <label for="attack-name">Nome do ataque</label>
         <input id="attack-name" data-field="attackName" value={card.attackName} maxlength="32" />
+      </div>
+      <div class="field">
+        <label for="attack-type">Tipo do ataque</label>
+        <select id="attack-type" data-field="type">
+          {GAME_TYPES.map((type) => <option value={type} selected={type === card.type}>{type}</option>)}
+        </select>
+        <p class="field-hint">O ícone do tipo aparece na própria carta.</p>
+      </div>
+      <div class="field">
+        <label for="attack-power">Potência</label>
+        <select id="attack-power" data-field="power">
+          {[0, 50, 100, 150, 200].map((power) => <option value={power} selected={power === card.power}>{power}%</option>)}
+        </select>
       </div>
     </div>
   </details>
@@ -61,7 +74,7 @@ const { card } = Astro.props;
     <summary><span class="section-index">04</span><span><strong>Carta</strong><small>Numeração e coleção</small></span><i aria-hidden="true">⌄</i></summary>
     <div class="section-body grid-2">
       <div class="field"><label for="attack-card-number">Número da carta</label><input id="attack-card-number" data-field="cardNumber" type="number" min="1" max="150" value={card.cardNumber} /></div>
-      <div class="field"><label>Total da coleção</label><input value="150" readonly /></div>
+      <div class="field"><label>Total da coleção</label><input value={card.setTotal} readonly /></div>
       <div class="field span-2"><label for="attack-set-code">Sigla da coleção</label><input id="attack-set-code" data-field="setCode" value={card.setCode} maxlength="8" spellcheck="false" /></div>
     </div>
   </details>

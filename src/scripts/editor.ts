@@ -1,21 +1,23 @@
 import { ATTACK_KIND_META, CARD_CATEGORY_META } from '../data/cardCategories';
-import { DEFAULT_ATTACK_CARD, DEFAULT_POKEMON_CARD, EMPTY_POKEMON_CARD, createEmptyCard, createUtilityCard } from '../data/defaultCard';
+import { DEFAULT_ATTACK_CARD, DEFAULT_POKEMON_CARD, EMPTY_POKEMON_CARD, createChampionCard, createEmptyCard, createUtilityCard } from '../data/defaultCard';
 import { exportCardAsPng } from '../lib/exportCard';
 import { getPokemonIndex, loadAbilityDescription, loadPokemonEditorData, loadPokemonSummary } from '../lib/pokeapi';
 import { TYPE_META, titleCasePokemon } from '../lib/pokemonMapping';
 import { clearDraft, loadDraft, saveDraft } from '../lib/storage';
-import { CARD_TYPE_LABELS } from '../types/card';
+import { CARD_FORMS, CARD_TYPE_LABELS, POKEMON_RARITY_LABELS } from '../types/card';
 import type {
   AttackCardData,
   AttackKind,
   CardData,
   CardType,
+  ChampionCardData,
   EditorReferenceData,
   GameType,
   PokemonCardData,
   PokemonForm,
+  PokemonRarity,
+  TrainerCardType,
   UtilityCardData,
-  UtilityCardType,
 } from '../types/card';
 
 const q = <T extends Element = HTMLElement>(selector: string, root: ParentNode = document) => root.querySelector<T>(selector);
@@ -64,11 +66,13 @@ const attackApiStatus = q<HTMLElement>('[data-role="attack-api-status"]')!;
 
 function isPokemon(value: CardData = card): value is PokemonCardData { return value.cardType === 'pokemon'; }
 function isAttack(value: CardData = card): value is AttackCardData { return value.cardType === 'attack'; }
-function isUtility(value: CardData = card): value is UtilityCardData { return !isPokemon(value) && !isAttack(value); }
+function isChampion(value: CardData = card): value is ChampionCardData { return value.cardType === 'champion'; }
+function isUtility(value: CardData = card): value is UtilityCardData { return !isPokemon(value) && !isAttack(value) && !isChampion(value); }
 
 function slotForCard(value: CardData = card) {
   if (value.cardType === 'pokemon') return 'pokemon';
   if (value.cardType === 'attack') return 'attack';
+  if (value.cardType === 'champion') return 'champion';
   return 'utility';
 }
 
@@ -184,7 +188,7 @@ function syncFormFromState() {
 
   if (isPokemon(card)) {
     const fields: Array<keyof PokemonCardData> = [
-      'pokemonName', 'form', 'type', 'stage', 'previousEvolution', 'previousEvolutionImage',
+      'pokemonName', 'form', 'rarity', 'type', 'stage', 'previousEvolution', 'previousEvolutionImage',
       'pokedexNumber', 'genus', 'height', 'weight', 'region', 'hp', 'attack', 'defense',
       'specialAttack', 'specialDefense', 'speed', 'abilityName', 'abilityDescription', 'flavorText', 'expandedArtwork',
     ];
@@ -192,9 +196,17 @@ function syncFormFromState() {
   } else if (isAttack(card)) {
     setInputValue('attackName', card.attackName);
     setInputValue('attackDescription', card.attackDescription);
+    setInputValue('power', card.power);
+    setInputValue('type', card.type);
     setInputValue('compatibleType', card.compatibleType);
     const compatibilityMode = card.compatibilityMode;
     qa<HTMLInputElement>('[data-compat-mode]').forEach((input) => { input.checked = input.value === compatibilityMode; });
+  } else if (isChampion(card)) {
+    const fields: Array<keyof ChampionCardData> = [
+      'name', 'victoryCondition', 'defeatCondition', 'passiveName', 'passiveDescription',
+      'initialAbilityName', 'initialAbilityDescription', 'initialPokemonCount', 'initialAttackCount', 'initialTrainerCount',
+    ];
+    fields.forEach((field) => setInputValue(String(field), card[field]));
   } else {
     setInputValue('name', card.name);
     setInputValue('effectText', card.effectText);
@@ -202,7 +214,6 @@ function syncFormFromState() {
   }
 
   updateRangeOutputs();
-  updateLegendaryAvailability();
   updateAttackCompatibilityEditor();
   updateAttackDescriptionCount();
 }
@@ -222,6 +233,7 @@ function renderPokemon(node: HTMLElement, value: PokemonCardData) {
   node.style.setProperty('--type-light', meta.light);
   node.dataset.form = value.form;
   node.dataset.pokemonType = value.type;
+  node.dataset.rarity = value.rarity;
   node.dataset.expanded = String(value.expandedArtwork);
   node.classList.toggle('is-expanded', value.expandedArtwork);
 
@@ -232,7 +244,6 @@ function renderPokemon(node: HTMLElement, value: PokemonCardData) {
   setTextIn(node, 'previous-name', value.previousEvolution || '');
   setTextIn(node, 'type-symbol', meta.symbol);
   setTypeIcon(node, 'type-icon', meta.icon);
-  setTextIn(node, 'type-name', value.type);
   setTextIn(node, 'dex-number', `#${String(value.pokedexNumber ?? 0).padStart(4, '0')}`);
   setTextIn(node, 'genus', value.genus || 'Pokémon');
   setTextIn(node, 'height', value.height || '—');
@@ -250,6 +261,14 @@ function renderPokemon(node: HTMLElement, value: PokemonCardData) {
   setTextIn(node, 'card-number', String(value.cardNumber || 0).padStart(3, '0'));
   setTextIn(node, 'set-total', value.setTotal);
   setTextIn(node, 'set-code', (value.setCode || 'SET').toUpperCase());
+  const raritySymbols: Record<PokemonRarity, string> = { common: '●', uncommon: '▲', rare: '◆', ultraRare: '★', illustrationRare: '★★', illustrationRareUltra: '★★★' };
+  setTextIn(node, 'rarity-mark', raritySymbols[value.rarity]);
+  const rarityMark = q<HTMLElement>('[data-role="rarity-mark"]', node);
+  if (rarityMark) {
+    rarityMark.dataset.rarity = value.rarity;
+    rarityMark.title = POKEMON_RARITY_LABELS[value.rarity];
+    rarityMark.setAttribute('aria-label', POKEMON_RARITY_LABELS[value.rarity]);
+  }
 
   const previousWrap = q<HTMLElement>('[data-role="previous-wrap"]', node);
   const previousImage = q<HTMLImageElement>('[data-role="previous-image"]', node);
@@ -276,6 +295,28 @@ function renderUtility(node: HTMLElement, value: UtilityCardData) {
   setTextIn(node, 'utility-name', value.name || CARD_TYPE_LABELS[value.cardType]);
   setTextIn(node, 'utility-effect', value.effectText || 'Escreva aqui o efeito desta carta.');
   setTextIn(node, 'utility-usage', value.usageText || 'Explique aqui como esta carta deve ser utilizada em jogo.');
+  setTextIn(node, 'card-number', String(value.cardNumber || 0).padStart(3, '0'));
+  setTextIn(node, 'set-total', value.setTotal);
+  setTextIn(node, 'set-code', (value.setCode || 'SET').toUpperCase());
+}
+
+function renderChampion(node: HTMLElement, value: ChampionCardData) {
+  const meta = CARD_CATEGORY_META.champion;
+  node.style.setProperty('--accent', meta.accent);
+  node.style.setProperty('--accent-deep', meta.deep);
+  node.style.setProperty('--utility-surface', meta.surface);
+  node.style.setProperty('--ribbon-start', meta.ribbonStart);
+  node.style.setProperty('--ribbon-end', meta.ribbonEnd);
+  setTextIn(node, 'champion-name', value.name || 'Campeão');
+  setTextIn(node, 'champion-victory', value.victoryCondition);
+  setTextIn(node, 'champion-defeat', value.defeatCondition);
+  setTextIn(node, 'champion-passive-name', value.passiveName);
+  setTextIn(node, 'champion-passive-description', value.passiveDescription);
+  setTextIn(node, 'champion-initial-ability-name', value.initialAbilityName);
+  setTextIn(node, 'champion-initial-ability-description', value.initialAbilityDescription);
+  setTextIn(node, 'champion-initial-pokemon', value.initialPokemonCount);
+  setTextIn(node, 'champion-initial-attack', value.initialAttackCount);
+  setTextIn(node, 'champion-initial-trainer', value.initialTrainerCount);
   setTextIn(node, 'card-number', String(value.cardNumber || 0).padStart(3, '0'));
   setTextIn(node, 'set-total', value.setTotal);
   setTextIn(node, 'set-code', (value.setCode || 'SET').toUpperCase());
@@ -319,13 +360,20 @@ function renderCompatiblePokemon(node: HTMLElement, value: AttackCardData) {
 
 function renderAttack(node: HTMLElement, value: AttackCardData) {
   const meta = ATTACK_KIND_META[value.attackKind];
+  const attackTypeMeta = TYPE_META[value.type];
   node.dataset.attackKind = value.attackKind;
+  node.dataset.attackType = value.type;
   node.style.setProperty('--accent', meta.accent);
   node.style.setProperty('--accent-deep', meta.deep);
   node.style.setProperty('--attack-surface', meta.surface);
   node.style.setProperty('--ribbon-start', meta.ribbonStart);
   node.style.setProperty('--ribbon-end', meta.ribbonEnd);
+  node.style.setProperty('--attack-type', attackTypeMeta.color);
+  node.style.setProperty('--attack-type-deep', attackTypeMeta.deep);
   setTextIn(node, 'attack-kind-label', meta.label);
+  setTextIn(node, 'attack-power', `${value.power}%`);
+  setTextIn(node, 'attack-type-symbol', attackTypeMeta.symbol);
+  setTypeIcon(node, 'attack-type-icon', attackTypeMeta.icon);
   setTextIn(node, 'attack-name-top', value.attackName || 'Novo Ataque');
   setTextIn(node, 'attack-name-bottom', value.attackName || 'Novo Ataque');
   setTextIn(node, 'attack-description', value.attackDescription || 'Descreva aqui o efeito deste ataque.');
@@ -341,21 +389,10 @@ function renderCard() {
   applyArtworkToNode(node);
   if (isPokemon(card)) renderPokemon(node, card);
   else if (isAttack(card)) renderAttack(node, card);
+  else if (isChampion(card)) renderChampion(node, card);
   else renderUtility(node, card);
-  updateLegendaryAvailability();
   updateAttackCompatibilityEditor();
   updateAttackDescriptionCount();
-}
-
-function updateLegendaryAvailability() {
-  const legendary = q<HTMLOptionElement>('option[data-legendary-option="true"]');
-  const hint = q<HTMLElement>('[data-role="legendary-hint"]');
-  const allowed = isPokemon(card) && card.isLegendary;
-  if (legendary) {
-    legendary.disabled = !allowed;
-    legendary.title = allowed ? '' : 'Disponível apenas para Pokémon lendários';
-  }
-  hint?.classList.toggle('is-visible', isPokemon(card) && !card.isLegendary);
 }
 
 function updateRangeOutputs() {
@@ -438,13 +475,39 @@ function markChanged() {
   }, 650);
 }
 
+function normalizeStat(value: number, max = Number.POSITIVE_INFINITY) {
+  const rounded = Math.max(0, Math.round((Number(value) || 0) / 10) * 10);
+  return Math.min(max, rounded);
+}
+
+function normalizePokemonRarityForForm(rarity: PokemonRarity, form: PokemonForm): PokemonRarity {
+  if (form === 'Normal') {
+    if (rarity === 'ultraRare') return 'rare';
+    if (rarity === 'illustrationRareUltra') return 'illustrationRare';
+    return rarity;
+  }
+  if (rarity === 'illustrationRare' || rarity === 'illustrationRareUltra') return 'illustrationRareUltra';
+  return 'ultraRare';
+}
+
 function mergeDraft(restored: CardData): CardData {
   if (restored.cardType === 'pokemon') {
+    const raw = restored as PokemonCardData & { form?: string; rarity?: PokemonRarity };
+    const form: PokemonForm = CARD_FORMS.includes(raw.form as PokemonForm) ? raw.form as PokemonForm : 'Normal';
+    const rarity = normalizePokemonRarityForForm(raw.rarity || (form === 'Normal' ? 'common' : 'ultraRare'), form);
     return {
       ...cloneCard(DEFAULT_POKEMON_CARD),
       ...restored,
       cardType: 'pokemon',
-      setTotal: 150,
+      form,
+      rarity,
+      hp: normalizeStat(restored.hp, 300),
+      attack: normalizeStat(restored.attack),
+      defense: normalizeStat(restored.defense),
+      specialAttack: normalizeStat(restored.specialAttack),
+      specialDefense: normalizeStat(restored.specialDefense),
+      speed: normalizeStat(restored.speed),
+      setTotal: Number(restored.setTotal) || 150,
       artworkTransform: { ...DEFAULT_POKEMON_CARD.artworkTransform, ...restored.artworkTransform },
     };
   }
@@ -453,9 +516,21 @@ function mergeDraft(restored: CardData): CardData {
       ...cloneCard(DEFAULT_ATTACK_CARD),
       ...restored,
       cardType: 'attack',
-      setTotal: 150,
+      power: [0, 50, 100, 150, 200].includes(Number(restored.power)) ? restored.power : 100,
+      type: restored.type || 'Água',
+      setTotal: Number(restored.setTotal) || 150,
       compatiblePokemon: Array.isArray(restored.compatiblePokemon) ? restored.compatiblePokemon.slice(0, 10) : [],
       artworkTransform: { ...DEFAULT_ATTACK_CARD.artworkTransform, ...restored.artworkTransform },
+    };
+  }
+  if (restored.cardType === 'champion') {
+    const base = createChampionCard();
+    return {
+      ...base,
+      ...restored,
+      cardType: 'champion',
+      setTotal: Number(restored.setTotal) || 150,
+      artworkTransform: { ...base.artworkTransform, ...restored.artworkTransform },
     };
   }
   const base = createUtilityCard(restored.cardType);
@@ -463,7 +538,8 @@ function mergeDraft(restored: CardData): CardData {
     ...base,
     ...restored,
     cardType: restored.cardType,
-    setTotal: 150,
+    usageText: base.usageText,
+    setTotal: Number(restored.setTotal) || 150,
     artworkTransform: { ...base.artworkTransform, ...restored.artworkTransform },
   };
 }
@@ -486,17 +562,13 @@ async function restoreDraft() {
 
 function applyPokemonForm(form: PokemonForm) {
   if (!isPokemon(card)) return;
-  if (form === 'Lendário' && !card.isLegendary) {
-    card.form = 'Normal';
-    pokemonSubtypeSelector.value = 'Normal';
-    toast('Forma Lendário só é liberada para espécies lendárias.', 'error');
-  } else {
-    card.form = form;
-    if (form !== 'Normal') card.stage = 'FINAL';
-    else card.stage = naturalStage;
-    setInputValue('stage', card.stage);
-    pokemonSubtypeSelector.value = card.form;
-  }
+  card.form = form;
+  card.rarity = normalizePokemonRarityForForm(card.rarity, form);
+  if (form !== 'Normal') card.stage = 'FINAL';
+  else card.stage = naturalStage;
+  setInputValue('stage', card.stage);
+  setInputValue('rarity', card.rarity);
+  pokemonSubtypeSelector.value = card.form;
   renderCard();
   markChanged();
 }
@@ -521,10 +593,25 @@ function updateField(input: HTMLInputElement | HTMLSelectElement | HTMLTextAreaE
   }
   if (field === 'cardNumber') value = clamp(Number(value) || 1, 1, 150);
   if (field === 'pokedexNumber') value = Number(value) || null;
-  if (['hp', 'attack', 'defense', 'specialAttack', 'specialDefense', 'speed'].includes(field)) value = Math.max(0, Math.round(Number(value) || 0));
+  if (['hp', 'attack', 'defense', 'specialAttack', 'specialDefense', 'speed'].includes(field)) {
+    value = normalizeStat(Number(value), field === 'hp' ? 300 : Number.POSITIVE_INFINITY);
+    input.value = String(value);
+  }
+  if (field === 'power' && isAttack(card)) {
+    const candidate = Number(value);
+    value = ([0, 50, 100, 150, 200].includes(candidate) ? candidate : 100);
+  }
+  if (['initialPokemonCount', 'initialAttackCount', 'initialTrainerCount'].includes(field) && isChampion(card)) {
+    value = clamp(Math.round(Number(value) || 0), 0, 12);
+    input.value = String(value);
+  }
 
   (card as unknown as Record<string, unknown>)[field] = value;
 
+  if (isPokemon(card) && field === 'rarity') {
+    card.rarity = normalizePokemonRarityForForm(card.rarity, card.form);
+    input.value = card.rarity;
+  }
   if (isPokemon(card) && field === 'stage' && card.form === 'Normal') naturalStage = card.stage;
 
   renderCard();
@@ -616,12 +703,9 @@ async function selectPokemon(identifier: string | number) {
       region: p.region,
       previousEvolution: p.previousEvolution,
       previousEvolutionImage: p.previousEvolutionImage,
-      isLegendary: p.isLegendary,
-      isMythical: p.isMythical,
       stage: card.form === 'Normal' ? p.stage : 'FINAL',
     });
     if (p.suggestedType) card.type = p.suggestedType;
-    if (card.form === 'Lendário' && !p.isLegendary) card.form = 'Normal';
 
     reference.officialStats = data.officialStats;
     reference.abilities = data.abilities;
@@ -809,12 +893,12 @@ function bindEvents() {
     const family = cardFamilySelector.value as CardFamily;
     if (family === 'pokemon') switchCardType('pokemon');
     else if (family === 'attack') switchCardType('attack');
-    else switchCardType(trainerSubtypeSelector.value as UtilityCardType);
+    else switchCardType(trainerSubtypeSelector.value as TrainerCardType);
   });
 
   trainerSubtypeSelector.addEventListener('change', () => {
     if (cardFamilySelector.value !== 'trainer') return;
-    switchCardType(trainerSubtypeSelector.value as UtilityCardType);
+    switchCardType(trainerSubtypeSelector.value as TrainerCardType);
   });
 
   pokemonSubtypeSelector.addEventListener('change', () => {

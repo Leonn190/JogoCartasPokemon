@@ -7,16 +7,19 @@ interface Props { card: AttackCardData }
 const { card } = Astro.props;
 const meta = ATTACK_KIND_META[card.attackKind];
 const typeMeta = TYPE_META[card.compatibleType];
+const attackTypeMeta = TYPE_META[card.type];
 const number = String(card.cardNumber).padStart(3, '0');
 const kindLabel = meta.label;
 const typeIcon = `${import.meta.env.BASE_URL}${typeMeta.icon}`;
+const attackTypeIcon = `${import.meta.env.BASE_URL}${attackTypeMeta.icon}`;
 ---
 <article
   class="game-card attack-card trainer-card"
   data-role="card-template"
   data-card-template="attack"
   data-attack-kind={card.attackKind}
-  style={`--accent:${meta.accent};--accent-deep:${meta.deep};--attack-surface:${meta.surface};--ribbon-start:${meta.ribbonStart};--ribbon-end:${meta.ribbonEnd};--compat:${typeMeta.color};--compat-deep:${typeMeta.deep};`}
+  data-attack-type={card.type}
+  style={`--accent:${meta.accent};--accent-deep:${meta.deep};--attack-surface:${meta.surface};--ribbon-start:${meta.ribbonStart};--ribbon-end:${meta.ribbonEnd};--compat:${typeMeta.color};--compat-deep:${typeMeta.deep};--attack-type:${attackTypeMeta.color};--attack-type-deep:${attackTypeMeta.deep};`}
 >
   <div class="attack-shell card-shell">
     <header class="tcg-title-rail attack-title-rail">
@@ -26,9 +29,15 @@ const typeIcon = `${import.meta.env.BASE_URL}${typeMeta.icon}`;
       <div class="tcg-major-label">ATAQUE</div>
     </header>
 
-    <div class="tcg-name-row">
+    <div class="tcg-name-row attack-name-row">
       <h2 data-role="attack-name-top">{card.attackName}</h2>
-      <span class="tcg-name-glint" aria-hidden="true"></span>
+      <div class="attack-name-meta">
+        <span class="attack-power-badge" data-role="attack-power">{card.power}%</span>
+        <span class="attack-type-badge" aria-label={`Tipo ${card.type}`} title={card.type}>
+          <span class="attack-type-fallback" data-role="attack-type-symbol">{attackTypeMeta.symbol}</span>
+          <img data-role="attack-type-icon" src={attackTypeIcon} alt="" onerror="this.style.display='none'" />
+        </span>
+      </div>
     </div>
 
     <SharedArtwork artwork={card.artwork} name={card.attackName} />

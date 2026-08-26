@@ -1,6 +1,6 @@
 ---
-import { CARD_FORMS, CARD_TYPE_LABELS, UTILITY_CARD_TYPES } from '../../types/card';
-import type { AttackKind, CardType, PokemonForm, UtilityCardType } from '../../types/card';
+import { CARD_FORMS, CARD_TYPE_LABELS, TRAINER_CARD_TYPES } from '../../types/card';
+import type { AttackKind, CardType, PokemonForm, TrainerCardType } from '../../types/card';
 interface Props {
   cardType: CardType;
   pokemonForm?: PokemonForm;
@@ -8,7 +8,7 @@ interface Props {
 }
 const { cardType, pokemonForm = 'Normal', attackKind = 'normal' } = Astro.props;
 const family = cardType === 'pokemon' ? 'pokemon' : cardType === 'attack' ? 'attack' : 'trainer';
-const trainerSubtype = cardType !== 'pokemon' && cardType !== 'attack' ? cardType as UtilityCardType : 'stadium';
+const trainerSubtype = cardType !== 'pokemon' && cardType !== 'attack' ? cardType as TrainerCardType : 'stadium';
 ---
 <div class="card-type-selector">
   <div class="type-selector-copy">
@@ -30,14 +30,14 @@ const trainerSubtype = cardType !== 'pokemon' && cardType !== 'attack' ? cardTyp
     <label class="compact-select" data-subtype-family="pokemon" hidden={family !== 'pokemon'}>
       <span>Subtipo</span>
       <select data-role="pokemon-subtype-selector" aria-label="Subtipo de Pokémon">
-        {CARD_FORMS.map((form) => <option value={form} selected={form === pokemonForm} data-legendary-option={form === 'Lendário' ? 'true' : undefined}>{form}</option>)}
+        {CARD_FORMS.map((form) => <option value={form} selected={form === pokemonForm}>{form}</option>)}
       </select>
     </label>
 
     <label class="compact-select" data-subtype-family="trainer" hidden={family !== 'trainer'}>
       <span>Subtipo</span>
       <select data-role="trainer-subtype-selector" aria-label="Subtipo de Treinador">
-        {UTILITY_CARD_TYPES.map((type) => <option value={type} selected={type === trainerSubtype}>{CARD_TYPE_LABELS[type]}</option>)}
+        {TRAINER_CARD_TYPES.map((type) => <option value={type} selected={type === trainerSubtype}>{CARD_TYPE_LABELS[type]}</option>)}
       </select>
     </label>
 
@@ -49,5 +49,4 @@ const trainerSubtype = cardType !== 'pokemon' && cardType !== 'attack' ? cardTyp
       </select>
     </label>
   </div>
-  <p class="type-selector-hint legendary-hint" data-role="legendary-hint">Lendário só fica disponível quando a espécie carregada é lendária.</p>
 </div>

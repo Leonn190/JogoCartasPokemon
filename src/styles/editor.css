@@ -32,9 +32,6 @@
 .field input:focus, .field select:focus, .field textarea:focus { background: #181c21; border-color: rgba(255,255,255,.26); outline: none; box-shadow: 0 0 0 3px rgba(255,255,255,.035); }
 .field input[readonly] { color: #7e8790; background: #111418; }
 .field-hint, .section-note { margin: 6px 1px 0; color: #6f7781; font-size: 9.5px; line-height: 1.45; }
-.legendary-hint { display: none; color: #9d8582; }
-.legendary-hint.is-visible { display: block; }
-
 .search-control { position: relative; }
 .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #777f88; z-index: 1; font-size: 17px; }
 .search-control input { padding-left: 34px; padding-right: 36px; }
@@ -149,3 +146,8 @@
 @media (max-width: 520px) {
   .type-selector-controls { grid-template-columns: 1fr; }
 }
+
+/* Campos adicionados pelo modelo Jornada v0.2 */
+.grid-3 { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px 12px; }
+.field textarea[readonly] { color:#aeb6bd; background:#111418; cursor:default; }
+@media (max-width: 720px) { .grid-3 { grid-template-columns:1fr; } }

@@ -1,6 +1,7 @@
 import type { CardData, PokemonCardData } from '../types/card';
 
-const DRAFT_KEY = 'card-forge:draft:v2';
+const DRAFT_KEY = 'card-forge:draft:v3';
+const LEGACY_V2_DRAFT_KEY = 'card-forge:draft:v2';
 const LEGACY_DRAFT_KEY = 'card-forge:draft:v1';
 const DB_NAME = 'card-forge-artwork';
 const STORE = 'artwork';
@@ -57,7 +58,8 @@ function migrateLegacy(value: PokemonCardData): CardData {
   return {
     ...value,
     cardType: 'pokemon',
-    setTotal: 150,
+    rarity: value.rarity ?? 'common',
+    setTotal: Number(value.setTotal) || 150,
     artworkTransform: {
       scale: value.artworkTransform?.scale ?? 1,
       x: value.artworkTransform?.x ?? 0,
@@ -73,11 +75,30 @@ export async function saveDraft(card: CardData) {
 }
 
 export async function loadDraft(): Promise<CardData | null> {
-  const raw = localStorage.getItem(DRAFT_KEY) ?? localStorage.getItem(LEGACY_DRAFT_KEY);
+  const currentRaw = localStorage.getItem(DRAFT_KEY);
+  const v2Raw = localStorage.getItem(LEGACY_V2_DRAFT_KEY);
+  const v1Raw = localStorage.getItem(LEGACY_DRAFT_KEY);
+  const raw = currentRaw ?? v2Raw ?? v1Raw;
   if (!raw) return null;
   try {
     const parsed = JSON.parse(raw) as CardData | PokemonCardData;
     const data = 'cardType' in parsed ? parsed as CardData : migrateLegacy(parsed as PokemonCardData);
+
+    // A versão v2 ainda usava a escala antiga 0–30 em vários rascunhos.
+    // Quando todos os seis atributos estão nessa faixa, preservamos a intenção
+    // do usuário migrando 8 -> 80, 10 -> 100 etc. A v3 já salva em dezenas.
+    if (!currentRaw && data.cardType === 'pokemon') {
+      const values = [data.hp, data.attack, data.defense, data.specialAttack, data.specialDefense, data.speed];
+      if (values.some((value) => value > 0) && values.every((value) => value >= 0 && value <= 30)) {
+        data.hp *= 10;
+        data.attack *= 10;
+        data.defense *= 10;
+        data.specialAttack *= 10;
+        data.specialDefense *= 10;
+        data.speed *= 10;
+      }
+    }
+
     try { data.artwork = await getArtwork(); } catch { data.artwork = ''; }
     return data;
   } catch {
@@ -87,6 +108,7 @@ export async function loadDraft(): Promise<CardData | null> {
 
 export async function clearDraft() {
   localStorage.removeItem(DRAFT_KEY);
+  localStorage.removeItem(LEGACY_V2_DRAFT_KEY);
   localStorage.removeItem(LEGACY_DRAFT_KEY);
   try { await clearArtwork(); } catch { /* noop */ }
 }

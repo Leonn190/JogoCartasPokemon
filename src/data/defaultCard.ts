@@ -128,8 +128,6 @@ export const DEFAULT_CHAMPION_CARD: ChampionCardData = {
   defeatCondition: 'Defina aqui a condição específica de Derrota deste Campeão.',
   passiveName: 'Presença de Campeão',
   passiveDescription: 'Descreva a Passiva que permanece ativa durante a Jornada.',
-  initialAbilityName: 'Preparação Especial',
-  initialAbilityDescription: 'Descreva a Habilidade Inicial resolvida durante a preparação da partida.',
   initialPokemonCount: 2,
   initialAttackCount: 1,
   initialTrainerCount: 3,

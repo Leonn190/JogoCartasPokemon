@@ -204,7 +204,7 @@ function syncFormFromState() {
   } else if (isChampion(card)) {
     const fields: Array<keyof ChampionCardData> = [
       'name', 'victoryCondition', 'defeatCondition', 'passiveName', 'passiveDescription',
-      'initialAbilityName', 'initialAbilityDescription', 'initialPokemonCount', 'initialAttackCount', 'initialTrainerCount',
+      'initialPokemonCount', 'initialAttackCount', 'initialTrainerCount',
     ];
     fields.forEach((field) => setInputValue(String(field), card[field]));
   } else {
@@ -312,8 +312,6 @@ function renderChampion(node: HTMLElement, value: ChampionCardData) {
   setTextIn(node, 'champion-defeat', value.defeatCondition);
   setTextIn(node, 'champion-passive-name', value.passiveName);
   setTextIn(node, 'champion-passive-description', value.passiveDescription);
-  setTextIn(node, 'champion-initial-ability-name', value.initialAbilityName);
-  setTextIn(node, 'champion-initial-ability-description', value.initialAbilityDescription);
   setTextIn(node, 'champion-initial-pokemon', value.initialPokemonCount);
   setTextIn(node, 'champion-initial-attack', value.initialAttackCount);
   setTextIn(node, 'champion-initial-trainer', value.initialTrainerCount);

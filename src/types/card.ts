@@ -130,8 +130,6 @@ export interface ChampionCardData extends BaseCardData {
   defeatCondition: string;
   passiveName: string;
   passiveDescription: string;
-  initialAbilityName: string;
-  initialAbilityDescription: string;
   initialPokemonCount: number;
   initialAttackCount: number;
   initialTrainerCount: number;

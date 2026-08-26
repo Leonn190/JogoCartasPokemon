@@ -26,6 +26,13 @@ const number = String(card.cardNumber).padStart(3, '0');
 
     <SharedArtwork artwork={card.artwork} name={card.name} />
 
+    <div class="champion-starting-config">
+      <strong>CONFIGURAÇÃO INICIAL</strong>
+      <span><b data-role="champion-initial-pokemon">{card.initialPokemonCount}</b> Pokémon</span>
+      <span><b data-role="champion-initial-attack">{card.initialAttackCount}</b> Ataques</span>
+      <span><b data-role="champion-initial-trainer">{card.initialTrainerCount}</b> Treinadores</span>
+    </div>
+
     <section class="champion-rules-panel">
       <div class="champion-rule champion-victory">
         <span>FORMA DE VITÓRIA</span>
@@ -35,21 +42,10 @@ const number = String(card.cardNumber).padStart(3, '0');
         <span>FORMA DE DERROTA</span>
         <p data-role="champion-defeat">{card.defeatCondition}</p>
       </div>
-      <div class="champion-rule">
+      <div class="champion-rule champion-passive">
         <span>PASSIVA</span>
         <h3 data-role="champion-passive-name">{card.passiveName}</h3>
         <p data-role="champion-passive-description">{card.passiveDescription}</p>
-      </div>
-      <div class="champion-rule">
-        <span>HABILIDADE INICIAL</span>
-        <h3 data-role="champion-initial-ability-name">{card.initialAbilityName}</h3>
-        <p data-role="champion-initial-ability-description">{card.initialAbilityDescription}</p>
-      </div>
-      <div class="champion-starting-config">
-        <strong>CONFIGURAÇÃO INICIAL</strong>
-        <span><b data-role="champion-initial-pokemon">{card.initialPokemonCount}</b> Pokémon</span>
-        <span><b data-role="champion-initial-attack">{card.initialAttackCount}</b> Ataques</span>
-        <span><b data-role="champion-initial-trainer">{card.initialTrainerCount}</b> Treinadores</span>
       </div>
     </section>
 

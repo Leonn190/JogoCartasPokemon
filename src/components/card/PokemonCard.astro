@@ -1,0 +1,35 @@
+---
+import type { PokemonCardData } from '../../types/card';
+import { TYPE_META } from '../../lib/pokemonMapping';
+import CardHeader from './CardHeader.astro';
+import CardArtwork from './CardArtwork.astro';
+import PokemonInfo from './PokemonInfo.astro';
+import StatsFlags from './StatsFlags.astro';
+import AbilityBlock from './AbilityBlock.astro';
+import CardFooter from './CardFooter.astro';
+interface Props { card: PokemonCardData }
+const { card } = Astro.props;
+const meta = TYPE_META[card.type];
+---
+<article
+  id="pokemon-card"
+  class:list={['pokemon-card', `form-${card.form.toLowerCase().replace('á', 'a')}`, { 'is-expanded': card.expandedArtwork }]}
+  data-role="pokemon-card"
+  data-form={card.form}
+  data-expanded={String(card.expandedArtwork)}
+  style={`--type:${meta.color};--type-deep:${meta.deep};--type-light:${meta.light};`}
+>
+  <div class="card-full-art" aria-hidden="true">
+    <img data-role="expanded-image" src={card.artwork} alt="" draggable="false" />
+  </div>
+  <div class="card-noise" aria-hidden="true"></div>
+  <div class="card-shine" aria-hidden="true"></div>
+  <div class="card-shell">
+    <CardHeader card={card} />
+    <CardArtwork card={card} />
+    <PokemonInfo card={card} />
+    <StatsFlags card={card} />
+    <AbilityBlock card={card} />
+    <CardFooter card={card} />
+  </div>
+</article>

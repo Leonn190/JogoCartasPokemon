@@ -1,0 +1,10 @@
+---
+import type { PokemonCardData } from '../../types/card';
+interface Props { card: PokemonCardData }
+const { card } = Astro.props;
+---
+<section class="ability-block">
+  <div class="ability-kicker"><span></span> HABILIDADE <span></span></div>
+  <h3 data-role="ability-name">{card.abilityName}</h3>
+  <p data-role="ability-description">{card.abilityDescription}</p>
+</section>

@@ -1,0 +1,27 @@
+---
+import TypeBadge from './TypeBadge.astro';
+import type { PokemonCardData } from '../../types/card';
+interface Props { card: PokemonCardData }
+const { card } = Astro.props;
+---
+<header class="card-header">
+  <div class="evolution-zone" data-role="evolution-zone">
+    <div class="stage-pill" data-role="stage">{card.stage}</div>
+    <div class:list={['previous-evolution', { 'is-empty': !card.previousEvolution }]} data-role="previous-wrap">
+      <img src={card.previousEvolutionImage} data-role="previous-image" alt={card.previousEvolution ? `Pré-evolução ${card.previousEvolution}` : ''} crossorigin="anonymous" />
+      <div class="previous-copy">
+        <span data-role="previous-label">{card.previousEvolution ? 'Evolui de' : 'Primeira forma'}</span>
+        <strong data-role="previous-name">{card.previousEvolution || 'Sem pré-evolução'}</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="name-zone">
+    <h2 data-role="pokemon-name">{card.pokemonName}</h2>
+    <span class:list={['form-mark', { 'is-normal': card.form === 'Normal' }]} data-role="form-mark">{card.form}</span>
+  </div>
+
+  <div class="type-zone">
+    <TypeBadge type={card.type} />
+  </div>
+</header>

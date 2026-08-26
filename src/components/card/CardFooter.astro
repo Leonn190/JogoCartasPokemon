@@ -1,0 +1,15 @@
+---
+import type { PokemonCardData } from '../../types/card';
+interface Props { card: PokemonCardData }
+const { card } = Astro.props;
+const number = String(card.cardNumber).padStart(3, '0');
+---
+<footer class="card-footer">
+  <p data-role="flavor-text">{card.flavorText}</p>
+  <div class="footer-rule"></div>
+  <div class="card-identity">
+    <span class="set-stamp" data-role="set-code">{card.setCode}</span>
+    <span class="collector-number"><strong data-role="card-number">{number}</strong><em>/</em><span data-role="set-total">{card.setTotal}</span></span>
+    <span class="edition-mark">CF • 01</span>
+  </div>
+</footer>

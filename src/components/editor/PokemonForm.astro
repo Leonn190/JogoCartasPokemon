@@ -1,0 +1,31 @@
+---
+import PokemonSearch from './PokemonSearch.astro';
+import { CARD_FORMS, GAME_TYPES } from '../../types/card';
+import type { PokemonCardData } from '../../types/card';
+interface Props { card: PokemonCardData }
+const { card } = Astro.props;
+---
+<details class="editor-section" open>
+  <summary><span class="section-index">01</span><span><strong>Pokémon</strong><small>Identidade e classificação</small></span><i aria-hidden="true">⌄</i></summary>
+  <div class="section-body grid-2">
+    <PokemonSearch />
+    <div class="field span-2">
+      <label for="pokemon-name">Nome</label>
+      <input id="pokemon-name" data-field="pokemonName" value={card.pokemonName} maxlength="28" />
+    </div>
+    <div class="field">
+      <label for="pokemon-form">Forma</label>
+      <select id="pokemon-form" data-field="form">
+        {CARD_FORMS.map((form) => <option value={form} selected={form === card.form} data-legendary-option={form === 'Lendário' ? 'true' : undefined}>{form}</option>)}
+      </select>
+      <p class="field-hint legendary-hint" data-role="legendary-hint">Disponível apenas para Pokémon lendários.</p>
+    </div>
+    <div class="field">
+      <label for="pokemon-type">Tipo do jogo</label>
+      <select id="pokemon-type" data-field="type">
+        {GAME_TYPES.map((type) => <option value={type} selected={type === card.type}>{type}</option>)}
+      </select>
+      <p class="field-hint" data-role="type-suggestion"></p>
+    </div>
+  </div>
+</details>

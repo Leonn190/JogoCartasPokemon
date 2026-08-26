@@ -1,0 +1,30 @@
+---
+import type { PokemonCardData } from '../../types/card';
+interface Props { card: PokemonCardData }
+const { card } = Astro.props;
+---
+<details class="editor-section">
+  <summary><span class="section-index">04</span><span><strong>Dados Pokédex</strong><small>Informações automáticas e editáveis</small></span><i aria-hidden="true">⌄</i></summary>
+  <div class="section-body grid-2">
+    <div class="field">
+      <label for="pokedex-number">Nº Pokédex</label>
+      <input id="pokedex-number" data-field="pokedexNumber" type="number" min="1" value={card.pokedexNumber ?? ''} />
+    </div>
+    <div class="field">
+      <label for="region">Região</label>
+      <input id="region" data-field="region" value={card.region} />
+    </div>
+    <div class="field span-2">
+      <label for="genus">Vulgo / espécie</label>
+      <input id="genus" data-field="genus" value={card.genus} />
+    </div>
+    <div class="field">
+      <label for="height">Altura</label>
+      <input id="height" data-field="height" value={card.height} />
+    </div>
+    <div class="field">
+      <label for="weight">Peso</label>
+      <input id="weight" data-field="weight" value={card.weight} />
+    </div>
+  </div>
+</details>

@@ -1,0 +1,29 @@
+---
+import type { PokemonCardData } from '../../types/card';
+import PokemonForm from './PokemonForm.astro';
+import EvolutionEditor from './EvolutionEditor.astro';
+import ArtworkControls from './ArtworkControls.astro';
+import PokedexEditor from './PokedexEditor.astro';
+import StatsEditor from './StatsEditor.astro';
+import AbilityEditor from './AbilityEditor.astro';
+import CardMetadataEditor from './CardMetadataEditor.astro';
+interface Props { card: PokemonCardData }
+const { card } = Astro.props;
+---
+<aside class="editor-panel" aria-label="Painel de edição">
+  <div class="panel-heading">
+    <div>
+      <span class="eyebrow">EDITOR</span>
+      <h1>Crie sua carta</h1>
+      <p>Edite cada detalhe. O preview reage em tempo real.</p>
+    </div>
+    <span class="autosave-pill" data-role="autosave-status"><i></i> Salvo localmente</span>
+  </div>
+  <PokemonForm card={card} />
+  <EvolutionEditor card={card} />
+  <ArtworkControls card={card} />
+  <PokedexEditor card={card} />
+  <StatsEditor card={card} />
+  <AbilityEditor card={card} />
+  <CardMetadataEditor card={card} />
+</aside>

@@ -1,0 +1,86 @@
+---
+import EditorPanel from '../components/editor/EditorPanel.astro';
+import PokemonCard from '../components/card/PokemonCard.astro';
+import { DEFAULT_CARD } from '../data/defaultCard';
+import '../styles/global.css';
+import '../styles/editor.css';
+import '../styles/card.css';
+---
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0d0f12" />
+    <meta name="description" content="Editor estático de cartas Pokémon customizadas, integrado à PokéAPI." />
+    <link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL}favicon.svg`} />
+    <title>Card Forge — Editor de Cartas</title>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand" aria-label="Card Forge">
+          <div class="brand-mark" aria-hidden="true">✦</div>
+          <div class="brand-copy">
+            <strong>Card Forge</strong>
+            <span>Pokémon Card Editor</span>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <button class="button subtle" type="button" data-action="new-card">
+            <span class="button-icon" aria-hidden="true">＋</span>
+            <span class="button-label optional">Nova carta</span>
+          </button>
+          <button class="button subtle" type="button" data-action="save-now">
+            <span class="button-icon" aria-hidden="true">◇</span>
+            <span class="button-label optional">Salvar</span>
+          </button>
+          <button class="button primary" type="button" data-action="export">
+            <span class="button-icon" aria-hidden="true">⇩</span>
+            Exportar PNG
+          </button>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <EditorPanel card={DEFAULT_CARD} />
+
+        <section class="preview-column" aria-label="Preview da carta">
+          <div class="preview-heading">
+            <div>
+              <span class="eyebrow">PREVIEW EM TEMPO REAL</span>
+              <h2>Carta final</h2>
+              <p>Composição fixa 63 × 88, escalada apenas para visualização.</p>
+            </div>
+            <div class="preview-tools">
+              <span class="scale-chip" data-role="preview-scale">100%</span>
+              <span class="scale-chip">630 × 880 base</span>
+            </div>
+          </div>
+
+          <div class="preview-stage">
+            <div class="card-scale-box">
+              <PokemonCard card={DEFAULT_CARD} />
+            </div>
+          </div>
+          <p class="preview-footnote"><span>↳</span> A exportação usa uma tela de 1260 × 1760 px e captura somente a carta. A arte pode ser arrastada diretamente no quadro para refinar o enquadramento.</p>
+        </section>
+      </main>
+    </div>
+
+    <div class="toast-region" data-role="toast-region" aria-live="polite" aria-atomic="true"></div>
+
+    <dialog class="confirm-dialog" data-role="new-card-dialog">
+      <div class="dialog-inner">
+        <h3>Começar uma nova carta?</h3>
+        <p>As alterações que ainda não chegaram ao autosave podem ser descartadas. Seu último rascunho salvo localmente também será limpo.</p>
+        <div class="dialog-actions">
+          <button class="button subtle" type="button" data-action="cancel-new">Cancelar</button>
+          <button class="button primary" type="button" data-action="confirm-new">Criar nova carta</button>
+        </div>
+      </div>
+    </dialog>
+
+    <script src="../scripts/editor.ts"></script>
+  </body>
+</html>

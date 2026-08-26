@@ -1,0 +1,21 @@
+---
+import type { PokemonCardData } from '../../types/card';
+interface Props { card: PokemonCardData }
+const { card } = Astro.props;
+---
+<section class:list={['artwork-frame', { 'has-artwork': !!card.artwork }]} data-role="artwork-frame">
+  <div class="artwork-inner" data-role="artwork-drag-surface" aria-label="Área da arte da carta">
+    <img
+      class="artwork-image"
+      data-role="artwork-image"
+      src={card.artwork}
+      alt={card.artwork ? `Arte de ${card.pokemonName}` : ''}
+      draggable="false"
+    />
+    <div class="artwork-placeholder" data-role="artwork-placeholder">
+      <div class="placeholder-orbit"><span>✦</span></div>
+      <strong>Adicione sua arte</strong>
+      <small>PNG, JPG ou WebP</small>
+    </div>
+  </div>
+</section>

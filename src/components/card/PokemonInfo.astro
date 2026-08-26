@@ -1,0 +1,13 @@
+---
+import type { PokemonCardData } from '../../types/card';
+interface Props { card: PokemonCardData }
+const { card } = Astro.props;
+const dex = `#${String(card.pokedexNumber ?? 0).padStart(4, '0')}`;
+---
+<div class="pokemon-info" aria-label="Informações da espécie">
+  <span data-role="dex-number">{dex}</span><i></i>
+  <span data-role="genus">{card.genus}</span><i></i>
+  <span data-role="height">{card.height}</span><i></i>
+  <span data-role="weight">{card.weight}</span><i></i>
+  <span data-role="region">{card.region}</span>
+</div>

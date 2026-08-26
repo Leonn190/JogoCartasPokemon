@@ -1,0 +1,40 @@
+---
+import type { PokemonCardData } from '../../types/card';
+interface Props { card: PokemonCardData }
+const { card } = Astro.props;
+---
+<details class="editor-section" open>
+  <summary><span class="section-index">03</span><span><strong>Arte</strong><small>Upload, corte e full bleed</small></span><i aria-hidden="true">⌄</i></summary>
+  <div class="section-body">
+    <div class="dropzone" data-role="dropzone" tabindex="0">
+      <input class="sr-only" id="artwork-file" data-role="artwork-file" type="file" accept="image/png,image/jpeg,image/webp" />
+      <div class="drop-icon" aria-hidden="true">↥</div>
+      <strong>Solte sua arte aqui</strong>
+      <span>ou clique para escolher PNG, JPG ou WebP</span>
+    </div>
+    <div class="art-actions">
+      <button class="button subtle" type="button" data-action="replace-art">Trocar imagem</button>
+      <button class="button subtle danger" type="button" data-action="remove-art">Remover</button>
+    </div>
+    <div class="range-grid">
+      <label class="range-field">
+        <span><b>Zoom</b><output data-output="artworkScale">{card.artworkTransform.scale.toFixed(2)}×</output></span>
+        <input type="range" min="0.75" max="2.5" step="0.01" value={card.artworkTransform.scale} data-transform="scale" />
+      </label>
+      <label class="range-field">
+        <span><b>Posição X</b><output data-output="artworkX">{card.artworkTransform.x}%</output></span>
+        <input type="range" min="-50" max="50" step="1" value={card.artworkTransform.x} data-transform="x" />
+      </label>
+      <label class="range-field">
+        <span><b>Posição Y</b><output data-output="artworkY">{card.artworkTransform.y}%</output></span>
+        <input type="range" min="-50" max="50" step="1" value={card.artworkTransform.y} data-transform="y" />
+      </label>
+    </div>
+    <label class="toggle-row">
+      <span><strong>Arte Expandida</strong><small>Full bleed com painéis de legibilidade</small></span>
+      <input class="sr-only" type="checkbox" data-field="expandedArtwork" checked={card.expandedArtwork} />
+      <span class="toggle" aria-hidden="true"><i></i></span>
+    </label>
+    <p class="section-note">Dica: com uma arte carregada, arraste diretamente a imagem no preview para reposicioná-la.</p>
+  </div>
+</details>

@@ -1,0 +1,26 @@
+---
+import { CARD_STAGES } from '../../types/card';
+import type { PokemonCardData } from '../../types/card';
+interface Props { card: PokemonCardData }
+const { card } = Astro.props;
+---
+<details class="editor-section">
+  <summary><span class="section-index">02</span><span><strong>Evolução</strong><small>Cadeia e pré-evolução</small></span><i aria-hidden="true">⌄</i></summary>
+  <div class="section-body grid-2">
+    <div class="field">
+      <label for="stage">Estágio</label>
+      <select id="stage" data-field="stage">
+        {CARD_STAGES.map((stage) => <option value={stage} selected={stage === card.stage}>{stage}</option>)}
+      </select>
+    </div>
+    <div class="field">
+      <label for="previous-evolution">Pré-evolução</label>
+      <input id="previous-evolution" data-field="previousEvolution" value={card.previousEvolution} placeholder="Ex.: Charmeleon" />
+    </div>
+    <div class="field span-2">
+      <label for="previous-evolution-image">Imagem da pré-evolução</label>
+      <input id="previous-evolution-image" data-field="previousEvolutionImage" value={card.previousEvolutionImage} placeholder="URL da imagem / sprite" />
+      <p class="field-hint">Preenchida automaticamente quando possível, mas continua editável.</p>
+    </div>
+  </div>
+</details>

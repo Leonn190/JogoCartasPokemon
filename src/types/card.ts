@@ -64,9 +64,14 @@ export interface ArtworkTransform {
   y: number;
 }
 
+export type ArtworkSource = 'manual' | 'tcgdex' | 'none';
+
 export interface BaseCardData {
   cardType: CardType;
   artwork: string;
+  artworkSource?: ArtworkSource;
+  artworkSourceCardId?: string;
+  artworkSourceLabel?: string;
   artworkTransform: ArtworkTransform;
   cardNumber: number;
   setTotal: number;

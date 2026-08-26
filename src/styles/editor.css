@@ -151,3 +151,20 @@
 .grid-3 { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px 12px; }
 .field textarea[readonly] { color:#aeb6bd; background:#111418; cursor:default; }
 @media (max-width: 720px) { .grid-3 { grid-template-columns:1fr; } }
+
+/* Extração automática de artwork a partir de cartas normais da TCGdex. */
+.tcg-art-panel {
+  margin-top: 10px;
+  padding: 11px;
+  border: 1px solid rgba(255,255,255,.09);
+  border-radius: 9px;
+  background: linear-gradient(180deg, rgba(255,255,255,.025), rgba(255,255,255,.012));
+}
+.tcg-art-copy { display:flex; flex-direction:column; gap:4px; }
+.tcg-art-copy strong { color:#dfe3e7; font-size:10.5px; }
+.tcg-art-copy small { color:#737c86; font-size:9px; line-height:1.4; }
+.tcg-art-actions { display:grid; grid-template-columns:1fr 1fr; gap:7px; margin-top:9px; }
+.tcg-art-actions .button { min-width:0; padding-inline:8px; font-size:9.5px; }
+.tcg-art-actions .button:disabled { opacity:.38; cursor:not-allowed; }
+.tcg-art-status { min-height:28px; margin:8px 1px 0; color:#7d8791; font-size:9px; line-height:1.45; }
+@media (max-width:520px) { .tcg-art-actions { grid-template-columns:1fr; } }

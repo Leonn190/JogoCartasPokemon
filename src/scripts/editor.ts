@@ -2,6 +2,8 @@ import { ATTACK_KIND_META, CARD_CATEGORY_META } from '../data/cardCategories';
 import { DEFAULT_ATTACK_CARD, DEFAULT_POKEMON_CARD, EMPTY_POKEMON_CARD, createChampionCard, createEmptyCard, createUtilityCard } from '../data/defaultCard';
 import { exportCardAsPng } from '../lib/exportCard';
 import { getPokemonIndex, loadAbilityDescription, loadPokemonEditorData, loadPokemonSummary } from '../lib/pokeapi';
+import { extractArtworkFromCandidate, findNormalPokemonArtworkCandidates } from '../lib/tcgArtwork';
+import type { TcgArtworkCandidate } from '../lib/tcgArtwork';
 import { TYPE_META, titleCasePokemon } from '../lib/pokemonMapping';
 import { clearDraft, loadDraft, saveDraft } from '../lib/storage';
 import { CARD_FORMS, CARD_TYPE_LABELS, POKEMON_RARITY_LABELS } from '../types/card';
@@ -35,6 +37,9 @@ let pokemonIndex: Array<{ name: string; id: number }> | null = null;
 let pokemonSearchAbort: AbortController | null = null;
 let attackPokemonAbort: AbortController | null = null;
 let abilityAbort: AbortController | null = null;
+let tcgArtworkAbort: AbortController | null = null;
+let tcgArtworkCandidates: TcgArtworkCandidate[] = [];
+let tcgArtworkCandidateCursor = -1;
 let saveTimer = 0;
 let pokemonSearchTimer = 0;
 let attackSearchTimer = 0;
@@ -63,6 +68,9 @@ const attackSearchInput = q<HTMLInputElement>('[data-role="attack-pokemon-search
 const attackSuggestions = q<HTMLElement>('[data-role="attack-pokemon-suggestions"]')!;
 const attackSearchControl = q<HTMLElement>('[data-role="attack-search-control"]')!;
 const attackApiStatus = q<HTMLElement>('[data-role="attack-api-status"]')!;
+const tcgArtworkStatus = q<HTMLElement>('[data-role="tcg-art-status"]');
+const tcgArtworkButton = q<HTMLButtonElement>('[data-action="fetch-tcg-art"]');
+const tcgArtworkNextButton = q<HTMLButtonElement>('[data-action="next-tcg-art"]');
 
 function isPokemon(value: CardData = card): value is PokemonCardData { return value.cardType === 'pokemon'; }
 function isAttack(value: CardData = card): value is AttackCardData { return value.cardType === 'attack'; }
@@ -216,6 +224,7 @@ function syncFormFromState() {
   updateRangeOutputs();
   updateAttackCompatibilityEditor();
   updateAttackDescriptionCount();
+  updateTcgArtworkUI();
 }
 
 function applyArtworkToNode(node: HTMLElement) {
@@ -242,7 +251,6 @@ function renderPokemon(node: HTMLElement, value: PokemonCardData) {
   q<HTMLElement>('[data-role="form-mark"]', node)?.classList.toggle('is-normal', value.form === 'Normal');
   setTextIn(node, 'stage', value.stage);
   setTextIn(node, 'previous-name', value.previousEvolution || '');
-  setTextIn(node, 'type-symbol', meta.symbol);
   setTypeIcon(node, 'type-icon', meta.icon);
   setTextIn(node, 'dex-number', `#${String(value.pokedexNumber ?? 0).padStart(4, '0')}`);
   setTextIn(node, 'genus', value.genus || 'Pokémon');
@@ -331,7 +339,6 @@ function renderCompatiblePokemon(node: HTMLElement, value: AttackCardData) {
     const meta = TYPE_META[value.compatibleType];
     node.style.setProperty('--compat', meta.color);
     node.style.setProperty('--compat-deep', meta.deep);
-    setTextIn(node, 'compatible-type-symbol', meta.symbol);
     setTypeIcon(node, 'compatible-type-icon', meta.icon);
     setTextIn(node, 'compatible-type-text', `TODOS OS POKÉMON DE ${value.compatibleType.toUpperCase()}`);
     return;
@@ -370,7 +377,6 @@ function renderAttack(node: HTMLElement, value: AttackCardData) {
   node.style.setProperty('--attack-type-deep', attackTypeMeta.deep);
   setTextIn(node, 'attack-kind-label', meta.label);
   setTextIn(node, 'attack-power', `${value.power}%`);
-  setTextIn(node, 'attack-type-symbol', attackTypeMeta.symbol);
   setTypeIcon(node, 'attack-type-icon', attackTypeMeta.icon);
   setTextIn(node, 'attack-name-top', value.attackName || 'Novo Ataque');
   setTextIn(node, 'attack-name-bottom', value.attackName || 'Novo Ataque');
@@ -455,6 +461,117 @@ function renderSelectedPokemonEditor() {
     </div>`).join('');
 }
 
+function clearArtworkSourceMetadata(nextSource: 'manual' | 'none' = 'none') {
+  card.artworkSource = nextSource;
+  card.artworkSourceCardId = '';
+  card.artworkSourceLabel = '';
+}
+
+function updateTcgArtworkUI() {
+  if (!tcgArtworkStatus || !tcgArtworkButton || !tcgArtworkNextButton) return;
+  const available = isPokemon(card) && card.form === 'Normal' && Boolean(card.pokemonName.trim());
+  tcgArtworkButton.disabled = !available;
+  tcgArtworkNextButton.disabled = !available || tcgArtworkCandidates.length < 2;
+
+  if (!isPokemon(card)) return;
+  if (card.form !== 'Normal') {
+    tcgArtworkStatus.textContent = 'Busca automática desativada para EX, Mega, Radiante e Gigantamax.';
+    return;
+  }
+  if (card.artworkSource === 'tcgdex' && card.artworkSourceLabel) {
+    tcgArtworkStatus.textContent = `Arte recortada de ${card.artworkSourceLabel}.`;
+  } else if (card.artworkSource === 'manual' && card.artwork) {
+    tcgArtworkStatus.textContent = 'Arte manual preservada. Use “Buscar arte normal” se quiser substituí-la.';
+  } else {
+    tcgArtworkStatus.textContent = 'Ao escolher um Pokémon normal, o editor tenta extrair automaticamente a arte de uma carta padrão.';
+  }
+}
+
+function resetTcgArtworkCandidates() {
+  tcgArtworkCandidates = [];
+  tcgArtworkCandidateCursor = -1;
+  updateTcgArtworkUI();
+}
+
+async function applyTcgArtworkCandidate(candidate: TcgArtworkCandidate, expectedPokemonName: string) {
+  if (!isPokemon(card) || card.form !== 'Normal') return false;
+  if (normalizePokemonNameForArtwork(card.pokemonName) !== normalizePokemonNameForArtwork(expectedPokemonName)) return false;
+  if (tcgArtworkStatus) tcgArtworkStatus.textContent = `Recortando ${candidate.setName} #${candidate.localId}…`;
+  const extraction = await extractArtworkFromCandidate(candidate, tcgArtworkAbort?.signal);
+  if (!isPokemon(card) || card.form !== 'Normal') return false;
+  if (normalizePokemonNameForArtwork(card.pokemonName) !== normalizePokemonNameForArtwork(expectedPokemonName)) return false;
+
+  card.artwork = extraction.artwork;
+  card.artworkSource = 'tcgdex';
+  card.artworkSourceCardId = candidate.cardId;
+  card.artworkSourceLabel = `${candidate.setName} #${candidate.localId}`;
+  card.artworkTransform = { scale: 1, x: 0, y: 0 };
+  renderCard();
+  syncFormFromState();
+  markChanged();
+  const safety = extraction.crop.evolvedSafetyApplied ? ' A faixa da pré-evolução foi evitada.' : '';
+  if (tcgArtworkStatus) tcgArtworkStatus.textContent = `Arte extraída de ${candidate.setName} #${candidate.localId}.${safety}`;
+  toast(`Arte de ${candidate.cardName} extraída automaticamente.`, 'success');
+  return true;
+}
+
+function normalizePokemonNameForArtwork(value: string) {
+  return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '');
+}
+
+async function fetchTcgArtwork(options: { force?: boolean; next?: boolean } = {}) {
+  if (!isPokemon(card)) return;
+  if (card.form !== 'Normal') {
+    if (tcgArtworkStatus) tcgArtworkStatus.textContent = 'A extração automática aceita apenas a forma Normal.';
+    return;
+  }
+  const pokemonName = card.pokemonName.trim();
+  if (!pokemonName || pokemonName === 'Novo Pokémon') {
+    if (tcgArtworkStatus) tcgArtworkStatus.textContent = 'Escolha um Pokémon antes de buscar a arte.';
+    return;
+  }
+  if (!options.force && card.artworkSource === 'manual' && card.artwork) {
+    updateTcgArtworkUI();
+    return;
+  }
+
+  tcgArtworkAbort?.abort();
+  tcgArtworkAbort = new AbortController();
+  tcgArtworkButton && (tcgArtworkButton.disabled = true);
+  tcgArtworkNextButton && (tcgArtworkNextButton.disabled = true);
+
+  try {
+    const samePokemon = tcgArtworkCandidates[0]
+      && normalizePokemonNameForArtwork(tcgArtworkCandidates[0].cardName) === normalizePokemonNameForArtwork(pokemonName);
+    if (!samePokemon) {
+      resetTcgArtworkCandidates();
+      if (tcgArtworkStatus) tcgArtworkStatus.textContent = 'Procurando cartas normais na TCGdex…';
+      tcgArtworkCandidates = await findNormalPokemonArtworkCandidates(pokemonName, tcgArtworkAbort.signal);
+      tcgArtworkCandidateCursor = -1;
+    }
+
+    if (!tcgArtworkCandidates.length) {
+      if (tcgArtworkStatus) tcgArtworkStatus.textContent = 'Não encontrei uma carta normal segura para extrair a arte deste Pokémon.';
+      if (options.force) toast('Nenhuma carta normal compatível encontrada na TCGdex.', 'neutral');
+      return;
+    }
+
+    const nextCursor = options.next
+      ? (tcgArtworkCandidateCursor + 1 + tcgArtworkCandidates.length) % tcgArtworkCandidates.length
+      : Math.max(0, tcgArtworkCandidateCursor);
+    tcgArtworkCandidateCursor = nextCursor;
+    const candidate = tcgArtworkCandidates[tcgArtworkCandidateCursor]!;
+    await applyTcgArtworkCandidate(candidate, pokemonName);
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') return;
+    const message = error instanceof Error ? error.message : 'Falha ao buscar ou recortar a arte.';
+    if (tcgArtworkStatus) tcgArtworkStatus.textContent = `${message} Você ainda pode enviar uma imagem manualmente.`;
+    if (options.force) toast(message, 'error');
+  } finally {
+    updateTcgArtworkUI();
+  }
+}
+
 function markChanged() {
   dirty = true;
   autosaveStatus?.classList.add('is-saving');
@@ -506,6 +623,7 @@ function mergeDraft(restored: CardData): CardData {
       specialDefense: normalizeStat(restored.specialDefense),
       speed: normalizeStat(restored.speed),
       setTotal: Number(restored.setTotal) || 150,
+      artworkSource: restored.artworkSource ?? (restored.artwork ? 'manual' : 'none'),
       artworkTransform: { ...DEFAULT_POKEMON_CARD.artworkTransform, ...restored.artworkTransform },
     };
   }
@@ -518,6 +636,7 @@ function mergeDraft(restored: CardData): CardData {
       type: restored.type || 'Água',
       setTotal: Number(restored.setTotal) || 150,
       compatiblePokemon: Array.isArray(restored.compatiblePokemon) ? restored.compatiblePokemon.slice(0, 10) : [],
+      artworkSource: restored.artworkSource ?? (restored.artwork ? 'manual' : 'none'),
       artworkTransform: { ...DEFAULT_ATTACK_CARD.artworkTransform, ...restored.artworkTransform },
     };
   }
@@ -528,6 +647,7 @@ function mergeDraft(restored: CardData): CardData {
       ...restored,
       cardType: 'champion',
       setTotal: Number(restored.setTotal) || 150,
+      artworkSource: restored.artworkSource ?? (restored.artwork ? 'manual' : 'none'),
       artworkTransform: { ...base.artworkTransform, ...restored.artworkTransform },
     };
   }
@@ -538,6 +658,7 @@ function mergeDraft(restored: CardData): CardData {
     cardType: restored.cardType,
     usageText: base.usageText,
     setTotal: Number(restored.setTotal) || 150,
+    artworkSource: restored.artworkSource ?? (restored.artwork ? 'manual' : 'none'),
     artworkTransform: { ...base.artworkTransform, ...restored.artworkTransform },
   };
 }
@@ -568,7 +689,9 @@ function applyPokemonForm(form: PokemonForm) {
   setInputValue('rarity', card.rarity);
   pokemonSubtypeSelector.value = card.form;
   renderCard();
+  updateTcgArtworkUI();
   markChanged();
+  if (form === 'Normal' && (!card.artwork || card.artworkSource === 'tcgdex')) void fetchTcgArtwork();
 }
 
 function updateField(input: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement) {
@@ -690,6 +813,11 @@ async function selectPokemon(identifier: string | number) {
     if (!isPokemon(card)) return;
     const p = data.pokemon;
     naturalStage = p.stage;
+    resetTcgArtworkCandidates();
+    if (card.artworkSource === 'tcgdex') {
+      card.artwork = '';
+      clearArtworkSourceMetadata('none');
+    }
     Object.assign(card, {
       pokemonId: p.pokemonId,
       pokemonName: p.pokemonName,
@@ -719,6 +847,7 @@ async function selectPokemon(identifier: string | number) {
     if (typeSuggestion) typeSuggestion.textContent = p.suggestedType ? `Sugestão da API: ${p.suggestedType}` : 'Tipo oficial ambíguo: escolha manualmente.';
     markChanged();
     toast(`${p.pokemonName} carregado pela PokéAPI.`, 'success');
+    void fetchTcgArtwork();
   } catch (error) {
     if (error instanceof DOMException && error.name === 'AbortError') return;
     const message = error instanceof Error ? error.message : 'Falha ao consultar a PokéAPI.';
@@ -786,6 +915,7 @@ function readArtwork(file: File) {
   const reader = new FileReader();
   reader.onload = () => {
     card.artwork = String(reader.result || '');
+    clearArtworkSourceMetadata('manual');
     card.artworkTransform = { scale: 1, x: 0, y: 0 };
     syncFormFromState();
     renderCard();
@@ -875,6 +1005,7 @@ function switchCardType(nextType: CardType) {
   if (nextType === card.cardType) return;
   pokemonSearchAbort?.abort();
   attackPokemonAbort?.abort();
+  tcgArtworkAbort?.abort();
   cardCache[card.cardType] = cloneCard(card);
   const next = cardCache[nextType] ? cloneCard(cardCache[nextType]!) : createEmptyCard(nextType);
   if (nextType === 'pokemon' && next.cardType === 'pokemon') naturalStage = next.stage;
@@ -1000,8 +1131,12 @@ function bindEvents() {
   ['dragleave', 'drop'].forEach((type) => dropzone.addEventListener(type, (event) => { event.preventDefault(); dropzone.classList.remove('is-dragover'); }));
   dropzone.addEventListener('drop', (event) => { const file = event.dataTransfer?.files?.[0]; if (file) readArtwork(file); });
   q<HTMLButtonElement>('[data-action="replace-art"]')?.addEventListener('click', () => fileInput.click());
+  tcgArtworkButton?.addEventListener('click', () => { void fetchTcgArtwork({ force: true }); });
+  tcgArtworkNextButton?.addEventListener('click', () => { void fetchTcgArtwork({ force: true, next: true }); });
   q<HTMLButtonElement>('[data-action="remove-art"]')?.addEventListener('click', () => {
     card.artwork = '';
+    clearArtworkSourceMetadata('none');
+    resetTcgArtworkCandidates();
     card.artworkTransform = { scale: 1, x: 0, y: 0 };
     fileInput.value = '';
     syncFormFromState();
@@ -1065,6 +1200,8 @@ async function resetToNewCard() {
   await clearDraft();
   cardCache = {};
   reference = { officialStats: null, abilities: [] };
+  tcgArtworkAbort?.abort();
+  resetTcgArtworkCandidates();
   naturalStage = 'BÁSICO';
   pokemonSearchInput.value = '';
   attackSearchInput.value = '';

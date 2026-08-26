@@ -34,7 +34,6 @@ const attackTypeIcon = `${import.meta.env.BASE_URL}${attackTypeMeta.icon}`;
       <div class="attack-name-meta">
         <span class="attack-power-badge" data-role="attack-power">{card.power}%</span>
         <span class="attack-type-badge" aria-label={`Tipo ${card.type}`} title={card.type}>
-          <span class="attack-type-fallback" data-role="attack-type-symbol">{attackTypeMeta.symbol}</span>
           <img data-role="attack-type-icon" src={attackTypeIcon} alt="" onerror="this.style.display='none'" />
         </span>
       </div>
@@ -48,7 +47,6 @@ const attackTypeIcon = `${import.meta.env.BASE_URL}${attackTypeMeta.icon}`;
         <div class="compatible-pokemon-grid" data-role="compatible-pokemon-grid"></div>
         <div class="compatible-type-display" data-role="compatible-type-display" hidden>
           <span class="compatible-type-symbol">
-            <span class="compatible-type-fallback" data-role="compatible-type-symbol">{typeMeta.symbol}</span>
             <img data-role="compatible-type-icon" src={typeIcon} alt="" onerror="this.style.display='none'" />
           </span>
           <strong data-role="compatible-type-text">TODOS OS POKÉMON DE {card.compatibleType.toUpperCase()}</strong>

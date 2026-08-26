@@ -17,6 +17,17 @@ const expanded = card.cardType === 'pokemon' ? card.expandedArtwork : false;
       <button class="button subtle" type="button" data-action="replace-art">Trocar imagem</button>
       <button class="button subtle danger" type="button" data-action="remove-art">Remover</button>
     </div>
+    <div class="tcg-art-panel" data-pokemon-only>
+      <div class="tcg-art-copy">
+        <strong>Arte de carta normal</strong>
+        <small>Busca na TCGdex, rejeita EX/GX/V/Mega/Full Art e recorta somente a ilustração.</small>
+      </div>
+      <div class="tcg-art-actions">
+        <button class="button subtle" type="button" data-action="fetch-tcg-art">Buscar arte normal</button>
+        <button class="button subtle" type="button" data-action="next-tcg-art" disabled>Outra versão</button>
+      </div>
+      <p class="tcg-art-status" data-role="tcg-art-status">Ao escolher um Pokémon normal, o editor tenta extrair automaticamente a arte de uma carta padrão.</p>
+    </div>
     <div class="range-grid">
       <label class="range-field">
         <span><b>Zoom</b><output data-output="artworkScale">{card.artworkTransform.scale.toFixed(2)}×</output></span>

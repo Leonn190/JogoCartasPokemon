@@ -1,6 +1,7 @@
-import type { PokemonCardData } from '../types/card';
+import type { CardData, PokemonCardData } from '../types/card';
 
-const DRAFT_KEY = 'card-forge:draft:v1';
+const DRAFT_KEY = 'card-forge:draft:v2';
+const LEGACY_DRAFT_KEY = 'card-forge:draft:v1';
 const DB_NAME = 'card-forge-artwork';
 const STORE = 'artwork';
 const ART_KEY = 'current';
@@ -52,17 +53,31 @@ async function clearArtwork() {
   db.close();
 }
 
-export async function saveDraft(card: PokemonCardData) {
+function migrateLegacy(value: PokemonCardData): CardData {
+  return {
+    ...value,
+    cardType: 'pokemon',
+    setTotal: 150,
+    artworkTransform: {
+      scale: value.artworkTransform?.scale ?? 1,
+      x: value.artworkTransform?.x ?? 0,
+      y: value.artworkTransform?.y ?? 0,
+    },
+  };
+}
+
+export async function saveDraft(card: CardData) {
   const copy = { ...card, artwork: '' };
   localStorage.setItem(DRAFT_KEY, JSON.stringify(copy));
   try { await putArtwork(card.artwork); } catch { /* localStorage draft remains useful */ }
 }
 
-export async function loadDraft(): Promise<PokemonCardData | null> {
-  const raw = localStorage.getItem(DRAFT_KEY);
+export async function loadDraft(): Promise<CardData | null> {
+  const raw = localStorage.getItem(DRAFT_KEY) ?? localStorage.getItem(LEGACY_DRAFT_KEY);
   if (!raw) return null;
   try {
-    const data = JSON.parse(raw) as PokemonCardData;
+    const parsed = JSON.parse(raw) as CardData | PokemonCardData;
+    const data = 'cardType' in parsed ? parsed as CardData : migrateLegacy(parsed as PokemonCardData);
     try { data.artwork = await getArtwork(); } catch { data.artwork = ''; }
     return data;
   } catch {
@@ -72,5 +87,6 @@ export async function loadDraft(): Promise<PokemonCardData | null> {
 
 export async function clearDraft() {
   localStorage.removeItem(DRAFT_KEY);
+  localStorage.removeItem(LEGACY_DRAFT_KEY);
   try { await clearArtwork(); } catch { /* noop */ }
 }

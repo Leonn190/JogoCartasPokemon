@@ -1,19 +1,23 @@
 import { toPng } from 'html-to-image';
-import type { PokemonCardData } from '../types/card';
+import type { CardData } from '../types/card';
 
 function slug(value: string) {
   return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 }
 
-export function exportFilename(card: PokemonCardData) {
-  const name = slug(card.pokemonName || 'pokemon');
-  const form = card.form === 'Normal' ? '' : `-${slug(card.form)}`;
+export function exportFilename(card: CardData) {
   const number = String(card.cardNumber || 0).padStart(3, '0');
   const code = slug(card.setCode || 'set');
-  return `${name}${form}-${number}-${code}.png`;
+  if (card.cardType === 'pokemon') {
+    const name = slug(card.pokemonName || 'pokemon');
+    const form = card.form === 'Normal' ? '' : `-${slug(card.form)}`;
+    return `${name}${form}-${number}-${code}.png`;
+  }
+  if (card.cardType === 'attack') return `${slug(card.attackName || 'ataque')}-ataque-${number}-${code}.png`;
+  return `${slug(card.name || card.cardType)}-${card.cardType}-${number}-${code}.png`;
 }
 
-export async function exportCardAsPng(node: HTMLElement, card: PokemonCardData) {
+export async function exportCardAsPng(node: HTMLElement, card: CardData) {
   const dataUrl = await toPng(node, {
     width: 630,
     height: 880,
@@ -22,6 +26,7 @@ export async function exportCardAsPng(node: HTMLElement, card: PokemonCardData) 
     pixelRatio: 1,
     cacheBust: true,
     skipFonts: true,
+    imagePlaceholder: 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=',
     style: {
       transform: 'none',
       transformOrigin: 'center',

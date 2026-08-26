@@ -1,6 +1,7 @@
-import type { PokemonCardData } from '../types/card';
+import type { AttackCardData, CardData, CardType, PokemonCardData, UtilityCardData, UtilityCardType } from '../types/card';
 
-export const DEFAULT_CARD: PokemonCardData = {
+export const DEFAULT_POKEMON_CARD: PokemonCardData = {
+  cardType: 'pokemon',
   pokemonId: 6,
   pokemonName: 'Charizard',
   form: 'Normal',
@@ -32,8 +33,8 @@ export const DEFAULT_CARD: PokemonCardData = {
   isMythical: false,
 };
 
-export const EMPTY_CARD: PokemonCardData = {
-  ...DEFAULT_CARD,
+export const EMPTY_POKEMON_CARD: PokemonCardData = {
+  ...DEFAULT_POKEMON_CARD,
   pokemonId: null,
   pokemonName: 'Novo Pokémon',
   form: 'Normal',
@@ -63,3 +64,69 @@ export const EMPTY_CARD: PokemonCardData = {
   isLegendary: false,
   isMythical: false,
 };
+
+export const DEFAULT_ATTACK_CARD: AttackCardData = {
+  cardType: 'attack',
+  attackName: 'Aqua Jet',
+  attackDescription: 'Descreva aqui o efeito completo deste ataque durante a partida.',
+  compatibilityMode: 'specific',
+  compatiblePokemon: [],
+  compatibleType: 'Água',
+  artwork: '',
+  artworkTransform: { scale: 1, x: 0, y: 0 },
+  cardNumber: 66,
+  setTotal: 150,
+  setCode: 'CKT',
+};
+
+const UTILITY_COPY: Record<UtilityCardType, { name: string; effect: string; usage: string; number: number }> = {
+  stadium: {
+    name: 'Arena Central',
+    effect: 'Escreva aqui o efeito que este Estádio produz enquanto estiver em jogo.',
+    usage: 'Explique aqui como este Estádio entra em jogo e por quanto tempo seu efeito permanece.',
+    number: 114,
+  },
+  supporter: {
+    name: 'Parceiro de Jornada',
+    effect: 'Escreva aqui o efeito concedido por este Apoiador.',
+    usage: 'Explique aqui quando e como este Apoiador pode ser utilizado.',
+    number: 122,
+  },
+  item: {
+    name: 'Kit de Campo',
+    effect: 'Escreva aqui o efeito produzido por este Item.',
+    usage: 'Explique aqui quando este Item pode ser utilizado.',
+    number: 132,
+  },
+  tool: {
+    name: 'Insígnia de Aço',
+    effect: 'Escreva aqui o efeito concedido por esta Ferramenta.',
+    usage: 'Explique aqui como esta Ferramenta é utilizada em jogo.',
+    number: 148,
+  },
+};
+
+export function createUtilityCard(cardType: UtilityCardType): UtilityCardData {
+  const copy = UTILITY_COPY[cardType];
+  return {
+    cardType,
+    name: copy.name,
+    effectText: copy.effect,
+    usageText: copy.usage,
+    artwork: '',
+    artworkTransform: { scale: 1, x: 0, y: 0 },
+    cardNumber: copy.number,
+    setTotal: 150,
+    setCode: 'CKT',
+  };
+}
+
+export function createEmptyCard(cardType: CardType): CardData {
+  if (cardType === 'pokemon') return structuredClone(EMPTY_POKEMON_CARD);
+  if (cardType === 'attack') return structuredClone(DEFAULT_ATTACK_CARD);
+  return createUtilityCard(cardType);
+}
+
+// Aliases mantidos para compatibilidade com imports antigos do projeto.
+export const DEFAULT_CARD = DEFAULT_POKEMON_CARD;
+export const EMPTY_CARD = EMPTY_POKEMON_CARD;

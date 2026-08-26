@@ -1,3 +1,18 @@
+export const CARD_TYPES = ['pokemon', 'attack', 'stadium', 'supporter', 'item', 'tool'] as const;
+export type CardType = (typeof CARD_TYPES)[number];
+
+export const CARD_TYPE_LABELS: Record<CardType, string> = {
+  pokemon: 'Pokémon',
+  attack: 'Ataque',
+  stadium: 'Estádio',
+  supporter: 'Apoiador',
+  item: 'Item',
+  tool: 'Ferramenta',
+};
+
+export const UTILITY_CARD_TYPES = ['stadium', 'supporter', 'item', 'tool'] as const;
+export type UtilityCardType = (typeof UTILITY_CARD_TYPES)[number];
+
 export const CARD_FORMS = ['Normal', 'EX', 'Mega', 'Radiante', 'Gigantamax', 'Lendário'] as const;
 export type PokemonForm = (typeof CARD_FORMS)[number];
 
@@ -25,7 +40,17 @@ export interface ArtworkTransform {
   y: number;
 }
 
-export interface PokemonCardData extends CardStats {
+export interface BaseCardData {
+  cardType: CardType;
+  artwork: string;
+  artworkTransform: ArtworkTransform;
+  cardNumber: number;
+  setTotal: 150;
+  setCode: string;
+}
+
+export interface PokemonCardData extends BaseCardData, CardStats {
+  cardType: 'pokemon';
   pokemonId: number | null;
   pokemonName: string;
   form: PokemonForm;
@@ -33,8 +58,6 @@ export interface PokemonCardData extends CardStats {
   stage: PokemonStage;
   previousEvolution: string;
   previousEvolutionImage: string;
-  artwork: string;
-  artworkTransform: ArtworkTransform;
   expandedArtwork: boolean;
   pokedexNumber: number | null;
   genus: string;
@@ -44,12 +67,35 @@ export interface PokemonCardData extends CardStats {
   abilityName: string;
   abilityDescription: string;
   flavorText: string;
-  cardNumber: number;
-  setTotal: 150;
-  setCode: string;
   isLegendary: boolean;
   isMythical: boolean;
 }
+
+export interface CompatiblePokemon {
+  id: number;
+  name: string;
+  sprite: string;
+}
+
+export type AttackCompatibilityMode = 'specific' | 'type';
+
+export interface AttackCardData extends BaseCardData {
+  cardType: 'attack';
+  attackName: string;
+  attackDescription: string;
+  compatibilityMode: AttackCompatibilityMode;
+  compatiblePokemon: CompatiblePokemon[];
+  compatibleType: GameType;
+}
+
+export interface UtilityCardData extends BaseCardData {
+  cardType: UtilityCardType;
+  name: string;
+  effectText: string;
+  usageText: string;
+}
+
+export type CardData = PokemonCardData | AttackCardData | UtilityCardData;
 
 export interface OfficialStats extends CardStats {}
 

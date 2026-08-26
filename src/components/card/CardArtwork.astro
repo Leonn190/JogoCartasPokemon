@@ -1,5 +1,6 @@
 ---
 import type { PokemonCardData } from '../../types/card';
+import PokemonInfo from './PokemonInfo.astro';
 interface Props { card: PokemonCardData }
 const { card } = Astro.props;
 ---
@@ -18,4 +19,5 @@ const { card } = Astro.props;
       <small>PNG, JPG ou WebP</small>
     </div>
   </div>
+  <PokemonInfo card={card} />
 </section>

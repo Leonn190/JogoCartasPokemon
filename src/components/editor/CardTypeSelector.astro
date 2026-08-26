@@ -1,0 +1,15 @@
+---
+import { CARD_TYPES, CARD_TYPE_LABELS } from '../../types/card';
+import type { CardType } from '../../types/card';
+interface Props { cardType: CardType }
+const { cardType } = Astro.props;
+---
+<div class="card-type-selector">
+  <div>
+    <span class="eyebrow">TIPO DE CARTA</span>
+    <strong>Escolha o template</strong>
+  </div>
+  <select data-role="card-type-selector" aria-label="Tipo de carta">
+    {CARD_TYPES.map((type) => <option value={type} selected={type === cardType}>{CARD_TYPE_LABELS[type]}</option>)}
+  </select>
+</div>

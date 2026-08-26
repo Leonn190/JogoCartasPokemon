@@ -145,3 +145,15 @@ export async function loadAbilityDescription(url: string, signal?: AbortSignal):
   const effect = ability.effect_entries.find((entry) => entry.language.name === 'en') ?? ability.effect_entries[0];
   return sanitizeFlavorText(effect?.short_effect || effect?.effect || '');
 }
+
+export async function loadPokemonSummary(identifier: string | number, signal?: AbortSignal) {
+  const normalized = String(identifier).trim().toLowerCase();
+  const pokemon = await apiFetch<PokemonResponse>(`/pokemon/${encodeURIComponent(normalized)}`, signal);
+  return {
+    id: pokemon.id,
+    name: titleCasePokemon(pokemon.name),
+    sprite: pokemon.sprites.other?.['official-artwork']?.front_default
+      ?? pokemon.sprites.front_default
+      ?? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.id}.png`,
+  };
+}

@@ -1,0 +1,45 @@
+---
+import type { AttackCardData } from '../../types/card';
+import { CARD_CATEGORY_META } from '../../data/cardCategories';
+import { TYPE_META } from '../../lib/pokemonMapping';
+import SharedArtwork from './SharedArtwork.astro';
+interface Props { card: AttackCardData }
+const { card } = Astro.props;
+const meta = CARD_CATEGORY_META.attack;
+const typeMeta = TYPE_META[card.compatibleType];
+const number = String(card.cardNumber).padStart(3, '0');
+---
+<article
+  class="game-card attack-card"
+  data-role="card-template"
+  data-card-template="attack"
+  style={`--accent:${meta.accent};--accent-deep:${meta.deep};--attack-surface:${meta.surface};--compat:${typeMeta.color};--compat-deep:${typeMeta.deep};`}
+>
+  <div class="attack-shell card-shell">
+    <header class="utility-header attack-header">
+      <div class="utility-category"><span>✦</span><strong>ATAQUE</strong></div>
+      <h2 data-role="attack-name-top">{card.attackName}</h2>
+    </header>
+    <SharedArtwork artwork={card.artwork} name={card.attackName} />
+    <section class="compatibility-zone">
+      <span class="compatibility-label">POKÉMON COMPATÍVEIS</span>
+      <div class="compatible-pokemon-grid" data-role="compatible-pokemon-grid"></div>
+      <div class="compatible-type-display" data-role="compatible-type-display" hidden>
+        <span class="compatible-type-symbol" data-role="compatible-type-symbol">{typeMeta.symbol}</span>
+        <strong data-role="compatible-type-text">TODOS OS POKÉMON DE {card.compatibleType.toUpperCase()}</strong>
+      </div>
+    </section>
+    <section class="attack-module">
+      <div class="attack-module-head">
+        <span>ATAQUE</span>
+        <h3 data-role="attack-name-bottom">{card.attackName}</h3>
+      </div>
+      <p data-role="attack-description">{card.attackDescription}</p>
+      <div class="attack-module-footer">
+        <span class="set-stamp" data-role="set-code">{card.setCode}</span>
+        <span class="collector-number"><strong data-role="card-number">{number}</strong><em>/</em><span data-role="set-total">{card.setTotal}</span></span>
+        <span class="edition-mark">CF • 01</span>
+      </div>
+    </section>
+  </div>
+</article>

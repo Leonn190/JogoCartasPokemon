@@ -8,11 +8,10 @@ const { card } = Astro.props;
   <div class="evolution-zone" data-role="evolution-zone">
     <div class="stage-pill" data-role="stage">{card.stage}</div>
     <div class:list={['previous-evolution', { 'is-empty': !card.previousEvolution }]} data-role="previous-wrap">
-      <img src={card.previousEvolutionImage} data-role="previous-image" alt={card.previousEvolution ? `Pré-evolução ${card.previousEvolution}` : ''} crossorigin="anonymous" />
-      <div class="previous-copy">
-        <span data-role="previous-label">{card.previousEvolution ? 'Evolui de' : 'Primeira forma'}</span>
-        <strong data-role="previous-name">{card.previousEvolution || 'Sem pré-evolução'}</strong>
-      </div>
+      <span class="previous-medallion">
+        <img src={card.previousEvolutionImage} data-role="previous-image" alt={card.previousEvolution ? `Pré-evolução ${card.previousEvolution}` : ''} crossorigin="anonymous" />
+      </span>
+      <strong data-role="previous-name">{card.previousEvolution}</strong>
     </div>
   </div>
 

@@ -1,0 +1,9 @@
+---
+import PokemonCard from './PokemonCard.astro';
+import AttackCard from './AttackCard.astro';
+import UtilityCard from './UtilityCard.astro';
+import { DEFAULT_ATTACK_CARD, DEFAULT_POKEMON_CARD, createUtilityCard } from '../../data/defaultCard';
+---
+<div class="card-template-slot is-active" data-card-slot="pokemon"><PokemonCard card={DEFAULT_POKEMON_CARD} /></div>
+<div class="card-template-slot" data-card-slot="attack" hidden><AttackCard card={DEFAULT_ATTACK_CARD} /></div>
+<div class="card-template-slot" data-card-slot="utility" hidden><UtilityCard card={createUtilityCard('stadium')} /></div>

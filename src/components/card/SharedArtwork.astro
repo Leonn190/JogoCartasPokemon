@@ -1,0 +1,14 @@
+---
+interface Props { artwork: string; name: string }
+const { artwork, name } = Astro.props;
+---
+<section class:list={['shared-artwork', { 'has-artwork': !!artwork }]} data-role="artwork-frame">
+  <div class="shared-artwork-inner" data-role="artwork-drag-surface">
+    <img class="artwork-image" data-role="artwork-image" src={artwork} alt={artwork ? `Arte de ${name}` : ''} draggable="false" />
+    <div class="artwork-placeholder" data-role="artwork-placeholder">
+      <div class="placeholder-orbit"><span>✦</span></div>
+      <strong>Adicione sua arte</strong>
+      <small>PNG, JPG ou WebP</small>
+    </div>
+  </div>
+</section>

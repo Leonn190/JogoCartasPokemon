@@ -1,0 +1,37 @@
+---
+import type { UtilityCardData } from '../../types/card';
+import { UTILITY_META } from '../../data/cardCategories';
+import SharedArtwork from './SharedArtwork.astro';
+interface Props { card: UtilityCardData }
+const { card } = Astro.props;
+const meta = UTILITY_META[card.cardType];
+const number = String(card.cardNumber).padStart(3, '0');
+---
+<article
+  class="game-card utility-card"
+  data-role="card-template"
+  data-card-template="utility"
+  data-utility-type={card.cardType}
+  style={`--accent:${meta.accent};--accent-deep:${meta.deep};--utility-surface:${meta.surface};`}
+>
+  <div class="utility-shell card-shell">
+    <header class="utility-header">
+      <div class="utility-category"><span data-role="utility-symbol">{meta.symbol}</span><strong data-role="utility-category">{meta.label}</strong></div>
+      <h2 data-role="utility-name">{card.name}</h2>
+    </header>
+    <SharedArtwork artwork={card.artwork} name={card.name} />
+    <section class="utility-effect">
+      <div class="utility-kicker">EFEITO</div>
+      <p data-role="utility-effect">{card.effectText}</p>
+      <div class="usage-box">
+        <strong>COMO USAR</strong>
+        <p data-role="utility-usage">{card.usageText}</p>
+      </div>
+    </section>
+    <footer class="simple-footer">
+      <span class="set-stamp" data-role="set-code">{card.setCode}</span>
+      <span class="collector-number"><strong data-role="card-number">{number}</strong><em>/</em><span data-role="set-total">{card.setTotal}</span></span>
+      <span class="edition-mark">CF • 01</span>
+    </footer>
+  </div>
+</article>

@@ -1,5 +1,7 @@
 ---
 import type { PokemonCardData } from '../../types/card';
+import { DEFAULT_ATTACK_CARD, createUtilityCard } from '../../data/defaultCard';
+import CardTypeSelector from './CardTypeSelector.astro';
 import PokemonForm from './PokemonForm.astro';
 import EvolutionEditor from './EvolutionEditor.astro';
 import ArtworkControls from './ArtworkControls.astro';
@@ -7,6 +9,8 @@ import PokedexEditor from './PokedexEditor.astro';
 import StatsEditor from './StatsEditor.astro';
 import AbilityEditor from './AbilityEditor.astro';
 import CardMetadataEditor from './CardMetadataEditor.astro';
+import AttackEditor from './AttackEditor.astro';
+import UtilityEditor from './UtilityEditor.astro';
 interface Props { card: PokemonCardData }
 const { card } = Astro.props;
 ---
@@ -19,11 +23,19 @@ const { card } = Astro.props;
     </div>
     <span class="autosave-pill" data-role="autosave-status"><i></i> Salvo localmente</span>
   </div>
-  <PokemonForm card={card} />
-  <EvolutionEditor card={card} />
+
+  <CardTypeSelector cardType={card.cardType} />
+
+  <div class="editor-kind" data-editor-kind="pokemon">
+    <PokemonForm card={card} />
+    <EvolutionEditor card={card} />
+    <PokedexEditor card={card} />
+    <StatsEditor card={card} />
+    <AbilityEditor card={card} />
+    <CardMetadataEditor card={card} />
+  </div>
+
+  <AttackEditor card={DEFAULT_ATTACK_CARD} />
+  <UtilityEditor card={createUtilityCard('stadium')} />
   <ArtworkControls card={card} />
-  <PokedexEditor card={card} />
-  <StatsEditor card={card} />
-  <AbilityEditor card={card} />
-  <CardMetadataEditor card={card} />
 </aside>

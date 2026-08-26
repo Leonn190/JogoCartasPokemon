@@ -16,6 +16,7 @@ const meta = TYPE_META[card.type];
   data-role="card-template"
   data-card-template="pokemon"
   data-form={card.form}
+  data-pokemon-type={card.type}
   data-expanded={String(card.expandedArtwork)}
   style={`--type:${meta.color};--type-deep:${meta.deep};--type-light:${meta.light};`}
 >

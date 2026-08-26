@@ -122,3 +122,30 @@
   .segmented-choice { grid-template-columns: 1fr; }
   .selected-pokemon-list { grid-template-columns: 1fr; }
 }
+
+/* Hierarquia do tipo da carta: Pokémon / Treinador / Ataque + subtipo. */
+.card-type-selector {
+  min-height: 104px;
+  align-items: stretch;
+  padding: 14px;
+  display: grid;
+  grid-template-columns: minmax(150px, .8fr) minmax(250px, 1.2fr);
+  gap: 12px 18px;
+}
+.type-selector-copy { display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+.type-selector-copy strong { color: #eef1f3; font-size: 12px; }
+.type-selector-copy small { margin-top: 4px; max-width: 230px; color: #68717a; font-size: 9px; line-height: 1.35; }
+.type-selector-controls { display: grid; grid-template-columns: 1fr 1fr; align-items: end; gap: 8px; }
+.compact-select { min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+.compact-select[hidden], [data-subtype-family][hidden] { display: none !important; }
+.compact-select > span { color: #7e8790; font-size: 8.5px; font-weight: 750; letter-spacing: .06em; text-transform: uppercase; }
+.card-type-selector .compact-select select { width: 100%; min-width: 0; }
+.type-selector-hint { grid-column: 1 / -1; margin: -3px 0 0; padding-left: 1px; font-size: 9px; }
+
+@media (max-width: 720px) {
+  .card-type-selector { grid-template-columns: 1fr; }
+  .type-selector-copy small { max-width: none; }
+}
+@media (max-width: 520px) {
+  .type-selector-controls { grid-template-columns: 1fr; }
+}

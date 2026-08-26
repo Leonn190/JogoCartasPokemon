@@ -896,3 +896,282 @@
   -webkit-text-stroke:.35px rgba(5,7,9,.72);
   paint-order:stroke fill;
 }
+
+/* ----------------------------------------------------------------------
+   Refinamento 2026: moldura prata moderna, textura de impressão e cores
+   mais vivas, mantendo o editor autoral sem depender de assets externos.
+   ---------------------------------------------------------------------- */
+
+/* Moldura prata fina em todas as famílias. */
+.game-card {
+  background:
+    linear-gradient(112deg, rgba(255,255,255,.96) 0 1.6%, transparent 6% 88%, rgba(255,255,255,.5) 93%, transparent 98%),
+    repeating-linear-gradient(132deg, rgba(255,255,255,.24) 0 1px, rgba(55,60,63,.055) 1px 3px),
+    linear-gradient(145deg, #e5e7e8 0%, #9ca3a7 24%, #dfe2e3 49%, #8f979b 73%, #d9ddde 100%);
+  box-shadow:
+    0 24px 70px rgba(0,0,0,.45),
+    inset 0 0 0 1px rgba(255,255,255,.96),
+    inset 0 0 0 4px rgba(86,92,96,.24),
+    inset 0 0 0 6px rgba(232,235,236,.42);
+}
+.pokemon-card[data-form],
+.pokemon-card.is-expanded[data-form] {
+  background:
+    linear-gradient(112deg, rgba(255,255,255,.96) 0 1.6%, transparent 6% 88%, rgba(255,255,255,.5) 93%, transparent 98%),
+    repeating-linear-gradient(132deg, rgba(255,255,255,.24) 0 1px, rgba(55,60,63,.055) 1px 3px),
+    linear-gradient(145deg, #e5e7e8 0%, #9ca3a7 24%, #dfe2e3 49%, #8f979b 73%, #d9ddde 100%);
+}
+.card-shell { inset: 13px; }
+
+/* Fundo Pokémon: camada pigmentada + microtextura, menos “cor chapada”. */
+.pokemon-card .card-shell {
+  background:
+    linear-gradient(122deg, rgba(255,255,255,.34) 0 2%, transparent 7% 36%, rgba(255,255,255,.10) 47% 49%, transparent 56% 100%),
+    radial-gradient(ellipse at 18% 5%, color-mix(in srgb, var(--type-light) 72%, white) 0%, transparent 31%),
+    radial-gradient(ellipse at 84% 42%, color-mix(in srgb, var(--type-deep) 34%, transparent) 0%, transparent 42%),
+    repeating-linear-gradient(17deg, rgba(255,255,255,.075) 0 1px, transparent 1px 6px),
+    repeating-linear-gradient(103deg, color-mix(in srgb, var(--type-deep) 9%, transparent) 0 1px, transparent 1px 9px),
+    linear-gradient(155deg,
+      color-mix(in srgb, var(--type) 78%, #f1eee4) 0%,
+      color-mix(in srgb, var(--type-light) 58%, var(--type)) 35%,
+      color-mix(in srgb, var(--type) 73%, #d8d2c1) 66%,
+      color-mix(in srgb, var(--type-deep) 55%, var(--type)) 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.42),
+    inset 0 0 26px color-mix(in srgb, var(--type-deep) 23%, transparent),
+    inset 0 12px 28px rgba(255,255,255,.08);
+}
+.pokemon-card .card-shell::before {
+  opacity: .58;
+  background:
+    repeating-radial-gradient(ellipse at 22% 18%, rgba(255,255,255,.16) 0 1px, transparent 1px 7px),
+    repeating-linear-gradient(14deg, transparent 0 11px, rgba(255,255,255,.06) 11px 12px, transparent 12px 24px),
+    repeating-linear-gradient(104deg, transparent 0 19px, rgba(25,28,30,.035) 19px 20px, transparent 20px 38px);
+}
+
+/* Tipo Sombrio = carta realmente preta, com tipografia clara. */
+.pokemon-card[data-pokemon-type="Sombrio"] { color: #f5f6f7; }
+.pokemon-card[data-pokemon-type="Sombrio"] .card-shell {
+  background:
+    linear-gradient(118deg, rgba(255,255,255,.13) 0 2%, transparent 8% 71%, rgba(255,255,255,.055) 82%, transparent 94%),
+    radial-gradient(ellipse at 18% 8%, #3f4148 0%, transparent 30%),
+    radial-gradient(ellipse at 84% 45%, #090a0d 0%, transparent 44%),
+    repeating-linear-gradient(16deg, rgba(255,255,255,.04) 0 1px, transparent 1px 6px),
+    linear-gradient(155deg, #25262b 0%, #111216 48%, #050609 100%);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.15), inset 0 0 34px rgba(0,0,0,.52);
+}
+.pokemon-card[data-pokemon-type="Sombrio"] .name-zone h2,
+.pokemon-card[data-pokemon-type="Sombrio"] .form-mark,
+.pokemon-card[data-pokemon-type="Sombrio"] .previous-evolution strong,
+.pokemon-card[data-pokemon-type="Sombrio"] .type-name,
+.pokemon-card[data-pokemon-type="Sombrio"] .card-footer,
+.pokemon-card[data-pokemon-type="Sombrio"] .card-footer > p { color: #f7f7f7; }
+.pokemon-card[data-pokemon-type="Sombrio"] .stage-pill {
+  color: #f5f5f5;
+  border-color: rgba(211,217,221,.55);
+  background: linear-gradient(180deg, #303238, #17181d);
+}
+.pokemon-card[data-pokemon-type="Sombrio"] .pokemon-info {
+  color: #f4f5f6;
+  background: linear-gradient(180deg, #33353a, #17181c);
+}
+.pokemon-card[data-pokemon-type="Sombrio"] .pokemon-info i { background: rgba(255,255,255,.62); }
+.pokemon-card[data-pokemon-type="Sombrio"] .ability-block {
+  color: #f6f6f6;
+  border-color: rgba(206,213,217,.62);
+  background:
+    repeating-linear-gradient(180deg, rgba(255,255,255,.035) 0 1px, transparent 1px 5px),
+    linear-gradient(180deg, #2a2b30, #111216);
+}
+.pokemon-card[data-pokemon-type="Sombrio"] .ability-kicker { color: #cfd3da; }
+.pokemon-card[data-pokemon-type="Sombrio"] .footer-rule { background: rgba(230,233,235,.34); }
+.pokemon-card[data-pokemon-type="Sombrio"] .set-stamp { border-color: rgba(218,223,226,.55); background: rgba(255,255,255,.08); }
+
+/* Ícones reais de /public/tipos, mantendo símbolo apenas como fallback. */
+.type-symbol {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  padding: 0;
+  overflow: visible;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.type-icon {
+  position: absolute;
+  inset: -1px;
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,.28));
+}
+.type-symbol-fallback {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(230,234,236,.72);
+  border-radius: 50%;
+  background: var(--type-deep);
+  color: #fff;
+  font-size: 18px;
+}
+
+/* Quadro da arte com filete de prata, como moldura física moderna. */
+.artwork-frame {
+  border: 2px solid #aeb6ba;
+  box-shadow:
+    0 0 0 1px rgba(245,247,248,.86),
+    0 3px 7px rgba(25,27,28,.24),
+    inset 0 0 0 1px rgba(71,77,81,.22);
+}
+.artwork-inner { inset: 0 0 26px; }
+.pokemon-info {
+  height: 26px;
+  font-size: 8.65px;
+  font-weight: 780;
+}
+
+/* Blocos de status: acabamento metalizado e filete prateado fino. */
+.stat-flag {
+  background:
+    linear-gradient(108deg, transparent 0 9%, rgba(255,255,255,.38) 17%, transparent 29% 55%, rgba(255,255,255,.15) 67%, transparent 82%),
+    repeating-linear-gradient(176deg, rgba(255,255,255,.055) 0 1px, transparent 1px 5px),
+    linear-gradient(180deg,
+      color-mix(in srgb,var(--stat) 30%,#f0f2f3) 0%,
+      color-mix(in srgb,var(--stat) 82%,#c4c9cc) 12%,
+      var(--stat) 39%,
+      color-mix(in srgb,var(--stat) 76%,#11161a) 72%,
+      color-mix(in srgb,var(--stat) 58%,#080b0e) 100%);
+  filter:
+    drop-shadow(0 0 .7px rgba(240,244,246,.95))
+    drop-shadow(0 2px 1px rgba(0,0,0,.24));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.72),
+    inset 1px 0 0 rgba(226,232,235,.42),
+    inset -1px 0 0 rgba(100,108,113,.48),
+    inset 0 -7px 13px rgba(0,0,0,.15);
+}
+.stat-flag::before { border-top-color: rgba(248,250,251,.74); border-bottom-color: rgba(211,217,220,.44); }
+
+/* Medalhão da pré-evolução preserva uma moldura prateada mais limpa. */
+.previous-medallion {
+  border-color: #aab1b5;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.78), inset 0 0 0 1px rgba(78,83,87,.14);
+}
+
+/* Treinador/Ataque: papel prateado com pigmento do subtipo nas bordas. */
+.trainer-card {
+  background:
+    linear-gradient(112deg, rgba(255,255,255,.95) 0 2%, transparent 7% 86%, rgba(255,255,255,.46) 92%, transparent 98%),
+    repeating-linear-gradient(135deg, rgba(255,255,255,.2) 0 1px, rgba(60,64,67,.045) 1px 3px),
+    linear-gradient(150deg, #e9eaea 0%, #a8adb0 30%, #e0e2e2 53%, #969da0 77%, #dfe1df 100%);
+}
+.utility-shell,
+.attack-shell {
+  background:
+    linear-gradient(104deg, color-mix(in srgb,var(--accent) 8%,transparent), transparent 19% 80%, color-mix(in srgb,var(--accent) 9%,transparent)),
+    repeating-linear-gradient(180deg, rgba(74,77,78,.038) 0 1px, transparent 1px 5px),
+    linear-gradient(90deg, #cfd2d3 0%, #f4f4f1 11%, #dcdddb 48%, #f6f6f3 86%, #c4c8c9 100%);
+  box-shadow: inset 0 0 24px rgba(69,70,69,.15), inset 0 0 0 1px rgba(255,255,255,.38);
+}
+.trainer-card .shared-artwork {
+  border: 2px solid #aab1b5;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.9), 0 3px 6px rgba(0,0,0,.21), inset 0 0 0 1px rgba(71,76,79,.17);
+}
+.tcg-subtype-ribbon {
+  border-color: color-mix(in srgb,var(--accent-deep) 82%,#323537);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.48), transparent 40%),
+    repeating-linear-gradient(90deg, rgba(255,255,255,.075) 0 1px, transparent 1px 6px),
+    linear-gradient(90deg,var(--ribbon-start),var(--ribbon-end));
+}
+
+/* Cores solicitadas para os subtipos de Treinador. */
+.utility-card[data-utility-type="stadium"] { --accent:#55a765; --accent-deep:#275d35; --ribbon-start:#72c57d; --ribbon-end:#3f8650; }
+.utility-card[data-utility-type="supporter"] { --accent:#eb7a3f; --accent-deep:#8f3f18; --ribbon-start:#ff9d62; --ribbon-end:#cf592d; }
+.utility-card[data-utility-type="item"] { --accent:#438fc3; --accent-deep:#245578; --ribbon-start:#68add7; --ribbon-end:#327aa8; }
+.utility-card[data-utility-type="tool"] { --accent:#8a61b6; --accent-deep:#51356f; --ribbon-start:#a985d0; --ribbon-end:#70489b; }
+.utility-card[data-utility-type="champion"] { --accent:#d6ac2e; --accent-deep:#73590c; --ribbon-start:#f0ca4c; --ribbon-end:#b88a16; }
+
+/* Ataque Normal vermelho; Ataque Especial roxo. */
+.attack-card[data-attack-kind="normal"] { --accent:#cc484b; --accent-deep:#752429; --ribbon-start:#e86364; --ribbon-end:#a93239; }
+.attack-card[data-attack-kind="special"] { --accent:#8658b3; --accent-deep:#4c306d; --ribbon-start:#a87ad0; --ribbon-end:#6b4397; }
+
+/* Compatibilidade agora vem primeiro; efeito fica no final do módulo. */
+.attack-module {
+  display: grid;
+  grid-template-rows: 151px 47px minmax(0,1fr);
+}
+.attack-module .compatibility-zone {
+  height: auto;
+  border-top: 0;
+  border-bottom: 1px solid rgba(48,54,58,.18);
+}
+.attack-module .attack-rule-heading {
+  height: auto;
+  border-top: 1px solid rgba(255,255,255,.42);
+  border-bottom: 1px solid rgba(58,62,65,.16);
+}
+.attack-module .attack-rule-copy {
+  height: auto;
+  padding: 14px 18px 11px;
+  -webkit-line-clamp: 6;
+}
+
+/* +5% aproximadamente nos medalhões dos Pokémon compatíveis. */
+.compatible-pokemon > span { width: 44px; height: 44px; border-color: #a7afb3; }
+.compatible-pokemon img { width: 41px; height: 41px; }
+.compatible-pokemon-grid[data-count="8"] .compatible-pokemon > span,
+.compatible-pokemon-grid[data-count="9"] .compatible-pokemon > span,
+.compatible-pokemon-grid[data-count="10"] .compatible-pokemon > span { width:41px; height:41px; }
+.compatible-pokemon-grid[data-count="8"] img,
+.compatible-pokemon-grid[data-count="9"] img,
+.compatible-pokemon-grid[data-count="10"] img { width:38px; height:38px; }
+.compatible-type-symbol {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  border: 0;
+  background: transparent;
+}
+.compatible-type-symbol img {
+  position: absolute;
+  inset: 0;
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,.22));
+}
+.compatible-type-fallback {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--compat-deep);
+  color: #fff;
+  font-size: 20px;
+  font-weight: 950;
+}
+
+/* Full art continua com borda externa prata e blocos translúcidos. */
+.pokemon-card.is-expanded .stat-flag { opacity: .82; }
+
+/* Os detalhes menores de Treinador também herdam a cor do subtipo. */
+.utility-card .tcg-usage-pill {
+  border-color: color-mix(in srgb,var(--accent-deep) 72%,#5e6366);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.58), transparent 39%),
+    linear-gradient(90deg,
+      color-mix(in srgb,var(--ribbon-start) 74%,#f4f5f3),
+      color-mix(in srgb,var(--ribbon-end) 70%,#e7e9e7));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.8), inset 0 -3px 7px color-mix(in srgb,var(--accent-deep) 18%,transparent), 0 2px 3px rgba(0,0,0,.16);
+}
+.utility-card .tcg-usage-dot {
+  background: linear-gradient(145deg, color-mix(in srgb,var(--accent) 45%,white), var(--accent));
+  border-color: color-mix(in srgb,var(--accent-deep) 58%,#4e5356);
+}

@@ -1,14 +1,15 @@
 ---
 import type { AttackCardData } from '../../types/card';
-import { CARD_CATEGORY_META } from '../../data/cardCategories';
+import { ATTACK_KIND_META } from '../../data/cardCategories';
 import { TYPE_META } from '../../lib/pokemonMapping';
 import SharedArtwork from './SharedArtwork.astro';
 interface Props { card: AttackCardData }
 const { card } = Astro.props;
-const meta = CARD_CATEGORY_META.attack;
+const meta = ATTACK_KIND_META[card.attackKind];
 const typeMeta = TYPE_META[card.compatibleType];
 const number = String(card.cardNumber).padStart(3, '0');
-const kindLabel = card.attackKind === 'special' ? 'Ataque Especial' : 'Ataque Normal';
+const kindLabel = meta.label;
+const typeIcon = `${import.meta.env.BASE_URL}${typeMeta.icon}`;
 ---
 <article
   class="game-card attack-card trainer-card"
@@ -33,20 +34,23 @@ const kindLabel = card.attackKind === 'special' ? 'Ataque Especial' : 'Ataque No
     <SharedArtwork artwork={card.artwork} name={card.attackName} />
 
     <section class="tcg-rules-panel attack-module">
+      <div class="compatibility-zone">
+        <span class="compatibility-label">COMPATIBILIDADE</span>
+        <div class="compatible-pokemon-grid" data-role="compatible-pokemon-grid"></div>
+        <div class="compatible-type-display" data-role="compatible-type-display" hidden>
+          <span class="compatible-type-symbol">
+            <span class="compatible-type-fallback" data-role="compatible-type-symbol">{typeMeta.symbol}</span>
+            <img data-role="compatible-type-icon" src={typeIcon} alt="" onerror="this.style.display='none'" />
+          </span>
+          <strong data-role="compatible-type-text">TODOS OS POKÉMON DE {card.compatibleType.toUpperCase()}</strong>
+        </div>
+      </div>
+
       <div class="attack-rule-heading">
         <span>EFEITO</span>
         <h3 data-role="attack-name-bottom">{card.attackName}</h3>
       </div>
       <p class="attack-rule-copy" data-role="attack-description">{card.attackDescription}</p>
-
-      <div class="compatibility-zone">
-        <span class="compatibility-label">COMPATIBILIDADE</span>
-        <div class="compatible-pokemon-grid" data-role="compatible-pokemon-grid"></div>
-        <div class="compatible-type-display" data-role="compatible-type-display" hidden>
-          <span class="compatible-type-symbol" data-role="compatible-type-symbol">{typeMeta.symbol}</span>
-          <strong data-role="compatible-type-text">TODOS OS POKÉMON DE {card.compatibleType.toUpperCase()}</strong>
-        </div>
-      </div>
     </section>
 
     <footer class="simple-footer tcg-footer attack-module-footer">

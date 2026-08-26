@@ -1,4 +1,4 @@
-import { CARD_CATEGORY_META } from '../data/cardCategories';
+import { ATTACK_KIND_META, CARD_CATEGORY_META } from '../data/cardCategories';
 import { DEFAULT_ATTACK_CARD, DEFAULT_POKEMON_CARD, EMPTY_POKEMON_CARD, createEmptyCard, createUtilityCard } from '../data/defaultCard';
 import { exportCardAsPng } from '../lib/exportCard';
 import { getPokemonIndex, loadAbilityDescription, loadPokemonEditorData, loadPokemonSummary } from '../lib/pokeapi';
@@ -7,6 +7,7 @@ import { clearDraft, loadDraft, saveDraft } from '../lib/storage';
 import { CARD_TYPE_LABELS } from '../types/card';
 import type {
   AttackCardData,
+  AttackKind,
   CardData,
   CardType,
   EditorReferenceData,
@@ -14,6 +15,7 @@ import type {
   PokemonCardData,
   PokemonForm,
   UtilityCardData,
+  UtilityCardType,
 } from '../types/card';
 
 const q = <T extends Element = HTMLElement>(selector: string, root: ParentNode = document) => root.querySelector<T>(selector);
@@ -44,7 +46,11 @@ const autosaveStatus = q<HTMLElement>('[data-role="autosave-status"]');
 const fileInput = q<HTMLInputElement>('[data-role="artwork-file"]')!;
 const dropzone = q<HTMLElement>('[data-role="dropzone"]')!;
 const dialog = q<HTMLDialogElement>('[data-role="new-card-dialog"]');
-const cardTypeSelector = q<HTMLSelectElement>('[data-role="card-type-selector"]')!;
+const cardFamilySelector = q<HTMLSelectElement>('[data-role="card-family-selector"]')!;
+const pokemonSubtypeSelector = q<HTMLSelectElement>('[data-role="pokemon-subtype-selector"]')!;
+const trainerSubtypeSelector = q<HTMLSelectElement>('[data-role="trainer-subtype-selector"]')!;
+const attackSubtypeSelector = q<HTMLSelectElement>('[data-role="attack-subtype-selector"]')!;
+const baseUrl = document.documentElement.dataset.baseUrl || '/';
 
 const pokemonSearchInput = q<HTMLInputElement>('[data-role="pokemon-search"]')!;
 const pokemonSuggestions = q<HTMLElement>('[data-role="pokemon-suggestions"]')!;
@@ -64,6 +70,53 @@ function slotForCard(value: CardData = card) {
   if (value.cardType === 'pokemon') return 'pokemon';
   if (value.cardType === 'attack') return 'attack';
   return 'utility';
+}
+
+type CardFamily = 'pokemon' | 'trainer' | 'attack';
+
+function familyForCard(value: CardData = card): CardFamily {
+  if (value.cardType === 'pokemon') return 'pokemon';
+  if (value.cardType === 'attack') return 'attack';
+  return 'trainer';
+}
+
+function iconUrl(relativePath: string) {
+  return `${baseUrl.replace(/\/$/, '')}/${relativePath.replace(/^\//, '')}`;
+}
+
+function setTypeIcon(root: ParentNode, role: string, relativePath: string) {
+  const image = q<HTMLImageElement>(`[data-role="${role}"]`, root);
+  if (!image) return;
+
+  const stem = relativePath.replace(/\.[a-z0-9]+$/i, '');
+  const candidates = [relativePath, `${stem}.webp`, `${stem}.svg`, `${stem}.jpg`]
+    .filter((value, index, list) => list.indexOf(value) === index);
+  let cursor = 0;
+
+  const loadNext = () => {
+    if (cursor >= candidates.length) {
+      image.style.display = 'none';
+      image.onerror = null;
+      return;
+    }
+    image.style.display = '';
+    image.src = iconUrl(candidates[cursor++]!);
+  };
+
+  image.onerror = loadNext;
+  loadNext();
+}
+
+function syncTypeSelectorUI() {
+  const family = familyForCard();
+  cardFamilySelector.value = family;
+  qa<HTMLElement>('[data-subtype-family]').forEach((node) => {
+    node.hidden = node.dataset.subtypeFamily !== family;
+  });
+
+  if (isPokemon(card)) pokemonSubtypeSelector.value = card.form;
+  else if (isAttack(card)) attackSubtypeSelector.value = card.attackKind;
+  else trainerSubtypeSelector.value = card.cardType;
 }
 
 function getActiveCardNode(): HTMLElement {
@@ -110,9 +163,13 @@ function updateEditorVisibility() {
     node.classList.toggle('is-active', active);
   });
   qa<HTMLElement>('[data-pokemon-only]').forEach((node) => { node.hidden = !isPokemon(card); });
-  cardTypeSelector.value = card.cardType;
+  syncTypeSelectorUI();
   const previewTitle = q<HTMLElement>('[data-role="preview-title"]');
-  if (previewTitle) previewTitle.textContent = `Carta ${CARD_TYPE_LABELS[card.cardType]}`;
+  if (previewTitle) {
+    if (isPokemon(card)) previewTitle.textContent = `Carta Pokémon — ${card.form}`;
+    else if (isAttack(card)) previewTitle.textContent = `Carta Ataque — ${card.attackKind === 'special' ? 'Especial' : 'Normal'}`;
+    else previewTitle.textContent = `Carta Treinador — ${CARD_TYPE_LABELS[card.cardType]}`;
+  }
 }
 
 function syncFormFromState() {
@@ -136,8 +193,6 @@ function syncFormFromState() {
     setInputValue('attackName', card.attackName);
     setInputValue('attackDescription', card.attackDescription);
     setInputValue('compatibleType', card.compatibleType);
-    const attackKind = card.attackKind;
-    qa<HTMLInputElement>('[data-attack-kind]').forEach((input) => { input.checked = input.value === attackKind; });
     const compatibilityMode = card.compatibilityMode;
     qa<HTMLInputElement>('[data-compat-mode]').forEach((input) => { input.checked = input.value === compatibilityMode; });
   } else {
@@ -166,6 +221,7 @@ function renderPokemon(node: HTMLElement, value: PokemonCardData) {
   node.style.setProperty('--type-deep', meta.deep);
   node.style.setProperty('--type-light', meta.light);
   node.dataset.form = value.form;
+  node.dataset.pokemonType = value.type;
   node.dataset.expanded = String(value.expandedArtwork);
   node.classList.toggle('is-expanded', value.expandedArtwork);
 
@@ -175,6 +231,7 @@ function renderPokemon(node: HTMLElement, value: PokemonCardData) {
   setTextIn(node, 'stage', value.stage);
   setTextIn(node, 'previous-name', value.previousEvolution || '');
   setTextIn(node, 'type-symbol', meta.symbol);
+  setTypeIcon(node, 'type-icon', meta.icon);
   setTextIn(node, 'type-name', value.type);
   setTextIn(node, 'dex-number', `#${String(value.pokedexNumber ?? 0).padStart(4, '0')}`);
   setTextIn(node, 'genus', value.genus || 'Pokémon');
@@ -236,6 +293,7 @@ function renderCompatiblePokemon(node: HTMLElement, value: AttackCardData) {
     node.style.setProperty('--compat', meta.color);
     node.style.setProperty('--compat-deep', meta.deep);
     setTextIn(node, 'compatible-type-symbol', meta.symbol);
+    setTypeIcon(node, 'compatible-type-icon', meta.icon);
     setTextIn(node, 'compatible-type-text', `TODOS OS POKÉMON DE ${value.compatibleType.toUpperCase()}`);
     return;
   }
@@ -260,14 +318,14 @@ function renderCompatiblePokemon(node: HTMLElement, value: AttackCardData) {
 }
 
 function renderAttack(node: HTMLElement, value: AttackCardData) {
-  const meta = CARD_CATEGORY_META.attack;
+  const meta = ATTACK_KIND_META[value.attackKind];
   node.dataset.attackKind = value.attackKind;
   node.style.setProperty('--accent', meta.accent);
   node.style.setProperty('--accent-deep', meta.deep);
   node.style.setProperty('--attack-surface', meta.surface);
   node.style.setProperty('--ribbon-start', meta.ribbonStart);
   node.style.setProperty('--ribbon-end', meta.ribbonEnd);
-  setTextIn(node, 'attack-kind-label', value.attackKind === 'special' ? 'Ataque Especial' : 'Ataque Normal');
+  setTextIn(node, 'attack-kind-label', meta.label);
   setTextIn(node, 'attack-name-top', value.attackName || 'Novo Ataque');
   setTextIn(node, 'attack-name-bottom', value.attackName || 'Novo Ataque');
   setTextIn(node, 'attack-description', value.attackDescription || 'Descreva aqui o efeito deste ataque.');
@@ -426,10 +484,32 @@ async function restoreDraft() {
   toast('Último rascunho restaurado.', 'success');
 }
 
+function applyPokemonForm(form: PokemonForm) {
+  if (!isPokemon(card)) return;
+  if (form === 'Lendário' && !card.isLegendary) {
+    card.form = 'Normal';
+    pokemonSubtypeSelector.value = 'Normal';
+    toast('Forma Lendário só é liberada para espécies lendárias.', 'error');
+  } else {
+    card.form = form;
+    if (form !== 'Normal') card.stage = 'FINAL';
+    else card.stage = naturalStage;
+    setInputValue('stage', card.stage);
+    pokemonSubtypeSelector.value = card.form;
+  }
+  renderCard();
+  markChanged();
+}
+
 function updateField(input: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement) {
   const field = input.dataset.field;
   if (!field) return;
   if (!(field in card)) return;
+
+  if (field === 'form' && isPokemon(card)) {
+    applyPokemonForm(input.value as PokemonForm);
+    return;
+  }
 
   let value: unknown = input.value;
   if (input instanceof HTMLInputElement && input.type === 'checkbox') value = input.checked;
@@ -446,21 +526,6 @@ function updateField(input: HTMLInputElement | HTMLSelectElement | HTMLTextAreaE
   (card as unknown as Record<string, unknown>)[field] = value;
 
   if (isPokemon(card) && field === 'stage' && card.form === 'Normal') naturalStage = card.stage;
-
-  if (isPokemon(card) && field === 'form') {
-    const form = value as PokemonForm;
-    if (form === 'Lendário' && !card.isLegendary) {
-      card.form = 'Normal';
-      input.value = 'Normal';
-      toast('Forma Lendário só é liberada para espécies lendárias.', 'error');
-    } else if (form !== 'Normal') {
-      card.stage = 'FINAL';
-      setInputValue('stage', card.stage);
-    } else {
-      card.stage = naturalStage;
-      setInputValue('stage', card.stage);
-    }
-  }
 
   renderCard();
   markChanged();
@@ -740,15 +805,28 @@ function bindEvents() {
     input.addEventListener('input', () => updateField(input));
   });
 
-  cardTypeSelector.addEventListener('change', () => switchCardType(cardTypeSelector.value as CardType));
+  cardFamilySelector.addEventListener('change', () => {
+    const family = cardFamilySelector.value as CardFamily;
+    if (family === 'pokemon') switchCardType('pokemon');
+    else if (family === 'attack') switchCardType('attack');
+    else switchCardType(trainerSubtypeSelector.value as UtilityCardType);
+  });
 
-  qa<HTMLInputElement>('[data-attack-kind]').forEach((input) => {
-    input.addEventListener('change', () => {
-      if (!isAttack(card) || !input.checked) return;
-      card.attackKind = input.value === 'special' ? 'special' : 'normal';
-      renderCard();
-      markChanged();
-    });
+  trainerSubtypeSelector.addEventListener('change', () => {
+    if (cardFamilySelector.value !== 'trainer') return;
+    switchCardType(trainerSubtypeSelector.value as UtilityCardType);
+  });
+
+  pokemonSubtypeSelector.addEventListener('change', () => {
+    if (!isPokemon(card)) return;
+    applyPokemonForm(pokemonSubtypeSelector.value as PokemonForm);
+  });
+
+  attackSubtypeSelector.addEventListener('change', () => {
+    if (!isAttack(card)) return;
+    card.attackKind = attackSubtypeSelector.value as AttackKind;
+    renderCard();
+    markChanged();
   });
 
   qa<HTMLInputElement>('[data-transform]').forEach((input) => {

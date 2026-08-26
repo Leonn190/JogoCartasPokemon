@@ -1,4 +1,4 @@
-import type { CardType, UtilityCardType } from '../types/card';
+import type { AttackKind, CardType, UtilityCardType } from '../types/card';
 
 type CategoryMeta = {
   label: string;
@@ -12,28 +12,39 @@ type CategoryMeta = {
 
 export const CARD_CATEGORY_META: Record<Exclude<CardType, 'pokemon'>, CategoryMeta> = {
   attack: {
-    label: 'ATAQUE', symbol: '✦', accent: '#4f86b9', deep: '#203d5b', surface: '#d6dde3',
-    ribbonStart: '#5d93c1', ribbonEnd: '#2c5f8e',
+    label: 'ATAQUE', symbol: '✦', accent: '#c84a4a', deep: '#742526', surface: '#ddd9d9',
+    ribbonStart: '#e56562', ribbonEnd: '#a93438',
   },
   stadium: {
-    label: 'Estádio', symbol: '⌂', accent: '#5d8c72', deep: '#28483a', surface: '#d7ddd9',
-    ribbonStart: '#75a68a', ribbonEnd: '#3d6d55',
+    label: 'Estádio', symbol: '⌂', accent: '#55a765', deep: '#275d35', surface: '#d7ded8',
+    ribbonStart: '#72c57d', ribbonEnd: '#3f8650',
   },
   supporter: {
-    label: 'Apoiador', symbol: '✧', accent: '#ef7845', deep: '#8e351c', surface: '#dedddd',
-    ribbonStart: '#ff9b69', ribbonEnd: '#db542c',
+    label: 'Apoiador', symbol: '✧', accent: '#eb7a3f', deep: '#8f3f18', surface: '#e0dbd8',
+    ribbonStart: '#ff9d62', ribbonEnd: '#cf592d',
   },
   item: {
-    label: 'Item', symbol: '◆', accent: '#4d89ad', deep: '#244f6a', surface: '#d8dee2',
-    ribbonStart: '#6fa8c8', ribbonEnd: '#397494',
+    label: 'Item', symbol: '◆', accent: '#438fc3', deep: '#245578', surface: '#d8dde1',
+    ribbonStart: '#68add7', ribbonEnd: '#327aa8',
   },
   tool: {
-    label: 'Ferramenta', symbol: '⬡', accent: '#7c7f8c', deep: '#42454e', surface: '#dcdddf',
-    ribbonStart: '#9c9faa', ribbonEnd: '#646874',
+    label: 'Ferramenta', symbol: '⬡', accent: '#8a61b6', deep: '#51356f', surface: '#ddd9e1',
+    ribbonStart: '#a985d0', ribbonEnd: '#70489b',
   },
   champion: {
-    label: 'Campeão', symbol: '♛', accent: '#cf9f36', deep: '#715011', surface: '#e1ded5',
-    ribbonStart: '#e4bc58', ribbonEnd: '#b87a18',
+    label: 'Campeão', symbol: '♛', accent: '#d6ac2e', deep: '#73590c', surface: '#e2dfd2',
+    ribbonStart: '#f0ca4c', ribbonEnd: '#b88a16',
+  },
+};
+
+export const ATTACK_KIND_META: Record<AttackKind, CategoryMeta> = {
+  normal: {
+    label: 'Ataque Normal', symbol: '✦', accent: '#cc484b', deep: '#752429', surface: '#dfd9d9',
+    ribbonStart: '#e86364', ribbonEnd: '#a93239',
+  },
+  special: {
+    label: 'Ataque Especial', symbol: '✦', accent: '#8658b3', deep: '#4c306d', surface: '#ddd9e2',
+    ribbonStart: '#a87ad0', ribbonEnd: '#6b4397',
   },
 };
 

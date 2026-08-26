@@ -1,6 +1,6 @@
 ---
 import PokemonSearch from './PokemonSearch.astro';
-import { CARD_FORMS, GAME_TYPES } from '../../types/card';
+import { GAME_TYPES } from '../../types/card';
 import type { PokemonCardData } from '../../types/card';
 interface Props { card: PokemonCardData }
 const { card } = Astro.props;
@@ -13,14 +13,7 @@ const { card } = Astro.props;
       <label for="pokemon-name">Nome</label>
       <input id="pokemon-name" data-field="pokemonName" value={card.pokemonName} maxlength="28" />
     </div>
-    <div class="field">
-      <label for="pokemon-form">Forma</label>
-      <select id="pokemon-form" data-field="form">
-        {CARD_FORMS.map((form) => <option value={form} selected={form === card.form} data-legendary-option={form === 'Lendário' ? 'true' : undefined}>{form}</option>)}
-      </select>
-      <p class="field-hint legendary-hint" data-role="legendary-hint">Disponível apenas para Pokémon lendários.</p>
-    </div>
-    <div class="field">
+    <div class="field span-2">
       <label for="pokemon-type">Tipo do jogo</label>
       <select id="pokemon-type" data-field="type">
         {GAME_TYPES.map((type) => <option value={type} selected={type === card.type}>{type}</option>)}

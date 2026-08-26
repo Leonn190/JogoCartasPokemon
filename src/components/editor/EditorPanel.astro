@@ -24,7 +24,7 @@ const { card } = Astro.props;
     <span class="autosave-pill" data-role="autosave-status"><i></i> Salvo localmente</span>
   </div>
 
-  <CardTypeSelector cardType={card.cardType} />
+  <CardTypeSelector cardType={card.cardType} pokemonForm={card.form} attackKind="normal" />
 
   <div class="editor-kind" data-editor-kind="pokemon">
     <PokemonForm card={card} />

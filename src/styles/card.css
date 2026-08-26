@@ -1425,118 +1425,200 @@
 .pokemon-card .rarity-mark { margin-left:0; justify-self:center; }
 
 
-/* === FINAL 2026 SPECIAL-FORM + VIVID-COLOR PASS ====================== */
+/* === FINAL 2026 STANDARD-PALETTE + UNIFIED SPECIAL-FORM PASS ========== */
 /*
-  Direção final:
-  - Pokémon normais usam pigmento do tipo quase puro, sem o antigo véu bege.
-  - EX: brilho laminado limpo inspirado na linguagem Scarlet & Violet.
-  - Mega: acabamento cromado/entalhado inspirado nas Mega ex contemporâneas.
-  - Radiante: brilho perolado/estrelar na linguagem VSTAR.
-  - Gigantamax: aurora prismática e energia ampla na linguagem VMAX.
+  Todas as formas especiais compartilham o mesmo layout de EX/Mega:
+  a arte sangra horizontalmente, mas nunca invade a fileira de status.
+
+  Acabamentos:
+  - Normal: prata simples, sem cromado forte.
+  - EX: prata metálica.
+  - Mega: preto metálico.
+  - Radiante: dourado metálico.
+  - Gigantamax: vermelho metálico.
+
+  O corpo da carta segue a linguagem dos templates padrão enviados:
+  pigmento vivo + manchas/nuvens sutis, sem véu bege e sem cromado no fundo.
 */
 
-/* Cor-base muito mais viva: highlight -> pigmento puro -> profundidade. */
-.pokemon-card:not([data-pokemon-type="Sombrio"]) .card-shell {
-  background:
-    linear-gradient(118deg, rgba(255,255,255,.32) 0 2%, transparent 8% 37%, rgba(255,255,255,.11) 46% 49%, transparent 56% 100%),
-    radial-gradient(ellipse at 19% 4%, color-mix(in srgb, var(--type-light) 88%, white) 0%, transparent 34%),
-    radial-gradient(ellipse at 87% 86%, color-mix(in srgb, var(--type-deep) 74%, black) 0%, transparent 48%),
-    repeating-linear-gradient(17deg, rgba(255,255,255,.035) 0 1px, transparent 1px 7px),
-    repeating-linear-gradient(103deg, color-mix(in srgb, var(--type-deep) 7%, transparent) 0 1px, transparent 1px 10px),
-    linear-gradient(155deg,
-      color-mix(in srgb, var(--type-light) 92%, var(--type)) 0%,
-      var(--type) 37%,
-      color-mix(in srgb, var(--type) 82%, var(--type-deep)) 69%,
-      var(--type-deep) 100%);
-  box-shadow:
-    inset 0 0 0 1px rgba(255,255,255,.5),
-    inset 0 0 30px color-mix(in srgb, var(--type-deep) 28%, transparent),
-    inset 0 14px 30px rgba(255,255,255,.08);
+/* Variáveis de acabamento. O Normal é propositalmente mais fosco. */
+.pokemon-card[data-form="Normal"] {
+  --trim-light:#eef0f1;
+  --trim-mid:#c7cbcd;
+  --trim-deep:#9da3a6;
+  --trim-dark:#7f8588;
+  --trim-glint:rgba(255,255,255,.42);
 }
-
-/* A habilidade deixa de parecer papel creme e vira metal tingido pelo tipo. */
-.pokemon-card:not([data-pokemon-type="Sombrio"]) .ability-block {
-  border-color: color-mix(in srgb, var(--type-deep) 48%, #aeb7bb);
-  background:
-    linear-gradient(112deg, transparent 0 12%, rgba(255,255,255,.32) 23%, transparent 37% 72%, rgba(255,255,255,.13) 82%, transparent 94%),
-    repeating-linear-gradient(180deg, rgba(255,255,255,.045) 0 1px, transparent 1px 6px),
-    linear-gradient(155deg,
-      color-mix(in srgb, var(--type-light) 72%, white) 0%,
-      color-mix(in srgb, var(--type) 68%, #dfe4e5) 48%,
-      color-mix(in srgb, var(--type-deep) 54%, #c8ced1) 100%);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.82),
-    inset 0 -2px 8px color-mix(in srgb, var(--type-deep) 16%, transparent),
-    0 0 0 1px rgba(244,247,248,.48);
-}
-
-/* Moldura externa mais neutra: prata fria em vez de dourado/bege. */
-.game-card,
-.pokemon-card[data-form],
-.pokemon-card.is-expanded[data-form] {
-  background:
-    linear-gradient(112deg, rgba(255,255,255,.98) 0 1.5%, transparent 5.5% 87%, rgba(255,255,255,.54) 92%, transparent 98%),
-    repeating-linear-gradient(132deg, rgba(255,255,255,.23) 0 1px, rgba(47,54,58,.055) 1px 3px),
-    linear-gradient(145deg, #f4f6f7 0%, #a8afb4 23%, #e5e9eb 48%, #7f878c 73%, #dfe4e6 100%);
-}
-
-/* Base para todo foil especial. */
-.pokemon-card[data-form="EX"]::after,
-.pokemon-card[data-form="Mega"]::after,
-.pokemon-card[data-form="Radiante"]::after,
-.pokemon-card[data-form="Gigantamax"]::after {
-  content:"";
-  position:absolute;
-  inset:5px;
-  z-index:12;
-  border-radius:23px;
-  pointer-events:none;
-  mix-blend-mode:screen;
-}
-
-/* EX — laminado limpo e angular, com brilho concentrado nas diagonais. */
 .pokemon-card[data-form="EX"] {
+  --trim-light:#ffffff;
+  --trim-mid:#c9d0d4;
+  --trim-deep:#7f8a90;
+  --trim-dark:#4f595f;
+  --trim-glint:rgba(255,255,255,.88);
+}
+.pokemon-card[data-form="Mega"] {
+  --trim-light:#858b90;
+  --trim-mid:#34383c;
+  --trim-deep:#15181b;
+  --trim-dark:#050607;
+  --trim-glint:rgba(255,255,255,.36);
+}
+.pokemon-card[data-form="Radiante"] {
+  --trim-light:#fff2a8;
+  --trim-mid:#e0b84b;
+  --trim-deep:#a27619;
+  --trim-dark:#76520b;
+  --trim-glint:rgba(255,250,206,.78);
+}
+.pokemon-card[data-form="Gigantamax"] {
+  --trim-light:#ff9287;
+  --trim-mid:#d43b38;
+  --trim-deep:#8d191d;
+  --trim-dark:#5c0d11;
+  --trim-glint:rgba(255,226,220,.68);
+}
+
+/* Fundo padrão: saturado e macio, como papel pigmentado/marmorizado. */
+.pokemon-card:not([data-pokemon-type="Sombrio"]) .card-shell {
+  border:1px solid color-mix(in srgb,var(--trim-mid) 82%,white);
+  background:
+    /* grandes áreas claras, lembrando as nuvens dos templates */
+    radial-gradient(ellipse at 14% 10%, color-mix(in srgb,var(--type-light) 78%,white) 0%, transparent 29%),
+    radial-gradient(ellipse at 75% 17%, rgba(255,255,255,.20) 0%, transparent 26%),
+    radial-gradient(ellipse at 38% 58%, rgba(255,255,255,.19) 0%, transparent 31%),
+    radial-gradient(ellipse at 86% 67%, color-mix(in srgb,var(--type-light) 43%,transparent) 0%, transparent 30%),
+    radial-gradient(ellipse at 22% 91%, color-mix(in srgb,var(--type-deep) 19%,transparent) 0%, transparent 34%),
+    /* pigmento principal */
+    linear-gradient(180deg,
+      color-mix(in srgb,var(--type-light) 84%,var(--type)) 0%,
+      color-mix(in srgb,var(--type) 90%,var(--type-light)) 23%,
+      var(--type) 56%,
+      color-mix(in srgb,var(--type) 84%,var(--type-deep)) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.42),
+    inset 0 -18px 34px color-mix(in srgb,var(--type-deep) 13%,transparent),
+    0 0 0 1px color-mix(in srgb,var(--trim-deep) 48%,transparent);
+}
+
+/* Microtextura orgânica/bokeh em vez de listras metálicas. */
+.pokemon-card:not([data-pokemon-type="Sombrio"]) .card-shell::before {
+  opacity:.72;
+  mix-blend-mode:soft-light;
+  background:
+    radial-gradient(circle at 8% 56%, rgba(255,255,255,.28) 0 1.1%, transparent 1.7%),
+    radial-gradient(circle at 17% 63%, rgba(255,255,255,.20) 0 1.5%, transparent 2.2%),
+    radial-gradient(circle at 29% 52%, rgba(255,255,255,.22) 0 1.2%, transparent 1.9%),
+    radial-gradient(circle at 43% 67%, rgba(255,255,255,.20) 0 1.8%, transparent 2.5%),
+    radial-gradient(circle at 55% 57%, rgba(255,255,255,.23) 0 1.1%, transparent 1.8%),
+    radial-gradient(circle at 67% 72%, rgba(255,255,255,.18) 0 1.6%, transparent 2.4%),
+    radial-gradient(circle at 79% 53%, rgba(255,255,255,.24) 0 1.4%, transparent 2.1%),
+    radial-gradient(circle at 91% 65%, rgba(255,255,255,.19) 0 1.2%, transparent 1.9%),
+    radial-gradient(ellipse at 49% 45%, rgba(255,255,255,.13), transparent 39%),
+    repeating-radial-gradient(circle at 28% 72%, rgba(255,255,255,.055) 0 1px, transparent 1px 7px);
+}
+
+/* Sombrio segue pigmentado/preto, não cromado. */
+.pokemon-card[data-pokemon-type="Sombrio"] .card-shell {
+  border:1px solid color-mix(in srgb,var(--trim-mid) 78%,#777);
+  background:
+    radial-gradient(ellipse at 15% 8%, #565861 0%, transparent 31%),
+    radial-gradient(ellipse at 74% 22%, rgba(255,255,255,.065) 0%, transparent 28%),
+    radial-gradient(ellipse at 44% 62%, #292b31 0%, transparent 37%),
+    radial-gradient(ellipse at 88% 78%, #08090b 0%, transparent 38%),
+    linear-gradient(180deg,#34363c 0%,#202227 42%,#101216 75%,#08090c 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.13),
+    inset 0 -22px 38px rgba(0,0,0,.32),
+    0 0 0 1px color-mix(in srgb,var(--trim-deep) 46%,transparent);
+}
+.pokemon-card[data-pokemon-type="Sombrio"] .card-shell::before {
+  opacity:.5;
+  background:
+    radial-gradient(circle at 14% 60%,rgba(255,255,255,.10) 0 1.2%,transparent 2%),
+    radial-gradient(circle at 38% 52%,rgba(255,255,255,.08) 0 1.6%,transparent 2.4%),
+    radial-gradient(circle at 62% 69%,rgba(255,255,255,.08) 0 1.3%,transparent 2.1%),
+    radial-gradient(circle at 83% 58%,rgba(255,255,255,.07) 0 1.5%,transparent 2.3%);
+}
+
+/* Painéis internos ficam tonalizados pelo tipo e sem creme/bege. */
+.pokemon-card:not([data-pokemon-type="Sombrio"]) .ability-block {
+  border:1px solid color-mix(in srgb,var(--trim-mid) 76%,var(--type-deep));
+  background:
+    radial-gradient(ellipse at 22% 0%,rgba(255,255,255,.30),transparent 38%),
+    linear-gradient(180deg,
+      color-mix(in srgb,var(--type-light) 58%,white) 0%,
+      color-mix(in srgb,var(--type-light) 66%,var(--type)) 45%,
+      color-mix(in srgb,var(--type) 67%,white) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.58),
+    0 0 0 1px color-mix(in srgb,var(--trim-light) 48%,transparent);
+}
+.pokemon-card:not([data-pokemon-type="Sombrio"]) .pokemon-info {
+  border-top:1px solid color-mix(in srgb,var(--trim-mid) 78%,var(--type-deep));
+  background:linear-gradient(180deg,
+    rgba(255,255,255,.88),
+    color-mix(in srgb,var(--type-light) 34%,white));
+}
+
+/* NORMAL: prata real/fosca, sem o efeito de metal polido. */
+.pokemon-card[data-form="Normal"],
+.pokemon-card.is-expanded[data-form="Normal"] {
+  background:linear-gradient(145deg,#d9dcde 0%,#c9cdcf 48%,#b7bdc0 100%);
+  box-shadow:
+    0 24px 70px rgba(0,0,0,.43),
+    inset 0 0 0 1px #f0f2f3,
+    inset 0 0 0 5px rgba(124,130,134,.18);
+}
+
+/* EX: prata metálica limpa, com reflexo curto. */
+.pokemon-card[data-form="EX"],
+.pokemon-card.is-expanded[data-form="EX"] {
+  background:
+    linear-gradient(116deg,transparent 0 18%,rgba(255,255,255,.82) 25%,transparent 33% 67%,rgba(255,255,255,.30) 75%,transparent 84%),
+    linear-gradient(145deg,#f4f6f7 0%,#9da6ab 22%,#eef1f2 47%,#7e898f 72%,#dce2e4 100%);
   box-shadow:
     0 24px 70px rgba(0,0,0,.45),
-    0 0 18px color-mix(in srgb,var(--type) 30%,transparent),
-    inset 0 0 0 1px rgba(255,255,255,.94),
-    inset 0 0 0 5px rgba(91,98,102,.22);
-}
-.pokemon-card[data-form="EX"]::after {
-  opacity:.28;
-  background:
-    linear-gradient(118deg, transparent 0 26%, rgba(255,255,255,.08) 34%, rgba(255,255,255,.72) 42%, rgba(174,222,255,.2) 47%, transparent 55% 100%),
-    linear-gradient(62deg, transparent 0 61%, rgba(255,226,245,.22) 67%, rgba(255,255,255,.4) 70%, transparent 75%);
-}
-.pokemon-card[data-form="EX"] .card-shell {
-  box-shadow:
-    inset 0 0 0 1px rgba(255,255,255,.58),
-    inset 0 0 32px color-mix(in srgb,var(--type-deep) 24%,transparent),
-    0 0 0 1px rgba(105,113,118,.34);
+    inset 0 0 0 1px rgba(255,255,255,.96),
+    inset 0 0 0 5px rgba(82,91,96,.22);
 }
 
-/* Mega — cromado mais forte + microentalhe/prisma, lembrando acabamento etched. */
-.pokemon-card[data-form="Mega"] {
-  box-shadow:
-    0 24px 70px rgba(0,0,0,.48),
-    0 0 24px color-mix(in srgb,var(--type-light) 34%,transparent),
-    inset 0 0 0 1px rgba(255,255,255,.98),
-    inset 0 0 0 5px rgba(76,82,86,.28);
-}
-.pokemon-card[data-form="Mega"]::after {
-  opacity:.38;
+/* Mega: preto metálico, sem arco-íris. */
+.pokemon-card[data-form="Mega"],
+.pokemon-card.is-expanded[data-form="Mega"] {
   background:
-    repeating-linear-gradient(122deg, transparent 0 9px, rgba(255,255,255,.11) 9px 10px, transparent 10px 18px),
-    repeating-linear-gradient(28deg, transparent 0 15px, rgba(170,225,255,.07) 15px 16px, transparent 16px 30px),
-    conic-gradient(from 205deg at 49% 44%, transparent 0 9%, rgba(115,215,255,.22) 13%, transparent 18% 38%, rgba(255,112,205,.18) 44%, transparent 50% 69%, rgba(255,238,137,.18) 75%, transparent 82% 100%),
-    linear-gradient(111deg, transparent 0 31%, rgba(255,255,255,.66) 39%, transparent 48% 100%);
-}
-.pokemon-card[data-form="Mega"] .form-mark {
-  color: color-mix(in srgb,var(--type-deep) 88%,#111);
-  text-shadow:0 1px 0 rgba(255,255,255,.9),0 0 4px rgba(255,255,255,.34);
+    linear-gradient(116deg,transparent 0 21%,rgba(255,255,255,.28) 29%,transparent 37% 66%,rgba(255,255,255,.11) 75%,transparent 84%),
+    linear-gradient(145deg,#656a6e 0%,#24282b 24%,#090b0d 48%,#373b3f 69%,#101215 100%);
+  box-shadow:
+    0 24px 72px rgba(0,0,0,.56),
+    inset 0 0 0 1px rgba(179,186,190,.56),
+    inset 0 0 0 5px rgba(0,0,0,.58);
 }
 
-/* EX e Mega: a arte sangra horizontalmente até a borda interna da carta. */
+/* Radiante: dourado metálico. */
+.pokemon-card[data-form="Radiante"],
+.pokemon-card.is-expanded[data-form="Radiante"] {
+  background:
+    linear-gradient(116deg,transparent 0 20%,rgba(255,248,205,.76) 28%,transparent 36% 65%,rgba(255,236,159,.31) 74%,transparent 84%),
+    linear-gradient(145deg,#fff0a0 0%,#b88720 22%,#f3cf63 47%,#9a6c14 72%,#e5b941 100%);
+  box-shadow:
+    0 24px 72px rgba(0,0,0,.47),
+    inset 0 0 0 1px rgba(255,248,202,.92),
+    inset 0 0 0 5px rgba(112,78,9,.24);
+}
+
+/* Gigantamax: vermelho metálico. */
+.pokemon-card[data-form="Gigantamax"],
+.pokemon-card.is-expanded[data-form="Gigantamax"] {
+  background:
+    linear-gradient(116deg,transparent 0 20%,rgba(255,224,218,.62) 28%,transparent 36% 65%,rgba(255,174,166,.25) 74%,transparent 84%),
+    linear-gradient(145deg,#ff8c80 0%,#a91f22 23%,#e74a46 48%,#781116 72%,#c92d2f 100%);
+  box-shadow:
+    0 24px 72px rgba(0,0,0,.49),
+    inset 0 0 0 1px rgba(255,213,208,.8),
+    inset 0 0 0 5px rgba(91,8,12,.28);
+}
+
+/* Um único layout para EX, Mega, Radiante e Gigantamax. */
 .pokemon-card[data-form="EX"]:not(.is-expanded) .artwork-frame,
 .pokemon-card[data-form="Mega"]:not(.is-expanded) .artwork-frame,
 .pokemon-card[data-form="Radiante"]:not(.is-expanded) .artwork-frame,
@@ -1545,95 +1627,51 @@
   border-left:0;
   border-right:0;
   border-radius:0;
-  box-shadow:
-    0 -1px 0 rgba(255,255,255,.88),
-    0 1px 0 rgba(72,79,83,.52),
-    inset 0 0 0 1px rgba(255,255,255,.16);
 }
 
-/* Radiante — pérola/branco-dourado e brilho em estrela, inspiração VSTAR. */
-.pokemon-card[data-form="Radiante"] {
-  background:
-    linear-gradient(112deg, rgba(255,255,255,.98) 0 1.7%, transparent 6% 87%, rgba(255,255,255,.68) 92%, transparent 98%),
-    repeating-linear-gradient(132deg, rgba(255,255,255,.3) 0 1px, rgba(75,72,64,.04) 1px 3px),
-    linear-gradient(135deg,#fffdf3 0%,#cbd8e6 24%,#f4e7cf 46%,#d9e7e2 68%,#f6f1df 100%);
+/* Mesmos detalhes de moldura, mudando só o material/cor pela forma. */
+.pokemon-card .artwork-frame {
+  border-top-color:var(--trim-light);
+  border-bottom-color:var(--trim-deep);
   box-shadow:
-    0 24px 70px rgba(0,0,0,.45),
-    0 0 27px rgba(255,244,199,.24),
-    inset 0 0 0 1px #fff,
-    inset 0 0 0 5px rgba(135,141,145,.17);
+    0 -1px 0 var(--trim-glint),
+    0 1px 0 color-mix(in srgb,var(--trim-dark) 76%,black),
+    inset 0 0 0 1px color-mix(in srgb,var(--trim-light) 30%,transparent);
 }
-.pokemon-card[data-form="Radiante"]::after {
-  opacity:.34;
-  background:
-    conic-gradient(from 0deg at 24% 23%, transparent 0 7%, rgba(255,255,255,.74) 8% 9%, transparent 10% 24%, rgba(255,226,140,.21) 27%, transparent 31% 100%),
-    conic-gradient(from 45deg at 78% 63%, transparent 0 10%, rgba(188,225,255,.38) 12% 13%, transparent 15% 34%, rgba(255,187,225,.22) 37%, transparent 41% 100%),
-    linear-gradient(115deg, transparent 0 29%, rgba(255,255,255,.54) 37%, transparent 46% 100%);
+.pokemon-card .ability-block,
+.pokemon-card .pokemon-info,
+.pokemon-card .stage-pill,
+.pokemon-card .set-stamp {
+  border-color:color-mix(in srgb,var(--trim-mid) 82%,var(--trim-dark));
+}
+.pokemon-card .card-header::after,
+.pokemon-card .footer-rule {
+  background:linear-gradient(90deg,transparent,var(--trim-mid) 15% 85%,transparent);
+}
+.pokemon-card .form-mark {
+  color:color-mix(in srgb,var(--trim-dark) 82%,var(--type-deep));
+  text-shadow:0 1px 0 color-mix(in srgb,var(--trim-light) 58%,transparent);
 }
 
-/* Gigantamax — aurora/rainbow ampla, inspiração VMAX. */
-.pokemon-card[data-form="Gigantamax"] {
-  background:
-    linear-gradient(112deg, rgba(255,255,255,.94) 0 1.7%, transparent 6% 87%, rgba(255,255,255,.58) 92%, transparent 98%),
-    repeating-linear-gradient(132deg, rgba(255,255,255,.22) 0 1px, rgba(58,45,66,.055) 1px 3px),
-    linear-gradient(135deg,#cbdcf7 0%,#d2b9ef 21%,#f0b9dc 43%,#f6d19b 63%,#a8e6dc 82%,#c7c9f3 100%);
-  box-shadow:
-    0 24px 74px rgba(0,0,0,.48),
-    0 0 31px rgba(190,132,235,.28),
-    inset 0 0 0 1px rgba(255,255,255,.96),
-    inset 0 0 0 5px rgba(102,83,118,.2);
-}
+/* Normal não recebe sheen. Especiais recebem só um reflexo muito sutil no aro. */
+.pokemon-card[data-form="EX"]::after,
+.pokemon-card[data-form="Mega"]::after,
+.pokemon-card[data-form="Radiante"]::after,
 .pokemon-card[data-form="Gigantamax"]::after {
-  opacity:.42;
-  background:
-    conic-gradient(from 215deg at 50% 47%, rgba(116,218,255,.18), transparent 10% 21%, rgba(244,122,222,.23) 29%, transparent 39% 49%, rgba(255,218,112,.21) 58%, transparent 68% 78%, rgba(135,255,218,.2) 88%, transparent 100%),
-    repeating-linear-gradient(128deg, transparent 0 18px, rgba(255,255,255,.09) 18px 20px, transparent 20px 39px),
-    linear-gradient(103deg, transparent 0 22%, rgba(255,255,255,.57) 31%, transparent 41% 68%, rgba(190,222,255,.28) 75%, transparent 84%);
+  content:"";
+  position:absolute;
+  inset:4px;
+  z-index:12;
+  border-radius:23px;
+  pointer-events:none;
+  opacity:.24;
+  background:linear-gradient(118deg,transparent 0 25%,rgba(255,255,255,.42) 33%,transparent 41% 100%);
+  mix-blend-mode:screen;
 }
-
-/* Radiante e Gigantamax: a arte cresce uma fileira para baixo; status ficam por cima. */
-.pokemon-card[data-form="Radiante"]:not(.is-expanded) .card-header,
-.pokemon-card[data-form="Gigantamax"]:not(.is-expanded) .card-header { grid-row:1; }
-.pokemon-card[data-form="Radiante"]:not(.is-expanded) .artwork-frame,
-.pokemon-card[data-form="Gigantamax"]:not(.is-expanded) .artwork-frame {
-  grid-row:2 / 4;
-  z-index:1;
-}
-.pokemon-card[data-form="Radiante"]:not(.is-expanded) .artwork-inner,
-.pokemon-card[data-form="Gigantamax"]:not(.is-expanded) .artwork-inner { inset:0; }
-.pokemon-card[data-form="Radiante"]:not(.is-expanded) .pokemon-info,
-.pokemon-card[data-form="Gigantamax"]:not(.is-expanded) .pokemon-info {
-  bottom:96px;
-  z-index:3;
-  border-top:1px solid rgba(230,236,239,.68);
-  border-bottom:1px solid rgba(92,99,104,.26);
-  background:linear-gradient(180deg,rgba(249,251,252,.88),color-mix(in srgb,var(--type-light) 31%,rgba(222,228,230,.86)));
-  backdrop-filter:blur(2px);
-}
-.pokemon-card[data-form="Radiante"]:not(.is-expanded) .stats-flags,
-.pokemon-card[data-form="Gigantamax"]:not(.is-expanded) .stats-flags {
-  grid-row:3;
-  align-self:end;
-  z-index:5;
-  padding-inline:5px;
-}
-.pokemon-card[data-form="Radiante"]:not(.is-expanded) .stat-flag,
-.pokemon-card[data-form="Gigantamax"]:not(.is-expanded) .stat-flag {
-  opacity:.91;
-  backdrop-filter:blur(2px) saturate(1.2);
-  filter:
-    drop-shadow(0 0 1px rgba(255,255,255,.82))
-    drop-shadow(0 3px 2px rgba(0,0,0,.3));
-}
-.pokemon-card[data-form="Radiante"]:not(.is-expanded) .ability-block,
-.pokemon-card[data-form="Gigantamax"]:not(.is-expanded) .ability-block { grid-row:4; z-index:3; }
-.pokemon-card[data-form="Radiante"]:not(.is-expanded) .card-footer,
-.pokemon-card[data-form="Gigantamax"]:not(.is-expanded) .card-footer { grid-row:5; z-index:3; }
-
-/* Full Art continua soberano: quando ligado, a arte ocupa a carta inteira. */
-.pokemon-card.is-expanded::after { opacity:.28; }
-.pokemon-card.is-expanded[data-form="Mega"]::after,
-.pokemon-card.is-expanded[data-form="Gigantamax"]::after { opacity:.34; }
+.pokemon-card[data-form="Mega"]::after { opacity:.15; }
+.pokemon-card[data-form="Radiante"]::after { opacity:.20; }
+.pokemon-card[data-form="Gigantamax"]::after { opacity:.18; }
+.pokemon-card.is-expanded::after { opacity:.12; }
 
 /* Campeão: mesma imagem de Treinador, configuração fina logo abaixo e apenas Passiva. */
 .champion-shell {

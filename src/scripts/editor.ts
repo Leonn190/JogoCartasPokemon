@@ -136,6 +136,8 @@ function syncFormFromState() {
     setInputValue('attackName', card.attackName);
     setInputValue('attackDescription', card.attackDescription);
     setInputValue('compatibleType', card.compatibleType);
+    const attackKind = card.attackKind;
+    qa<HTMLInputElement>('[data-attack-kind]').forEach((input) => { input.checked = input.value === attackKind; });
     const compatibilityMode = card.compatibilityMode;
     qa<HTMLInputElement>('[data-compat-mode]').forEach((input) => { input.checked = input.value === compatibilityMode; });
   } else {
@@ -210,6 +212,8 @@ function renderUtility(node: HTMLElement, value: UtilityCardData) {
   node.style.setProperty('--accent', meta.accent);
   node.style.setProperty('--accent-deep', meta.deep);
   node.style.setProperty('--utility-surface', meta.surface);
+  node.style.setProperty('--ribbon-start', meta.ribbonStart);
+  node.style.setProperty('--ribbon-end', meta.ribbonEnd);
   setTextIn(node, 'utility-symbol', meta.symbol);
   setTextIn(node, 'utility-category', meta.label);
   setTextIn(node, 'utility-name', value.name || CARD_TYPE_LABELS[value.cardType]);
@@ -257,9 +261,13 @@ function renderCompatiblePokemon(node: HTMLElement, value: AttackCardData) {
 
 function renderAttack(node: HTMLElement, value: AttackCardData) {
   const meta = CARD_CATEGORY_META.attack;
+  node.dataset.attackKind = value.attackKind;
   node.style.setProperty('--accent', meta.accent);
   node.style.setProperty('--accent-deep', meta.deep);
   node.style.setProperty('--attack-surface', meta.surface);
+  node.style.setProperty('--ribbon-start', meta.ribbonStart);
+  node.style.setProperty('--ribbon-end', meta.ribbonEnd);
+  setTextIn(node, 'attack-kind-label', value.attackKind === 'special' ? 'Ataque Especial' : 'Ataque Normal');
   setTextIn(node, 'attack-name-top', value.attackName || 'Novo Ataque');
   setTextIn(node, 'attack-name-bottom', value.attackName || 'Novo Ataque');
   setTextIn(node, 'attack-description', value.attackDescription || 'Descreva aqui o efeito deste ataque.');
@@ -733,6 +741,15 @@ function bindEvents() {
   });
 
   cardTypeSelector.addEventListener('change', () => switchCardType(cardTypeSelector.value as CardType));
+
+  qa<HTMLInputElement>('[data-attack-kind]').forEach((input) => {
+    input.addEventListener('change', () => {
+      if (!isAttack(card) || !input.checked) return;
+      card.attackKind = input.value === 'special' ? 'special' : 'normal';
+      renderCard();
+      markChanged();
+    });
+  });
 
   qa<HTMLInputElement>('[data-transform]').forEach((input) => {
     input.addEventListener('input', () => {

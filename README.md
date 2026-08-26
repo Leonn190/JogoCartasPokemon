@@ -5,9 +5,9 @@ Editor estático em **Astro + TypeScript** para criação de cartas de um jogo p
 ## Tipos de carta
 
 - **Pokémon** — Normal, EX, Mega, Radiante, Gigantamax e Lendário, com Arte Expandida em todas as formas.
-- **Ataque** — carta separada com arte, compatibilidade por Pokémon específicos ou por tipo e módulo inferior de nome + descrição.
-- **Estádio, Apoiador, Item e Ferramenta** — compartilham o mesmo template visual base, com identidade cromática própria e campo editável de “Como usar”.
-- **Treinador** — intencionalmente não implementado nesta versão.
+- **Ataque** — carta separada com visual prateado inspirado em TCG físico, subtipo **Ataque Normal / Ataque Especial**, arte, efeito e compatibilidade por Pokémon específicos ou por tipo.
+- **Estádio, Apoiador, Item, Ferramenta e Campeão** — pertencem à família **Treinador** e compartilham um template prateado com faixa de subtipo, título TREINADOR, área de regras texturizada e identidade cromática própria.
+- **Campeão** — novo subtipo de Treinador, por enquanto com a mesma estrutura base e identidade dourada discreta.
 
 ## Recursos principais
 
@@ -22,6 +22,8 @@ Editor estático em **Astro + TypeScript** para criação de cartas de um jogo p
 
 ## Pokémon
 
+- Fundos agora usam camadas de gradiente, brilho, microtrama e variação tonal por tipo para evitar cores chapadas.
+- Flags de status usam acabamento metalizado com luz, sombra interna e reflexo.
 - Cabeçalho compacto de 70 px na composição base.
 - Pokémon Básico mostra apenas `BÁSICO`, sem explicações redundantes.
 - Pré-evolução em medalhão próprio e imagem ligeiramente maior.
@@ -33,7 +35,8 @@ Editor estático em **Astro + TypeScript** para criação de cartas de um jogo p
 
 ## Ataques
 
-- Nome do ataque no topo e repetido no módulo inferior.
+- Cabeçalho no mesmo idioma visual das cartas de Treinador, com **ATAQUE** e faixa **Ataque Normal / Ataque Especial**.
+- Nome do ataque em uma faixa própria abaixo do cabeçalho e repetido discretamente no painel de efeito.
 - Descrição multlinha com limite de 360 caracteres e contador no editor.
 - Módulo inferior dimensionado para continuar útil quando o restante da carta estiver embaixo de um Pokémon.
 - Compatibilidade em modos alternativos:

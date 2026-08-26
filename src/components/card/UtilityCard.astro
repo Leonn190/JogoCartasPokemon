@@ -8,27 +8,38 @@ const meta = UTILITY_META[card.cardType];
 const number = String(card.cardNumber).padStart(3, '0');
 ---
 <article
-  class="game-card utility-card"
+  class="game-card utility-card trainer-card"
   data-role="card-template"
   data-card-template="utility"
   data-utility-type={card.cardType}
-  style={`--accent:${meta.accent};--accent-deep:${meta.deep};--utility-surface:${meta.surface};`}
+  style={`--accent:${meta.accent};--accent-deep:${meta.deep};--utility-surface:${meta.surface};--ribbon-start:${meta.ribbonStart};--ribbon-end:${meta.ribbonEnd};`}
 >
   <div class="utility-shell card-shell">
-    <header class="utility-header">
-      <div class="utility-category"><span data-role="utility-symbol">{meta.symbol}</span><strong data-role="utility-category">{meta.label}</strong></div>
-      <h2 data-role="utility-name">{card.name}</h2>
+    <header class="tcg-title-rail">
+      <div class="tcg-subtype-ribbon">
+        <strong data-role="utility-category">{meta.label}</strong>
+      </div>
+      <div class="tcg-major-label">TREINADOR</div>
     </header>
+
+    <div class="tcg-name-row">
+      <h2 data-role="utility-name">{card.name}</h2>
+      <span class="tcg-name-glint" aria-hidden="true"></span>
+    </div>
+
     <SharedArtwork artwork={card.artwork} name={card.name} />
-    <section class="utility-effect">
-      <div class="utility-kicker">EFEITO</div>
-      <p data-role="utility-effect">{card.effectText}</p>
-      <div class="usage-box">
-        <strong>COMO USAR</strong>
+
+    <section class="tcg-rules-panel utility-effect">
+      <div class="tcg-rule-copy">
+        <p data-role="utility-effect">{card.effectText}</p>
+      </div>
+      <div class="tcg-usage-pill">
+        <span class="tcg-usage-dot" aria-hidden="true"></span>
         <p data-role="utility-usage">{card.usageText}</p>
       </div>
     </section>
-    <footer class="simple-footer">
+
+    <footer class="simple-footer tcg-footer">
       <span class="set-stamp" data-role="set-code">{card.setCode}</span>
       <span class="collector-number"><strong data-role="card-number">{number}</strong><em>/</em><span data-role="set-total">{card.setTotal}</span></span>
       <span class="edition-mark">CF • 01</span>

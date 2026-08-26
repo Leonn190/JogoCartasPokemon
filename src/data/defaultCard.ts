@@ -67,6 +67,7 @@ export const EMPTY_POKEMON_CARD: PokemonCardData = {
 
 export const DEFAULT_ATTACK_CARD: AttackCardData = {
   cardType: 'attack',
+  attackKind: 'normal',
   attackName: 'Aqua Jet',
   attackDescription: 'Descreva aqui o efeito completo deste ataque durante a partida.',
   compatibilityMode: 'specific',
@@ -103,6 +104,12 @@ const UTILITY_COPY: Record<UtilityCardType, { name: string; effect: string; usag
     effect: 'Escreva aqui o efeito concedido por esta Ferramenta.',
     usage: 'Explique aqui como esta Ferramenta é utilizada em jogo.',
     number: 148,
+  },
+  champion: {
+    name: 'Campeão da Liga',
+    effect: 'Escreva aqui o efeito concedido por este Campeão.',
+    usage: 'Explique aqui quando e como esta carta de Campeão pode ser utilizada.',
+    number: 150,
   },
 };
 

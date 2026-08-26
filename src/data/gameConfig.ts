@@ -12,6 +12,6 @@ export const GAME_COLLECTION_REFERENCE = {
     supporters: 10,
     stadiums: 8,
     tools: 6,
-    trainers: 5,
+    champions: 5,
   },
 } as const;

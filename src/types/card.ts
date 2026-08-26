@@ -1,4 +1,4 @@
-export const CARD_TYPES = ['pokemon', 'attack', 'stadium', 'supporter', 'item', 'tool'] as const;
+export const CARD_TYPES = ['pokemon', 'attack', 'stadium', 'supporter', 'item', 'tool', 'champion'] as const;
 export type CardType = (typeof CARD_TYPES)[number];
 
 export const CARD_TYPE_LABELS: Record<CardType, string> = {
@@ -8,9 +8,10 @@ export const CARD_TYPE_LABELS: Record<CardType, string> = {
   supporter: 'Apoiador',
   item: 'Item',
   tool: 'Ferramenta',
+  champion: 'Campeão',
 };
 
-export const UTILITY_CARD_TYPES = ['stadium', 'supporter', 'item', 'tool'] as const;
+export const UTILITY_CARD_TYPES = ['stadium', 'supporter', 'item', 'tool', 'champion'] as const;
 export type UtilityCardType = (typeof UTILITY_CARD_TYPES)[number];
 
 export const CARD_FORMS = ['Normal', 'EX', 'Mega', 'Radiante', 'Gigantamax', 'Lendário'] as const;
@@ -78,9 +79,11 @@ export interface CompatiblePokemon {
 }
 
 export type AttackCompatibilityMode = 'specific' | 'type';
+export type AttackKind = 'normal' | 'special';
 
 export interface AttackCardData extends BaseCardData {
   cardType: 'attack';
+  attackKind: AttackKind;
   attackName: string;
   attackDescription: string;
   compatibilityMode: AttackCompatibilityMode;

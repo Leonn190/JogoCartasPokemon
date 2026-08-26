@@ -9,6 +9,13 @@ const { card } = Astro.props;
     <summary><span class="section-index">01</span><span><strong>Ataque</strong><small>Nome e efeito do módulo inferior</small></span><i aria-hidden="true">⌄</i></summary>
     <div class="section-body grid-2">
       <div class="field span-2">
+        <label>Categoria do ataque</label>
+        <div class="segmented-choice" role="radiogroup" aria-label="Categoria do ataque">
+          <label><input type="radio" name="attack-kind" value="normal" data-attack-kind checked={card.attackKind === 'normal'} /><span>Ataque Normal</span></label>
+          <label><input type="radio" name="attack-kind" value="special" data-attack-kind checked={card.attackKind === 'special'} /><span>Ataque Especial</span></label>
+        </div>
+      </div>
+      <div class="field span-2">
         <label for="attack-name">Nome do ataque</label>
         <input id="attack-name" data-field="attackName" value={card.attackName} maxlength="32" />
       </div>

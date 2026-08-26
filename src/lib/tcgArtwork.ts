@@ -1,6 +1,9 @@
 const TCGDEX_API = 'https://api.tcgdex.net/v2/en';
-const CACHE_PREFIX = 'card-forge:tcgdex-art:v1:';
+const POKEMON_TCG_API = 'https://api.pokemontcg.io/v2';
+const CACHE_PREFIX = 'card-forge:tcg-art:v2:';
 const CACHE_TTL = 1000 * 60 * 60 * 24 * 7;
+const SEARCH_TIMEOUT_MS = 5500;
+const IMAGE_TIMEOUT_MS = 9000;
 
 interface TcgDexCardBrief {
   id: string;
@@ -9,18 +12,28 @@ interface TcgDexCardBrief {
   image?: string;
 }
 
-interface TcgDexCard {
+interface PokemonTcgCard {
   id: string;
-  localId: string | number;
   name: string;
-  image?: string;
-  category: string;
+  supertype?: string;
+  subtypes?: string[];
   rarity?: string;
-  suffix?: string;
-  stage?: string;
-  evolveFrom?: string;
-  set: { id: string; name: string; cardCount?: { official?: number; total?: number } };
+  number?: string;
+  set?: {
+    id?: string;
+    name?: string;
+    series?: string;
+    printedTotal?: number;
+    total?: number;
+  };
+  images?: { small?: string; large?: string };
 }
+
+interface PokemonTcgResponse {
+  data?: PokemonTcgCard[];
+}
+
+export type TcgArtworkProvider = 'tcgdex' | 'pokemontcg';
 
 export interface TcgArtworkCandidate {
   cardId: string;
@@ -31,8 +44,11 @@ export interface TcgArtworkCandidate {
   stage: string;
   imageBaseUrl: string;
   imageUrl: string;
+  previewUrl: string;
+  fallbackImageUrl?: string;
   seriesId: string;
   score: number;
+  provider: TcgArtworkProvider;
 }
 
 export interface TcgArtworkExtraction {
@@ -46,6 +62,12 @@ export interface TcgArtworkExtraction {
     profile: string;
     evolvedSafetyApplied: boolean;
   };
+}
+
+export interface TcgArtworkSearchOptions {
+  signal?: AbortSignal;
+  force?: boolean;
+  fallbackStage?: string;
 }
 
 interface CacheEnvelope<T> { value: T; savedAt: number }
@@ -89,6 +111,8 @@ const SERIES_SCORE: Record<string, number> = {
   base: 10,
 };
 
+const SAFE_RARITIES = new Set(['common', 'uncommon', 'rare', 'rare holo']);
+
 function normalize(value: string) {
   return value
     .normalize('NFD')
@@ -102,6 +126,24 @@ function normalize(value: string) {
 function seriesFromImage(image = '') {
   const match = image.match(/assets\.tcgdex\.net\/[^/]+\/([^/]+)\//i);
   return match?.[1]?.toLowerCase() || '';
+}
+
+function seriesFromSetId(setId = '', series = '') {
+  const id = setId.toLowerCase();
+  const text = `${id} ${series}`.toLowerCase();
+  if (/scarlet|violet|^sv/.test(text)) return 'sv';
+  if (/sword|shield|^swsh/.test(text)) return 'swsh';
+  if (/sun|moon|^sm/.test(text)) return 'sm';
+  if (/^xy|\bxy\b/.test(text)) return 'xy';
+  if (/black|white|^bw/.test(text)) return 'bw';
+  if (/heartgold|soulsilver|^hgss/.test(text)) return 'hgss';
+  if (/platinum|^pl/.test(text)) return 'pl';
+  if (/diamond|pearl|^dp/.test(text)) return 'dp';
+  if (/^ex/.test(text)) return 'ex';
+  if (/neo/.test(text)) return 'neo';
+  if (/gym/.test(text)) return 'gym';
+  if (/base/.test(text)) return 'base';
+  return '';
 }
 
 function seriesScore(seriesId: string) {
@@ -127,112 +169,207 @@ function cacheWrite<T>(key: string, value: T) {
   try {
     localStorage.setItem(CACHE_PREFIX + key, JSON.stringify({ value, savedAt: Date.now() }));
   } catch {
-    // O cache é apenas uma otimização. Quota/privacidade nunca deve bloquear o editor.
+    // O cache é só uma otimização. Quota/privacidade nunca deve bloquear o editor.
   }
 }
 
-async function fetchJson<T>(url: string, signal?: AbortSignal): Promise<T> {
-  const response = await fetch(url, { signal, headers: { Accept: 'application/json' } });
-  if (!response.ok) throw new Error(`TCGdex respondeu ${response.status}.`);
-  return response.json() as Promise<T>;
+function isAbortError(error: unknown) {
+  return error instanceof DOMException && error.name === 'AbortError';
 }
 
-function hasSpecialNameOrSuffix(card: TcgDexCard) {
-  const text = `${card.name} ${card.suffix || ''}`.toLowerCase();
-  return /(?:^|[\s.-])(ex|gx|v|max|vmax|vstar|v-union|break|lv\.?x|mega|radiant|shining|star|δ|delta)(?:$|[\s.-])/i.test(text)
-    || /(?:^|\s)m\s+[a-z]/i.test(card.name);
+async function fetchJson<T>(url: string, signal?: AbortSignal, timeoutMs = SEARCH_TIMEOUT_MS): Promise<T> {
+  const controller = new AbortController();
+  let timedOut = false;
+  const relayAbort = () => controller.abort();
+  if (signal?.aborted) controller.abort();
+  else signal?.addEventListener('abort', relayAbort, { once: true });
+  const timer = window.setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, timeoutMs);
+
+  try {
+    const response = await fetch(url, {
+      signal: controller.signal,
+      headers: { Accept: 'application/json' },
+      cache: 'default',
+      credentials: 'omit',
+    });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return await response.json() as T;
+  } catch (error) {
+    if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
+    if (timedOut) throw new Error('tempo limite da API');
+    if (isAbortError(error)) throw error;
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(message === 'Failed to fetch' ? 'API indisponível ou bloqueada pela rede' : message);
+  } finally {
+    window.clearTimeout(timer);
+    signal?.removeEventListener('abort', relayAbort);
+  }
 }
 
-function hasSpecialRarity(rarity = '') {
-  return /illustration|ultra|secret|hyper|rainbow|gold|shiny|shining|amazing|promo|double rare|special art|trainer gallery|radiant/i.test(rarity);
+function isUnsafeLocalId(localId: string | number) {
+  return /^(tg|gg|sv|rc|sh|xy|sm)/i.test(String(localId).trim());
 }
 
-function looksLikeStandardPokemon(card: TcgDexCard, pokemonName: string) {
-  if (card.category !== 'Pokemon' || !card.image) return false;
-  if (normalize(card.name) !== normalize(pokemonName)) return false;
-  if (hasSpecialNameOrSuffix(card) || hasSpecialRarity(card.rarity)) return false;
-  const localNumber = Number(String(card.localId).match(/^\d+/)?.[0] || 0);
-  const officialCount = Number(card.set?.cardCount?.official || 0);
-  if (/^(tg|gg|sv|rc)/i.test(String(card.localId))) return false;
-  if (localNumber && officialCount && localNumber > officialCount) return false;
-  // "Common", "Uncommon", "Rare" e variações Holo são layouts normais. Alguns cards
-  // antigos omitem a raridade na base, então ausência de raridade não é reprovação.
-  const rarity = (card.rarity || '').toLowerCase();
-  if (rarity && !/common|uncommon|rare|holo/.test(rarity)) return false;
-  return true;
-}
-
-function candidateScore(card: TcgDexCard) {
-  const seriesId = seriesFromImage(card.image);
-  const rarity = (card.rarity || '').toLowerCase();
+function candidateScore(seriesId: string, rarity = '') {
   let score = seriesScore(seriesId);
-  if (rarity.includes('common')) score += 4;
-  if (rarity.includes('uncommon')) score += 5;
-  if (rarity.includes('rare')) score += 3;
-  if (card.stage?.toLowerCase() === 'basic') score += 2;
+  const safeRarity = rarity.toLowerCase();
+  if (safeRarity === 'common') score += 4;
+  if (safeRarity === 'uncommon') score += 5;
+  if (safeRarity === 'rare') score += 3;
+  if (safeRarity === 'rare holo') score += 2;
   return score;
 }
 
-async function mapLimit<T, R>(items: T[], limit: number, mapper: (item: T) => Promise<R>): Promise<R[]> {
-  const result: R[] = new Array(items.length);
-  let cursor = 0;
-  const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
-    while (cursor < items.length) {
-      const index = cursor++;
-      result[index] = await mapper(items[index]!);
-    }
+function dedupeCandidates(items: TcgArtworkCandidate[]) {
+  const seen = new Set<string>();
+  return items.filter((item) => {
+    const key = `${item.provider}:${item.cardId}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
   });
-  await Promise.all(workers);
-  return result;
 }
 
-export async function findNormalPokemonArtworkCandidates(pokemonName: string, signal?: AbortSignal): Promise<TcgArtworkCandidate[]> {
-  const normalizedName = normalize(pokemonName);
-  if (!normalizedName) return [];
-  const cacheKey = `candidates:${normalizedName}`;
-  const cached = cacheRead<TcgArtworkCandidate[]>(cacheKey);
-  if (cached?.length) return cached;
+async function searchTcgDex(pokemonName: string, fallbackStage: string, signal?: AbortSignal): Promise<TcgArtworkCandidate[]> {
+  const params = new URLSearchParams();
+  params.set('name', pokemonName);
+  params.set('category', 'Pokemon');
+  // Filtrar a raridade na própria API evita o antigo N+1 de até 24 requisições de detalhes.
+  // Assim a busca normalmente vira UMA requisição e já exclui IR/UR/Secret/Full Art.
+  params.set('rarity', 'eq:Common|Uncommon|Rare|Rare Holo');
+  params.set('pagination:page', '1');
+  params.set('pagination:itemsPerPage', '40');
+  const briefs = await fetchJson<TcgDexCardBrief[]>(`${TCGDEX_API}/cards?${params.toString()}`, signal);
+  const wanted = normalize(pokemonName);
 
-  const searchUrl = `${TCGDEX_API}/cards?name=${encodeURIComponent(pokemonName)}`;
-  const briefs = await fetchJson<TcgDexCardBrief[]>(searchUrl, signal);
-  const exact = briefs
-    .filter((item) => item.image && normalize(item.name) === normalizedName)
-    .sort((a, b) => seriesScore(seriesFromImage(b.image)) - seriesScore(seriesFromImage(a.image)))
-    .slice(0, 24);
-
-  if (!exact.length) return [];
-
-  const details = await mapLimit(exact, 6, async (item) => {
-    try {
-      return await fetchJson<TcgDexCard>(`${TCGDEX_API}/cards/${encodeURIComponent(item.id)}`, signal);
-    } catch (error) {
-      if (error instanceof DOMException && error.name === 'AbortError') throw error;
-      return null;
-    }
-  });
-
-  const candidates = details
-    .filter((item): item is TcgDexCard => Boolean(item && looksLikeStandardPokemon(item, pokemonName)))
+  return briefs
+    .filter((item) => item.image && normalize(item.name) === wanted && !isUnsafeLocalId(item.localId))
     .map((item) => {
       const seriesId = seriesFromImage(item.image);
+      const setId = item.id.split('-')[0] || seriesId || 'TCG';
       return {
         cardId: item.id,
         cardName: item.name,
-        setName: item.set?.name || item.set?.id || 'Coleção desconhecida',
+        setName: setId.toUpperCase(),
         localId: String(item.localId),
-        rarity: item.rarity || 'Raridade não informada',
-        stage: item.stage || '',
+        rarity: 'Normal',
+        stage: fallbackStage,
         imageBaseUrl: item.image!,
-        imageUrl: `${item.image}/high.png`,
+        imageUrl: `${item.image}/high.webp`,
+        previewUrl: `${item.image}/low.webp`,
+        fallbackImageUrl: `${item.image}/high.png`,
         seriesId,
-        score: candidateScore(item),
-      } satisfies TcgArtworkCandidate;
+        score: candidateScore(seriesId),
+        provider: 'tcgdex' as const,
+      };
     })
     .sort((a, b) => b.score - a.score || b.cardId.localeCompare(a.cardId))
-    .slice(0, 8);
+    .slice(0, 12);
+}
 
-  if (candidates.length) cacheWrite(cacheKey, candidates);
-  return candidates;
+function hasSpecialPokemonTcgSubtype(card: PokemonTcgCard) {
+  const subtypes = (card.subtypes || []).join(' ').toLowerCase();
+  return /\b(ex|gx|v|max|vmax|vstar|v-union|break|mega|radiant|lv\.?x|tag team)\b/i.test(subtypes);
+}
+
+function pokemonTcgStage(card: PokemonTcgCard, fallbackStage: string) {
+  const subtypes = card.subtypes || [];
+  if (subtypes.some((value) => /^basic$/i.test(value))) return 'Basic';
+  if (subtypes.some((value) => /^stage\s*1$/i.test(value))) return 'Stage1';
+  if (subtypes.some((value) => /^stage\s*2$/i.test(value))) return 'Stage2';
+  return fallbackStage;
+}
+
+async function searchPokemonTcg(pokemonName: string, fallbackStage: string, signal?: AbortSignal): Promise<TcgArtworkCandidate[]> {
+  const escapedName = pokemonName.replace(/["\\]/g, (value) => `\\${value}`);
+  const params = new URLSearchParams();
+  params.set('q', `name:"${escapedName}"`);
+  params.set('pageSize', '40');
+  params.set('select', 'id,name,supertype,subtypes,rarity,number,set,images');
+  const response = await fetchJson<PokemonTcgResponse>(`${POKEMON_TCG_API}/cards?${params.toString()}`, signal);
+  const wanted = normalize(pokemonName);
+
+  return (response.data || [])
+    .filter((item) => {
+      if (!item.images?.large || normalize(item.name) !== wanted) return false;
+      if (item.supertype && !/pok[eé]mon/i.test(item.supertype)) return false;
+      if (hasSpecialPokemonTcgSubtype(item)) return false;
+      const rarity = (item.rarity || '').trim().toLowerCase();
+      if (rarity && !SAFE_RARITIES.has(rarity)) return false;
+      if (isUnsafeLocalId(item.number || '')) return false;
+      const number = Number(String(item.number || '').match(/^\d+/)?.[0] || 0);
+      const printedTotal = Number(item.set?.printedTotal || 0);
+      if (number && printedTotal && number > printedTotal) return false;
+      return true;
+    })
+    .map((item) => {
+      const seriesId = seriesFromSetId(item.set?.id || '', item.set?.series || '');
+      return {
+        cardId: item.id,
+        cardName: item.name,
+        setName: item.set?.name || item.set?.id?.toUpperCase() || 'Pokémon TCG',
+        localId: String(item.number || item.id),
+        rarity: item.rarity || 'Normal',
+        stage: pokemonTcgStage(item, fallbackStage),
+        imageBaseUrl: item.images!.large!,
+        imageUrl: item.images!.large!,
+        previewUrl: item.images?.small || item.images!.large!,
+        fallbackImageUrl: item.images?.small,
+        seriesId,
+        score: candidateScore(seriesId, item.rarity),
+        provider: 'pokemontcg' as const,
+      };
+    })
+    .sort((a, b) => b.score - a.score || b.cardId.localeCompare(a.cardId))
+    .slice(0, 12);
+}
+
+export async function findNormalPokemonArtworkCandidates(
+  pokemonName: string,
+  options: TcgArtworkSearchOptions = {},
+): Promise<TcgArtworkCandidate[]> {
+  const normalizedName = normalize(pokemonName);
+  if (!normalizedName) return [];
+  const cacheKey = `candidates:${normalizedName}`;
+  if (!options.force) {
+    const cached = cacheRead<TcgArtworkCandidate[]>(cacheKey);
+    if (cached?.length) return cached;
+  }
+
+  // As duas fontes são consultadas em paralelo. Se uma estiver fora do ar, a outra ainda
+  // consegue abastecer as sugestões. Cada uma possui timeout curto para nunca travar o editor.
+  const results = await Promise.allSettled([
+    searchTcgDex(pokemonName, options.fallbackStage || '', options.signal),
+    searchPokemonTcg(pokemonName, options.fallbackStage || '', options.signal),
+  ]);
+
+  if (options.signal?.aborted) throw new DOMException('Aborted', 'AbortError');
+
+  const candidates = dedupeCandidates(
+    results.flatMap((result) => result.status === 'fulfilled' ? result.value : []),
+  )
+    .sort((a, b) => b.score - a.score || a.provider.localeCompare(b.provider))
+    .slice(0, 14);
+
+  if (candidates.length) {
+    cacheWrite(cacheKey, candidates);
+    return candidates;
+  }
+
+  // Só tratamos como erro de rede se AS DUAS fontes falharam. Se alguma respondeu vazia,
+  // significa apenas que não há uma carta normal segura para esse Pokémon.
+  const failures = results.filter((result): result is PromiseRejectedResult => result.status === 'rejected');
+  if (failures.length === results.length) {
+    const details = failures
+      .map((failure) => failure.reason instanceof Error ? failure.reason.message : String(failure.reason))
+      .filter(Boolean)
+      .join(' / ');
+    throw new Error(`Não foi possível consultar as fontes de cartas (${details || 'erro de rede'}).`);
+  }
+  return [];
 }
 
 function profileFor(candidate: TcgArtworkCandidate): CropProfile {
@@ -331,15 +468,57 @@ function refineArtworkRect(imageData: ImageData, expected: Rect): Rect {
   };
 }
 
-async function loadImageBitmap(url: string, signal?: AbortSignal): Promise<ImageBitmap> {
-  const response = await fetch(url, { signal, mode: 'cors', credentials: 'omit' });
-  if (!response.ok) throw new Error(`A imagem da carta respondeu ${response.status}.`);
-  const blob = await response.blob();
-  try {
-    return await createImageBitmap(blob);
-  } catch {
-    throw new Error('O navegador não conseguiu decodificar a imagem da carta.');
+async function loadImageElement(url: string, signal?: AbortSignal): Promise<HTMLImageElement> {
+  return await new Promise<HTMLImageElement>((resolve, reject) => {
+    const image = new Image();
+    let settled = false;
+    const finish = (callback: () => void) => {
+      if (settled) return;
+      settled = true;
+      window.clearTimeout(timer);
+      signal?.removeEventListener('abort', onAbort);
+      image.onload = null;
+      image.onerror = null;
+      callback();
+    };
+    const onAbort = () => finish(() => reject(new DOMException('Aborted', 'AbortError')));
+    const timer = window.setTimeout(() => finish(() => reject(new Error('A imagem da carta demorou demais para carregar.'))), IMAGE_TIMEOUT_MS);
+
+    image.crossOrigin = 'anonymous';
+    image.decoding = 'async';
+    image.referrerPolicy = 'no-referrer';
+    image.onload = () => finish(() => resolve(image));
+    image.onerror = () => finish(() => reject(new Error('A CDN da carta não liberou a imagem para recorte.')));
+    if (signal?.aborted) {
+      onAbort();
+      return;
+    }
+    signal?.addEventListener('abort', onAbort, { once: true });
+    image.src = url;
+  });
+}
+
+async function loadImageBitmap(candidate: TcgArtworkCandidate, signal?: AbortSignal): Promise<ImageBitmap> {
+  const urls = [candidate.imageUrl, candidate.fallbackImageUrl]
+    .filter((url): url is string => Boolean(url))
+    .filter((url, index, list) => list.indexOf(url) === index);
+  let lastError: unknown = null;
+
+  // Usar <img crossorigin> em vez de fetch(blob) evita o "Failed to fetch" que alguns
+  // navegadores/hosts apresentam mesmo quando a CDN consegue exibir a imagem normalmente.
+  for (const url of urls) {
+    try {
+      const image = await loadImageElement(url, signal);
+      return await createImageBitmap(image);
+    } catch (error) {
+      if (isAbortError(error)) throw error;
+      lastError = error;
+    }
   }
+
+  throw lastError instanceof Error
+    ? lastError
+    : new Error('Não foi possível carregar a imagem da carta para recorte.');
 }
 
 function exportCrop(bitmap: ImageBitmap, rect: Rect) {
@@ -357,8 +536,13 @@ function exportCrop(bitmap: ImageBitmap, rect: Rect) {
   return webp.startsWith('data:image/webp') ? webp : canvas.toDataURL('image/png');
 }
 
+function isBasicStage(stage = '') {
+  const value = normalize(stage);
+  return value === 'basic' || value === 'basico';
+}
+
 export async function extractArtworkFromCandidate(candidate: TcgArtworkCandidate, signal?: AbortSignal): Promise<TcgArtworkExtraction> {
-  const bitmap = await loadImageBitmap(candidate.imageUrl, signal);
+  const bitmap = await loadImageBitmap(candidate, signal);
   try {
     const analysisCanvas = document.createElement('canvas');
     analysisCanvas.width = bitmap.width;
@@ -373,7 +557,7 @@ export async function extractArtworkFromCandidate(candidate: TcgArtworkCandidate
     let rect = refineArtworkRect(imageData, expected);
     let evolvedSafetyApplied = false;
 
-    if (candidate.stage && !/basic/i.test(candidate.stage)) {
+    if (candidate.stage && !isBasicStage(candidate.stage)) {
       const safeTop = Math.round(profile.evolvedSafeTop * bitmap.height);
       if (safeTop > rect.y && safeTop < rect.y + rect.height * .62) {
         const originalBottom = rect.y + rect.height;

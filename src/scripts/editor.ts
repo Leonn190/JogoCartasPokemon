@@ -37,9 +37,11 @@ let pokemonIndex: Array<{ name: string; id: number }> | null = null;
 let pokemonSearchAbort: AbortController | null = null;
 let attackPokemonAbort: AbortController | null = null;
 let abilityAbort: AbortController | null = null;
-let tcgArtworkAbort: AbortController | null = null;
+let tcgArtworkSearchAbort: AbortController | null = null;
+let tcgArtworkCropAbort: AbortController | null = null;
 let tcgArtworkCandidates: TcgArtworkCandidate[] = [];
-let tcgArtworkCandidateCursor = -1;
+let tcgArtworkLoading = false;
+let tcgArtworkStatusOverride = '';
 let saveTimer = 0;
 let pokemonSearchTimer = 0;
 let attackSearchTimer = 0;
@@ -69,8 +71,10 @@ const attackSuggestions = q<HTMLElement>('[data-role="attack-pokemon-suggestions
 const attackSearchControl = q<HTMLElement>('[data-role="attack-search-control"]')!;
 const attackApiStatus = q<HTMLElement>('[data-role="attack-api-status"]')!;
 const tcgArtworkStatus = q<HTMLElement>('[data-role="tcg-art-status"]');
-const tcgArtworkButton = q<HTMLButtonElement>('[data-action="fetch-tcg-art"]');
-const tcgArtworkNextButton = q<HTMLButtonElement>('[data-action="next-tcg-art"]');
+const tcgArtworkSuggestions = q<HTMLElement>('[data-role="tcg-art-suggestions"]');
+const tcgArtworkSuggestionCount = q<HTMLElement>('[data-role="tcg-art-count"]');
+const tcgArtworkSuggestionDetails = q<HTMLDetailsElement>('[data-role="tcg-art-suggestions-details"]');
+const tcgArtworkRefreshButton = q<HTMLButtonElement>('[data-action="refresh-tcg-art"]');
 
 function isPokemon(value: CardData = card): value is PokemonCardData { return value.cardType === 'pokemon'; }
 function isAttack(value: CardData = card): value is AttackCardData { return value.cardType === 'attack'; }
@@ -467,109 +471,151 @@ function clearArtworkSourceMetadata(nextSource: 'manual' | 'none' = 'none') {
   card.artworkSourceLabel = '';
 }
 
+function providerLabel(candidate: TcgArtworkCandidate) {
+  return candidate.provider === 'tcgdex' ? 'TCGdex' : 'Pokémon TCG API';
+}
+
+function renderTcgArtworkSuggestions() {
+  if (!tcgArtworkSuggestions) return;
+  if (tcgArtworkSuggestionCount) tcgArtworkSuggestionCount.textContent = String(tcgArtworkCandidates.length);
+
+  if (!isPokemon(card) || card.form !== 'Normal') {
+    tcgArtworkSuggestions.innerHTML = '<p class="tcg-suggestion-empty">As sugestões aparecem apenas para Pokémon na forma Normal.</p>';
+    return;
+  }
+  if (tcgArtworkLoading) {
+    tcgArtworkSuggestions.innerHTML = Array.from({ length: 4 }, () => '<div class="tcg-card-skeleton" aria-hidden="true"><i></i><span></span></div>').join('');
+    return;
+  }
+  if (!tcgArtworkCandidates.length) {
+    tcgArtworkSuggestions.innerHTML = '<p class="tcg-suggestion-empty">Nenhuma sugestão carregada para este Pokémon.</p>';
+    return;
+  }
+
+  tcgArtworkSuggestions.innerHTML = tcgArtworkCandidates.map((candidate, index) => {
+    const selected = card.artworkSourceCardId === candidate.cardId ? ' is-selected' : '';
+    return `
+      <button type="button" class="tcg-card-suggestion${selected}" data-tcg-card-id="${escapeHtml(candidate.cardId)}" data-tcg-provider="${candidate.provider}" title="Usar arte de ${escapeHtml(candidate.setName)} #${escapeHtml(candidate.localId)}">
+        <span class="tcg-card-thumb"><img src="${escapeHtml(candidate.previewUrl)}" alt="${escapeHtml(candidate.cardName)} — ${escapeHtml(candidate.setName)} #${escapeHtml(candidate.localId)}" loading="lazy" decoding="async" referrerpolicy="no-referrer" /></span>
+        <span class="tcg-card-meta"><strong>${escapeHtml(candidate.setName)} #${escapeHtml(candidate.localId)}</strong><small>${providerLabel(candidate)}${index === 0 ? ' · sugerida' : ''}</small></span>
+      </button>`;
+  }).join('');
+
+  qa<HTMLImageElement>('img', tcgArtworkSuggestions).forEach((image) => {
+    image.addEventListener('error', () => image.closest('.tcg-card-suggestion')?.classList.add('has-image-error'), { once: true });
+  });
+}
+
 function updateTcgArtworkUI() {
-  if (!tcgArtworkStatus || !tcgArtworkButton || !tcgArtworkNextButton) return;
-  const available = isPokemon(card) && card.form === 'Normal' && Boolean(card.pokemonName.trim());
-  tcgArtworkButton.disabled = !available;
-  tcgArtworkNextButton.disabled = !available || tcgArtworkCandidates.length < 2;
+  const available = isPokemon(card) && card.form === 'Normal' && Boolean(card.pokemonName.trim()) && card.pokemonName !== 'Novo Pokémon';
+  if (tcgArtworkRefreshButton) tcgArtworkRefreshButton.disabled = !available || tcgArtworkLoading;
+  tcgArtworkSuggestionDetails?.classList.toggle('is-disabled', !available);
+  if (!available && tcgArtworkSuggestionDetails) tcgArtworkSuggestionDetails.open = false;
+  if (tcgArtworkSuggestionCount) tcgArtworkSuggestionCount.textContent = String(tcgArtworkCandidates.length);
 
   if (!isPokemon(card)) return;
   if (card.form !== 'Normal') {
-    tcgArtworkStatus.textContent = 'Busca automática desativada para EX, Mega, Radiante e Gigantamax.';
+    if (tcgArtworkStatus) tcgArtworkStatus.textContent = 'Sugestões de cartas desativadas para EX, Mega, Radiante e Gigantamax.';
+    return;
+  }
+  if (tcgArtworkStatusOverride) {
+    if (tcgArtworkStatus) tcgArtworkStatus.textContent = tcgArtworkStatusOverride;
     return;
   }
   if (card.artworkSource === 'tcgdex' && card.artworkSourceLabel) {
-    tcgArtworkStatus.textContent = `Arte recortada de ${card.artworkSourceLabel}.`;
+    if (tcgArtworkStatus) tcgArtworkStatus.textContent = `Arte recortada de ${card.artworkSourceLabel}. Você pode escolher outra sugestão abaixo.`;
+  } else if (tcgArtworkCandidates.length) {
+    if (tcgArtworkStatus) tcgArtworkStatus.textContent = `${tcgArtworkCandidates.length} sugestões de cartas normais encontradas. Abra “Sugestões” e escolha a arte.`;
   } else if (card.artworkSource === 'manual' && card.artwork) {
-    tcgArtworkStatus.textContent = 'Arte manual preservada. Use “Buscar arte normal” se quiser substituí-la.';
+    if (tcgArtworkStatus) tcgArtworkStatus.textContent = 'Arte manual preservada. As sugestões são carregadas em segundo plano.';
   } else {
-    tcgArtworkStatus.textContent = 'Ao escolher um Pokémon normal, o editor tenta extrair automaticamente a arte de uma carta padrão.';
+    if (tcgArtworkStatus) tcgArtworkStatus.textContent = 'Ao escolher um Pokémon na Pokédex, as cartas normais são buscadas automaticamente em segundo plano.';
   }
 }
 
-function resetTcgArtworkCandidates() {
+function resetTcgArtworkCandidates(status = '') {
   tcgArtworkCandidates = [];
-  tcgArtworkCandidateCursor = -1;
+  tcgArtworkStatusOverride = status;
+  renderTcgArtworkSuggestions();
   updateTcgArtworkUI();
+}
+
+async function preloadTcgArtworkSuggestions(pokemonName: string, force = false, prefetched?: Promise<TcgArtworkCandidate[]>) {
+  if (!isPokemon(card) || card.form !== 'Normal') return;
+  const expectedPokemonName = pokemonName.trim();
+  if (!expectedPokemonName || expectedPokemonName === 'Novo Pokémon') return;
+
+  if (!prefetched) {
+    tcgArtworkSearchAbort?.abort();
+    tcgArtworkSearchAbort = new AbortController();
+  }
+  tcgArtworkLoading = true;
+  tcgArtworkStatusOverride = 'Buscando cartas normais em segundo plano…';
+  renderTcgArtworkSuggestions();
+  updateTcgArtworkUI();
+
+  try {
+    const candidates = prefetched
+      ? await prefetched
+      : await findNormalPokemonArtworkCandidates(expectedPokemonName, {
+          signal: tcgArtworkSearchAbort?.signal,
+          force,
+          fallbackStage: card.stage,
+        });
+    if (!isPokemon(card) || card.form !== 'Normal') return;
+    if (normalizePokemonNameForArtwork(card.pokemonName) !== normalizePokemonNameForArtwork(expectedPokemonName)) return;
+
+    tcgArtworkCandidates = candidates;
+    tcgArtworkStatusOverride = candidates.length
+      ? `${candidates.length} sugestões encontradas. Abra “Sugestões” para escolher uma imagem.`
+      : 'Não encontrei uma carta normal segura para este Pokémon. EX/GX/V/Mega/Full Art continuam bloqueadas.';
+    renderTcgArtworkSuggestions();
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') return;
+    const message = error instanceof Error ? error.message : 'Falha ao consultar as fontes de cartas.';
+    tcgArtworkCandidates = [];
+    tcgArtworkStatusOverride = `${message} A Pokédex continua funcionando normalmente; tente atualizar as sugestões.`;
+    renderTcgArtworkSuggestions();
+  } finally {
+    if (isPokemon(card) && normalizePokemonNameForArtwork(card.pokemonName) === normalizePokemonNameForArtwork(expectedPokemonName)) {
+      tcgArtworkLoading = false;
+      renderTcgArtworkSuggestions();
+      updateTcgArtworkUI();
+    }
+  }
 }
 
 async function applyTcgArtworkCandidate(candidate: TcgArtworkCandidate, expectedPokemonName: string) {
   if (!isPokemon(card) || card.form !== 'Normal') return false;
   if (normalizePokemonNameForArtwork(card.pokemonName) !== normalizePokemonNameForArtwork(expectedPokemonName)) return false;
-  if (tcgArtworkStatus) tcgArtworkStatus.textContent = `Recortando ${candidate.setName} #${candidate.localId}…`;
-  const extraction = await extractArtworkFromCandidate(candidate, tcgArtworkAbort?.signal);
+
+  tcgArtworkCropAbort?.abort();
+  tcgArtworkCropAbort = new AbortController();
+  const candidateWithStage = { ...candidate, stage: card.stage || candidate.stage };
+  tcgArtworkStatusOverride = `Recortando ${candidate.setName} #${candidate.localId}…`;
+  updateTcgArtworkUI();
+  const extraction = await extractArtworkFromCandidate(candidateWithStage, tcgArtworkCropAbort.signal);
   if (!isPokemon(card) || card.form !== 'Normal') return false;
   if (normalizePokemonNameForArtwork(card.pokemonName) !== normalizePokemonNameForArtwork(expectedPokemonName)) return false;
 
   card.artwork = extraction.artwork;
+  // Mantido como "tcgdex" por compatibilidade com rascunhos salvos pela versão anterior.
   card.artworkSource = 'tcgdex';
   card.artworkSourceCardId = candidate.cardId;
   card.artworkSourceLabel = `${candidate.setName} #${candidate.localId}`;
   card.artworkTransform = { scale: 1, x: 0, y: 0 };
+  const safety = extraction.crop.evolvedSafetyApplied ? ' A faixa de “Evolui de” foi evitada.' : '';
+  tcgArtworkStatusOverride = `Arte extraída de ${candidate.setName} #${candidate.localId} via ${providerLabel(candidate)}.${safety}`;
   renderCard();
   syncFormFromState();
+  renderTcgArtworkSuggestions();
   markChanged();
-  const safety = extraction.crop.evolvedSafetyApplied ? ' A faixa da pré-evolução foi evitada.' : '';
-  if (tcgArtworkStatus) tcgArtworkStatus.textContent = `Arte extraída de ${candidate.setName} #${candidate.localId}.${safety}`;
-  toast(`Arte de ${candidate.cardName} extraída automaticamente.`, 'success');
+  toast(`Arte de ${candidate.cardName} aplicada.`, 'success');
   return true;
 }
 
 function normalizePokemonNameForArtwork(value: string) {
   return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '');
-}
-
-async function fetchTcgArtwork(options: { force?: boolean; next?: boolean } = {}) {
-  if (!isPokemon(card)) return;
-  if (card.form !== 'Normal') {
-    if (tcgArtworkStatus) tcgArtworkStatus.textContent = 'A extração automática aceita apenas a forma Normal.';
-    return;
-  }
-  const pokemonName = card.pokemonName.trim();
-  if (!pokemonName || pokemonName === 'Novo Pokémon') {
-    if (tcgArtworkStatus) tcgArtworkStatus.textContent = 'Escolha um Pokémon antes de buscar a arte.';
-    return;
-  }
-  if (!options.force && card.artworkSource === 'manual' && card.artwork) {
-    updateTcgArtworkUI();
-    return;
-  }
-
-  tcgArtworkAbort?.abort();
-  tcgArtworkAbort = new AbortController();
-  tcgArtworkButton && (tcgArtworkButton.disabled = true);
-  tcgArtworkNextButton && (tcgArtworkNextButton.disabled = true);
-
-  try {
-    const samePokemon = tcgArtworkCandidates[0]
-      && normalizePokemonNameForArtwork(tcgArtworkCandidates[0].cardName) === normalizePokemonNameForArtwork(pokemonName);
-    if (!samePokemon) {
-      resetTcgArtworkCandidates();
-      if (tcgArtworkStatus) tcgArtworkStatus.textContent = 'Procurando cartas normais na TCGdex…';
-      tcgArtworkCandidates = await findNormalPokemonArtworkCandidates(pokemonName, tcgArtworkAbort.signal);
-      tcgArtworkCandidateCursor = -1;
-    }
-
-    if (!tcgArtworkCandidates.length) {
-      if (tcgArtworkStatus) tcgArtworkStatus.textContent = 'Não encontrei uma carta normal segura para extrair a arte deste Pokémon.';
-      if (options.force) toast('Nenhuma carta normal compatível encontrada na TCGdex.', 'neutral');
-      return;
-    }
-
-    const nextCursor = options.next
-      ? (tcgArtworkCandidateCursor + 1 + tcgArtworkCandidates.length) % tcgArtworkCandidates.length
-      : Math.max(0, tcgArtworkCandidateCursor);
-    tcgArtworkCandidateCursor = nextCursor;
-    const candidate = tcgArtworkCandidates[tcgArtworkCandidateCursor]!;
-    await applyTcgArtworkCandidate(candidate, pokemonName);
-  } catch (error) {
-    if (error instanceof DOMException && error.name === 'AbortError') return;
-    const message = error instanceof Error ? error.message : 'Falha ao buscar ou recortar a arte.';
-    if (tcgArtworkStatus) tcgArtworkStatus.textContent = `${message} Você ainda pode enviar uma imagem manualmente.`;
-    if (options.force) toast(message, 'error');
-  } finally {
-    updateTcgArtworkUI();
-  }
 }
 
 function markChanged() {
@@ -676,6 +722,9 @@ async function restoreDraft() {
   const merged = mergeDraft(restored);
   cardCache[merged.cardType] = cloneCard(merged);
   applyState(merged);
+  if (merged.cardType === 'pokemon' && merged.form === 'Normal' && merged.pokemonName && merged.pokemonName !== 'Novo Pokémon') {
+    void preloadTcgArtworkSuggestions(merged.pokemonName);
+  }
   toast('Último rascunho restaurado.', 'success');
 }
 
@@ -691,7 +740,7 @@ function applyPokemonForm(form: PokemonForm) {
   renderCard();
   updateTcgArtworkUI();
   markChanged();
-  if (form === 'Normal' && (!card.artwork || card.artworkSource === 'tcgdex')) void fetchTcgArtwork();
+  if (form === 'Normal' && card.pokemonName && card.pokemonName !== 'Novo Pokémon') void preloadTcgArtworkSuggestions(card.pokemonName);
 }
 
 function updateField(input: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement) {
@@ -799,7 +848,7 @@ async function handleAttackSearchQuery() {
   }
 }
 
-async function selectPokemon(identifier: string | number) {
+async function selectPokemon(identifier: string | number, pokemonNameHint = '') {
   if (!isPokemon(card)) return;
   hideSuggestions(pokemonSuggestions, pokemonSearchInput, 'pokemon');
   pokemonSearchAbort?.abort();
@@ -807,6 +856,20 @@ async function selectPokemon(identifier: string | number) {
   pokemonSearchControl.classList.add('is-loading');
   getActiveCardNode().classList.add('is-api-loading');
   apiStatus.textContent = 'Consultando PokéAPI, espécie e cadeia evolutiva…';
+
+  const hintedName = (pokemonNameHint || (typeof identifier === 'string' ? identifier : '')).trim();
+  let artworkPrefetch: Promise<TcgArtworkCandidate[]> | null = null;
+  if (hintedName && card.form === 'Normal') {
+    tcgArtworkSearchAbort?.abort();
+    tcgArtworkSearchAbort = new AbortController();
+    artworkPrefetch = findNormalPokemonArtworkCandidates(hintedName, {
+      signal: tcgArtworkSearchAbort.signal,
+      fallbackStage: '',
+    });
+    // A busca de cartas começa ao mesmo tempo que a PokéAPI. O handler evita warning de
+    // Promise não tratada caso a fonte falhe antes de a PokéAPI terminar de carregar.
+    void artworkPrefetch.catch(() => undefined);
+  }
 
   try {
     const data = await loadPokemonEditorData(identifier, pokemonSearchAbort.signal);
@@ -847,7 +910,8 @@ async function selectPokemon(identifier: string | number) {
     if (typeSuggestion) typeSuggestion.textContent = p.suggestedType ? `Sugestão da API: ${p.suggestedType}` : 'Tipo oficial ambíguo: escolha manualmente.';
     markChanged();
     toast(`${p.pokemonName} carregado pela PokéAPI.`, 'success');
-    void fetchTcgArtwork();
+    const canReusePrefetch = artworkPrefetch && normalizePokemonNameForArtwork(hintedName) === normalizePokemonNameForArtwork(p.pokemonName);
+    void preloadTcgArtworkSuggestions(p.pokemonName, false, canReusePrefetch ? artworkPrefetch : undefined);
   } catch (error) {
     if (error instanceof DOMException && error.name === 'AbortError') return;
     const message = error instanceof Error ? error.message : 'Falha ao consultar a PokéAPI.';
@@ -916,6 +980,7 @@ function readArtwork(file: File) {
   reader.onload = () => {
     card.artwork = String(reader.result || '');
     clearArtworkSourceMetadata('manual');
+    tcgArtworkStatusOverride = '';
     card.artworkTransform = { scale: 1, x: 0, y: 0 };
     syncFormFromState();
     renderCard();
@@ -1005,11 +1070,16 @@ function switchCardType(nextType: CardType) {
   if (nextType === card.cardType) return;
   pokemonSearchAbort?.abort();
   attackPokemonAbort?.abort();
-  tcgArtworkAbort?.abort();
+  tcgArtworkSearchAbort?.abort();
+  tcgArtworkCropAbort?.abort();
   cardCache[card.cardType] = cloneCard(card);
   const next = cardCache[nextType] ? cloneCard(cardCache[nextType]!) : createEmptyCard(nextType);
+  resetTcgArtworkCandidates();
   if (nextType === 'pokemon' && next.cardType === 'pokemon') naturalStage = next.stage;
   applyState(next);
+  if (next.cardType === 'pokemon' && next.form === 'Normal' && next.pokemonName && next.pokemonName !== 'Novo Pokémon') {
+    void preloadTcgArtworkSuggestions(next.pokemonName);
+  }
   markChanged();
 }
 
@@ -1085,14 +1155,14 @@ function bindEvents() {
       event.preventDefault();
       if (!pokemonSuggestions.hidden && buttons.length) {
         const chosen = buttons[Math.max(0, pokemonSuggestionCursor)]!;
-        selectPokemon(chosen.dataset.pokemonId || chosen.dataset.pokemonName || pokemonSearchInput.value);
-      } else if (pokemonSearchInput.value.trim()) selectPokemon(pokemonSearchInput.value.trim());
+        selectPokemon(chosen.dataset.pokemonId || chosen.dataset.pokemonName || pokemonSearchInput.value, chosen.dataset.pokemonName || pokemonSearchInput.value);
+      } else if (pokemonSearchInput.value.trim()) selectPokemon(pokemonSearchInput.value.trim(), pokemonSearchInput.value.trim());
     }
   });
   pokemonSearchInput.addEventListener('focus', () => { if (pokemonSearchInput.value.trim().length >= 2) handlePokemonSearchQuery(); });
   pokemonSuggestions.addEventListener('click', (event) => {
     const button = (event.target as Element).closest<HTMLButtonElement>('[data-pokemon-id]');
-    if (button) selectPokemon(button.dataset.pokemonId || button.dataset.pokemonName || '');
+    if (button) selectPokemon(button.dataset.pokemonId || button.dataset.pokemonName || '', button.dataset.pokemonName || '');
   });
 
   attackSearchInput.addEventListener('input', () => {
@@ -1131,12 +1201,27 @@ function bindEvents() {
   ['dragleave', 'drop'].forEach((type) => dropzone.addEventListener(type, (event) => { event.preventDefault(); dropzone.classList.remove('is-dragover'); }));
   dropzone.addEventListener('drop', (event) => { const file = event.dataTransfer?.files?.[0]; if (file) readArtwork(file); });
   q<HTMLButtonElement>('[data-action="replace-art"]')?.addEventListener('click', () => fileInput.click());
-  tcgArtworkButton?.addEventListener('click', () => { void fetchTcgArtwork({ force: true }); });
-  tcgArtworkNextButton?.addEventListener('click', () => { void fetchTcgArtwork({ force: true, next: true }); });
+  tcgArtworkRefreshButton?.addEventListener('click', () => {
+    if (isPokemon(card)) void preloadTcgArtworkSuggestions(card.pokemonName, true);
+  });
+  tcgArtworkSuggestions?.addEventListener('click', (event) => {
+    const button = (event.target as Element).closest<HTMLButtonElement>('[data-tcg-card-id]');
+    if (!button || !isPokemon(card)) return;
+    const candidate = tcgArtworkCandidates.find((item) => item.cardId === button.dataset.tcgCardId && item.provider === button.dataset.tcgProvider);
+    if (!candidate) return;
+    void applyTcgArtworkCandidate(candidate, card.pokemonName).catch((error) => {
+      if (error instanceof DOMException && error.name === 'AbortError') return;
+      const message = error instanceof Error ? error.message : 'Não foi possível recortar essa carta.';
+      tcgArtworkStatusOverride = `${message} Escolha outra sugestão ou use upload manual.`;
+      updateTcgArtworkUI();
+      toast(message, 'error');
+    });
+  });
   q<HTMLButtonElement>('[data-action="remove-art"]')?.addEventListener('click', () => {
     card.artwork = '';
     clearArtworkSourceMetadata('none');
-    resetTcgArtworkCandidates();
+    tcgArtworkStatusOverride = '';
+    renderTcgArtworkSuggestions();
     card.artworkTransform = { scale: 1, x: 0, y: 0 };
     fileInput.value = '';
     syncFormFromState();
@@ -1200,7 +1285,8 @@ async function resetToNewCard() {
   await clearDraft();
   cardCache = {};
   reference = { officialStats: null, abilities: [] };
-  tcgArtworkAbort?.abort();
+  tcgArtworkSearchAbort?.abort();
+  tcgArtworkCropAbort?.abort();
   resetTcgArtworkCandidates();
   naturalStage = 'BÁSICO';
   pokemonSearchInput.value = '';

@@ -256,3 +256,17 @@
 
 @media (max-width:720px) { .tcg-suggestion-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } }
 @media (max-width:520px) { .tcg-suggestion-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+
+/* Ajuste da arte exclusivamente pelo mouse. */
+.mouse-artwork-help {
+  margin-top: 16px;
+  padding: 11px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border: 1px solid rgba(255,255,255,.09);
+  border-radius: 8px;
+  background: #14181c;
+}
+.mouse-artwork-help strong { color:#dfe3e7; font-size:9.8px; }
+.mouse-artwork-help span { color:#727b84; font-size:8.8px; line-height:1.45; }

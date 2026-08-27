@@ -1715,3 +1715,214 @@
 .champion-rule p { -webkit-line-clamp:6; font-size:10.2px; line-height:1.3; }
 .champion-victory p,
 .champion-defeat p { -webkit-line-clamp:4; font-size:9.6px; line-height:1.25; }
+
+/* ======================================================================
+   2026-08 — Cabeçalho Pokémon + ícones TCG + enquadramento por mouse
+   ====================================================================== */
+
+/* Borda externa limpa: sem faixas diagonais, sem aros empilhados e sem sheen. */
+.pokemon-card,
+.pokemon-card[data-form],
+.pokemon-card.is-expanded[data-form] {
+  background: linear-gradient(145deg,#eef1f2 0%,#c9cfd2 48%,#adb5b9 100%);
+  box-shadow:
+    0 24px 70px rgba(0,0,0,.44),
+    inset 0 0 0 1px rgba(255,255,255,.9),
+    inset 0 0 0 3px rgba(96,104,109,.12);
+}
+.pokemon-card[data-form="Mega"],
+.pokemon-card.is-expanded[data-form="Mega"] {
+  background: linear-gradient(145deg,#5b6064 0%,#24282b 52%,#0b0d0f 100%);
+}
+.pokemon-card[data-form="Radiante"],
+.pokemon-card.is-expanded[data-form="Radiante"] {
+  background: linear-gradient(145deg,#f5dc79 0%,#c59a32 52%,#9a6f17 100%);
+}
+.pokemon-card[data-form="Gigantamax"],
+.pokemon-card.is-expanded[data-form="Gigantamax"] {
+  background: linear-gradient(145deg,#e86a62 0%,#b62f31 52%,#781318 100%);
+}
+.pokemon-card::before,
+.pokemon-card::after { display:none !important; }
+
+/* Cabeçalho menor; o medalhão invade levemente a área de arte como nas cartas TCG. */
+.pokemon-card .card-shell {
+  grid-template-rows: 58px 394px 96px 132px 124px;
+}
+.card-header {
+  grid-template-columns: 205px 1fr 64px;
+  min-height:58px;
+  padding:0 3px;
+  overflow:visible;
+}
+.card-header::after { bottom:-3px; }
+.evolution-zone {
+  position:relative;
+  width:205px;
+  height:58px;
+  display:block;
+  overflow:visible;
+}
+.previous-evolution {
+  position:absolute;
+  left:0;
+  top:5px;
+  height:58px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+}
+.previous-evolution.is-empty { display:none; }
+.previous-medallion {
+  width:62px;
+  height:62px;
+  flex:0 0 62px;
+  border:3px solid #aeb5b9;
+  background:rgba(247,248,246,.92);
+  box-shadow:
+    0 0 0 2px rgba(255,255,255,.9),
+    0 2px 5px rgba(31,35,37,.2),
+    inset 0 0 0 1px rgba(71,78,82,.12);
+}
+.previous-medallion img {
+  width:55px;
+  height:55px;
+  object-fit:contain;
+}
+.stage-pill {
+  position:absolute;
+  left:-1px;
+  top:-8px;
+  z-index:4;
+  min-height:20px;
+  padding:0 9px;
+  border:1px solid #8f979b;
+  border-radius:10px 10px 8px 3px;
+  background:linear-gradient(180deg,#f8f9f8,#d8dddf);
+  box-shadow:0 1px 2px rgba(0,0,0,.16), inset 0 1px 0 #fff;
+  font-size:8px;
+  letter-spacing:.075em;
+}
+.previous-evolution-copy {
+  min-width:0;
+  max-width:126px;
+  display:flex;
+  flex-direction:column;
+  gap:1px;
+  padding-top:8px;
+  line-height:1.05;
+}
+.previous-evolution-copy small {
+  color:rgba(26,29,31,.64);
+  font-size:7.3px;
+  font-style:italic;
+  font-weight:750;
+  letter-spacing:.01em;
+  white-space:nowrap;
+}
+.previous-evolution-copy strong,
+.previous-evolution strong {
+  max-width:126px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:9.2px;
+  line-height:1.05;
+  font-weight:900;
+}
+.pokemon-card[data-pokemon-type="Sombrio"] .previous-evolution-copy small { color:rgba(255,255,255,.65); }
+
+.name-zone { width:292px; }
+.name-zone h2 { font-size:26px; }
+.form-mark { margin-top:2px; }
+
+/* Ícones: símbolo real sobre círculo preto com borda branca grossa. */
+.type-zone { min-width:60px; }
+.type-badge { width:58px; min-width:58px; justify-content:center; }
+.type-symbol {
+  position:relative;
+  width:50px;
+  height:50px;
+  flex:0 0 50px;
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+  padding:0;
+  border:5px solid #fff;
+  border-radius:50%;
+  background:#090a0b;
+  box-shadow:
+    0 0 0 1px rgba(0,0,0,.5),
+    0 2px 4px rgba(0,0,0,.28),
+    inset 0 0 0 1px rgba(255,255,255,.08);
+}
+.type-icon {
+  position:static;
+  width:34px;
+  height:34px;
+  object-fit:contain;
+  filter:drop-shadow(0 1px 1px rgba(0,0,0,.42));
+}
+.pokemon-card.is-expanded .type-symbol { border-color:#fff; background:#08090a; }
+
+/* Mesma linguagem para os ícones de tipo da carta de Ataque. */
+.attack-type-badge,
+.compatible-type-symbol {
+  overflow:hidden;
+  border:4px solid #fff;
+  border-radius:50%;
+  background:#090a0b;
+  box-shadow:0 0 0 1px rgba(0,0,0,.45),0 2px 3px rgba(0,0,0,.2);
+}
+.attack-type-badge { width:42px; height:42px; flex-basis:42px; }
+.attack-type-badge img {
+  position:static;
+  width:29px;
+  height:29px;
+  object-fit:contain;
+}
+.compatible-type-symbol { width:46px; height:46px; flex-basis:46px; display:grid; place-items:center; }
+.compatible-type-symbol img {
+  position:static;
+  width:31px;
+  height:31px;
+  object-fit:contain;
+}
+
+/* A imagem original é preservada inteira: ela fica atrás da abertura da carta.
+   O usuário recorta visualmente apenas pelo enquadramento, usando drag + wheel. */
+.artwork-inner,
+.card-full-art,
+.shared-artwork-inner {
+  touch-action:none;
+}
+.artwork-inner.is-dragging,
+.card-full-art.is-dragging,
+.shared-artwork-inner.is-dragging { cursor:grabbing; }
+.artwork-image,
+.card-full-art img {
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  object-position:center;
+  user-select:none;
+  -webkit-user-drag:none;
+}
+.artwork-inner,
+.card-full-art {
+  background:
+    linear-gradient(45deg,rgba(255,255,255,.045) 25%,transparent 25% 75%,rgba(255,255,255,.045) 75%),
+    linear-gradient(45deg,rgba(255,255,255,.045) 25%,transparent 25% 75%,rgba(255,255,255,.045) 75%),
+    color-mix(in srgb,var(--type) 15%,#24292d);
+  background-size:24px 24px;
+  background-position:0 0,12px 12px;
+}
+.previous-evolution-copy small strong {
+  display:inline;
+  max-width:none;
+  overflow:visible;
+  font-size:8.5px;
+  line-height:inherit;
+  vertical-align:baseline;
+}

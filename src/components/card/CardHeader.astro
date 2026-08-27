@@ -11,7 +11,9 @@ const { card } = Astro.props;
       <span class="previous-medallion">
         <img src={card.previousEvolutionImage} data-role="previous-image" alt={card.previousEvolution ? `Pré-evolução ${card.previousEvolution}` : ''} crossorigin="anonymous" />
       </span>
-      <strong data-role="previous-name">{card.previousEvolution}</strong>
+      <span class="previous-evolution-copy">
+        <small>Evolui de <strong data-role="previous-name">{card.previousEvolution}</strong></small>
+      </span>
     </div>
   </div>
 

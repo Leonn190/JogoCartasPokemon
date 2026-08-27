@@ -1022,38 +1022,76 @@ function bindArtworkDragging() {
   let startY = 0;
   let baseX = 0;
   let baseY = 0;
+  let moved = false;
+
+  const getArtworkSurface = (target: EventTarget | null) => {
+    const element = target instanceof Element ? target : null;
+    const artworkSurface = element?.closest<HTMLElement>('[data-role="artwork-drag-surface"]') || null;
+    if (!artworkSurface || !getActiveCardNode().contains(artworkSurface) || !card.artwork) return null;
+    return artworkSurface;
+  };
 
   scaleBox.addEventListener('pointerdown', (event) => {
-    const target = (event.target as Element).closest<HTMLElement>('[data-role="artwork-drag-surface"]');
-    if (!target || !getActiveCardNode().contains(target) || !card.artwork) return;
+    const target = getArtworkSurface(event.target);
+    if (!target) return;
     surface = target;
     pointerId = event.pointerId;
     startX = event.clientX;
     startY = event.clientY;
     baseX = card.artworkTransform.x;
     baseY = card.artworkTransform.y;
+    moved = false;
+    target.classList.add('is-dragging');
     target.setPointerCapture(pointerId);
+    event.preventDefault();
   });
 
   scaleBox.addEventListener('pointermove', (event) => {
     if (pointerId !== event.pointerId || !surface) return;
     const rect = surface.getBoundingClientRect();
-    card.artworkTransform.x = clamp(baseX + ((event.clientX - startX) / Math.max(1, rect.width)) * 100, -50, 50);
-    card.artworkTransform.y = clamp(baseY + ((event.clientY - startY) / Math.max(1, rect.height)) * 100, -50, 50);
-    qa<HTMLInputElement>('[data-transform="x"]').forEach((input) => { input.value = String(Math.round(card.artworkTransform.x)); });
-    qa<HTMLInputElement>('[data-transform="y"]').forEach((input) => { input.value = String(Math.round(card.artworkTransform.y)); });
-    updateRangeOutputs();
+    const dx = event.clientX - startX;
+    const dy = event.clientY - startY;
+    if (Math.abs(dx) + Math.abs(dy) > 2) moved = true;
+    card.artworkTransform.x = clamp(baseX + (dx / Math.max(1, rect.width)) * 100, -100, 100);
+    card.artworkTransform.y = clamp(baseY + (dy / Math.max(1, rect.height)) * 100, -100, 100);
     renderCard();
+    event.preventDefault();
   });
 
   const end = (event: PointerEvent) => {
     if (pointerId !== event.pointerId) return;
+    surface?.classList.remove('is-dragging');
     pointerId = null;
     surface = null;
-    markChanged();
+    if (moved) markChanged();
   };
   scaleBox.addEventListener('pointerup', end);
   scaleBox.addEventListener('pointercancel', end);
+
+  scaleBox.addEventListener('wheel', (event) => {
+    const target = getArtworkSurface(event.target);
+    if (!target) return;
+    event.preventDefault();
+
+    const direction = event.deltaY < 0 ? 1 : -1;
+    const step = event.ctrlKey ? 0.06 : 0.12;
+    const nextScale = clamp(card.artworkTransform.scale + direction * step, 0.5, 4);
+    if (nextScale === card.artworkTransform.scale) return;
+
+    card.artworkTransform.scale = Number(nextScale.toFixed(2));
+    renderCard();
+    markChanged();
+  }, { passive: false });
+
+  scaleBox.addEventListener('dblclick', (event) => {
+    const target = getArtworkSurface(event.target);
+    if (!target) return;
+    event.preventDefault();
+    card.artworkTransform = { scale: 1, x: 0, y: 0 };
+    renderCard();
+    markChanged();
+    toast('Enquadramento da arte resetado.');
+  });
 }
 
 function fitPreview() {

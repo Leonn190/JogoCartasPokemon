@@ -11,11 +11,14 @@
   --type-light: #ff9a74;
   --form-accent: #aeb6ba;
   color: #171a1c;
-  background: linear-gradient(145deg, #f0f2f3 0%, #cbd1d4 48%, #aeb6ba 100%);
+  background:
+    linear-gradient(116deg, rgba(255, 255, 255, .30) 0 2%, transparent 9% 86%, rgba(255, 255, 255, .14) 93%, transparent 98%),
+    linear-gradient(145deg, #bcc3c6 0%, #78848a 46%, #a7b0b4 72%, #667278 100%);
   box-shadow:
-    0 24px 70px rgba(0, 0, 0, .44),
-    inset 0 0 0 1px rgba(255, 255, 255, .96),
-    inset 0 0 0 4px rgba(91, 100, 105, .18);
+    0 24px 70px rgba(0, 0, 0, .48),
+    inset 0 0 0 1px rgba(255, 255, 255, .70),
+    inset 0 0 0 5px rgba(45, 54, 59, .26),
+    inset 0 0 20px rgba(21, 27, 31, .14);
 }
 
 .pokemon-card[data-form="EX"] { --form-accent: #dbe2e5; }
@@ -27,22 +30,23 @@
   inset: 13px;
   z-index: 2;
   display: grid;
-  grid-template-rows: 68px 406px 66px 126px 124px;
-  gap: 5px;
+  grid-template-rows: 66px 422px 58px 102px 150px;
+  gap: 9px;
   padding: 10px;
   overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--form-accent) 46%, #aab1b5);
+  border: 2px solid color-mix(in srgb, var(--form-accent) 52%, #69757b);
   border-radius: 17px;
   background:
-    radial-gradient(ellipse at 18% 3%, color-mix(in srgb, var(--type-light) 30%, white), transparent 30%),
-    repeating-linear-gradient(17deg, rgba(255, 255, 255, .04) 0 1px, transparent 1px 8px),
+    radial-gradient(ellipse at 18% 3%, color-mix(in srgb, var(--type-light) 34%, rgba(255,255,255,.54)), transparent 31%),
+    repeating-linear-gradient(17deg, rgba(255, 255, 255, .028) 0 1px, transparent 1px 8px),
     linear-gradient(155deg,
-      color-mix(in srgb, var(--type) 64%, #f4f5f2) 0%,
-      color-mix(in srgb, var(--type-light) 42%, #eef0ed) 52%,
-      color-mix(in srgb, var(--type) 57%, #e5e8e5) 100%);
+      color-mix(in srgb, var(--type) 80%, #c9ceca) 0%,
+      color-mix(in srgb, var(--type-light) 58%, #c8cecb) 50%,
+      color-mix(in srgb, var(--type) 76%, #bfc7c3) 100%);
   box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, .34),
-    inset 0 -18px 30px color-mix(in srgb, var(--type-deep) 10%, transparent);
+    inset 0 0 0 1px rgba(255, 255, 255, .20),
+    inset 0 -24px 38px color-mix(in srgb, var(--type-deep) 18%, transparent),
+    inset 0 16px 30px color-mix(in srgb, var(--type-light) 12%, transparent);
 }
 
 .pokemon-card .card-shell > * {
@@ -58,7 +62,7 @@
   gap: 10px;
   min-width: 0;
   padding: 0 5px 4px 2px;
-  border-bottom: 1px solid rgba(87, 94, 98, .28);
+  border-bottom: 1px solid color-mix(in srgb, var(--type-deep) 34%, rgba(62, 70, 74, .48));
 }
 
 .card-header:has(.previous-evolution.is-empty) {
@@ -224,53 +228,76 @@
   justify-content: center;
 }
 
-.type-zone { min-width: 58px; }
-.type-badge { width: 56px; min-width: 56px; }
+.type-zone { min-width: 61px; }
+.type-badge { width: 60px; min-width: 60px; height: 60px; }
 .type-name { display: none !important; }
 
-/* O fundo preto fica somente no núcleo. O PNG real cresce até perto da
-   borda branca, evitando o aro preto escapando ao redor do ícone. */
+/* Selo de tipo no padrão TCG: aro branco espesso, núcleo preto e o ícone
+   real centralizado por coordenadas absolutas. box-sizing evita que a
+   borda aumente o tamanho calculado do círculo e cause desalinhamento. */
 .type-symbol {
+  --type-icon-x: 0px;
+  --type-icon-y: 0px;
+  --type-icon-scale: 1.08;
   position: relative;
-  width: 52px;
-  height: 52px;
-  flex: 0 0 52px;
-  display: grid;
-  place-items: center;
+  width: 58px;
+  height: 58px;
+  flex: 0 0 58px;
+  box-sizing: border-box;
   overflow: hidden;
   border: 5px solid #fff;
   border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, .52), 0 2px 4px rgba(0, 0, 0, .22);
+  background: #08090a;
+  box-shadow:
+    0 0 0 1.5px rgba(18, 21, 23, .76),
+    0 2px 5px rgba(0, 0, 0, .24),
+    inset 0 0 0 1px rgba(255, 255, 255, .08);
 }
 
 .type-symbol::before {
   content: "";
   position: absolute;
+  left: 50%;
+  top: 50%;
   z-index: 0;
-  width: 31px;
-  height: 31px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
-  background: #090a0b;
+  background: #070809;
+  transform: translate(-50%, -50%);
 }
 
 .type-icon {
-  position: relative;
+  position: absolute;
+  left: 50%;
+  top: 50%;
   z-index: 1;
-  width: 46px;
-  height: 46px;
+  width: 49px;
+  height: 49px;
+  max-width: none;
   object-fit: contain;
+  object-position: 50% 50%;
+  transform: translate(calc(-50% + var(--type-icon-x)), calc(-50% + var(--type-icon-y))) scale(var(--type-icon-scale));
+  transform-origin: 50% 50%;
   filter: none;
+}
+
+/* O arquivo de Terra possui massa visual levemente baixa/direita; este
+   microajuste centraliza o desenho óptico sem alterar os demais tipos. */
+.type-symbol[data-type="Terra"] {
+  --type-icon-x: -1px;
+  --type-icon-y: -1.5px;
+  --type-icon-scale: 1.10;
 }
 
 /* Arte e faixa Pokédex -------------------------------------------------- */
 .artwork-frame {
   position: relative;
   overflow: hidden;
-  border: 2px solid #868e92;
+  border: 2px solid #667178;
   border-radius: 4px;
-  background: #242a2e;
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, .58), 0 2px 4px rgba(0, 0, 0, .16);
+  background: #20262a;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, .36), 0 3px 7px rgba(0, 0, 0, .20);
 }
 
 .artwork-inner {
@@ -311,9 +338,9 @@
   gap: 0;
   padding: 0 10px;
   overflow: hidden;
-  border-top: 1px solid rgba(92, 99, 103, .34);
-  background: rgba(247, 249, 248, .92);
-  color: rgba(27, 31, 33, .78);
+  border-top: 1px solid rgba(67, 75, 79, .42);
+  background: rgba(235, 239, 237, .90);
+  color: rgba(22, 27, 29, .84);
   white-space: nowrap;
   font-size: 7.6px;
   line-height: 1;
@@ -355,10 +382,11 @@
   align-items: stretch;
   gap: 0;
   overflow: hidden;
-  border-top: 1px solid rgba(255, 255, 255, .54);
-  border-bottom: 1px solid rgba(84, 91, 95, .34);
+  border-top: 1px solid rgba(255, 255, 255, .34);
+  border-bottom: 1px solid color-mix(in srgb, var(--type-deep) 42%, rgba(60, 67, 71, .48));
   border-radius: 3px;
-  background: color-mix(in srgb, var(--type-light) 31%, rgba(248, 249, 247, .94));
+  background: color-mix(in srgb, var(--type) 46%, rgba(224, 230, 226, .88));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.13);
 }
 
 .stat-flag {
@@ -394,54 +422,68 @@
   letter-spacing: -.025em;
 }
 
-/* Habilidade usa o mesmo material da carta, apenas com hierarquia textual. */
+/* Habilidade editorial: sem caixa, sem painel independente. Ela nasce do
+   próprio fundo da carta e é organizada somente por tipografia e filete. */
 .ability-block {
   min-height: 0;
   overflow: hidden;
-  padding: 13px 22px 11px;
-  border-top: 1px solid rgba(87, 94, 98, .34);
-  border-bottom: 1px solid rgba(87, 94, 98, .28);
-  background: color-mix(in srgb, var(--type-light) 22%, rgba(249, 250, 248, .93));
+  padding: 11px 21px 8px;
+  border: 0;
+  border-top: 2px solid color-mix(in srgb, var(--type-deep) 58%, rgba(54, 61, 65, .46));
+  background: transparent;
   text-align: left;
 }
 
-.ability-kicker {
+.ability-heading {
+  min-width: 0;
   display: flex;
-  align-items: center;
-  gap: 8px;
-  color: color-mix(in srgb, var(--type-deep) 83%, #252a2d);
-  font-size: 7.5px;
-  line-height: 1;
-  font-weight: 950;
-  letter-spacing: .17em;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 7px;
 }
 
-.ability-kicker span {
-  width: 22px;
-  height: 1px;
-  background: currentColor;
-  opacity: .32;
+.ability-kicker {
+  flex: 0 0 auto;
+  color: color-mix(in srgb, var(--type-deep) 88%, #202528);
+  font-size: 7.7px;
+  line-height: 1;
+  font-weight: 950;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.ability-kicker::before {
+  content: "";
+  display: inline-block;
+  width: 4px;
+  height: 9px;
+  margin-right: 6px;
+  border-radius: 1px;
+  background: var(--type-deep);
+  vertical-align: -1px;
 }
 
 .ability-block h3 {
-  margin: 8px 0 6px;
+  min-width: 0;
+  margin: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 18px;
+  font-size: 17.5px;
   line-height: 1;
   font-weight: 900;
   text-transform: none;
 }
 
 .ability-block p {
-  margin: 0;
+  margin: 0 0 0 10px;
+  max-width: calc(100% - 10px);
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 4;
+  -webkit-line-clamp: 3;
   overflow: hidden;
-  font-size: 10.6px;
-  line-height: 1.42;
+  font-size: 10.7px;
+  line-height: 1.40;
 }
 
 /* Rodapé --------------------------------------------------------------- */
@@ -449,7 +491,7 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
-  padding: 7px 10px 3px;
+  padding: 18px 10px 2px;
 }
 
 .card-footer > p {
@@ -471,7 +513,7 @@
 }
 
 .card-identity {
-  height: 29px;
+  height: 27px;
   display: grid;
   grid-template-columns: 1fr auto auto 1fr;
   align-items: center;
@@ -565,11 +607,16 @@
 }
 
 .pokemon-card.is-expanded .card-header,
-.pokemon-card.is-expanded .stats-flags,
-.pokemon-card.is-expanded .ability-block {
+.pokemon-card.is-expanded .stats-flags {
   border-color: rgba(255, 255, 255, .26);
   background: rgba(10, 13, 15, .48);
   backdrop-filter: blur(2px);
+}
+
+.pokemon-card.is-expanded .ability-block {
+  border-top-color: rgba(255, 255, 255, .40);
+  background: linear-gradient(90deg, rgba(8, 11, 13, .48), rgba(8, 11, 13, .16) 72%, transparent);
+  backdrop-filter: blur(1.5px);
 }
 
 .pokemon-card.is-expanded .header-hp span,
@@ -595,7 +642,7 @@
 
 .pokemon-card.is-expanded .type-symbol {
   border-color: #fff;
-  background: #fff;
+  background: #08090a;
 }
 
 .pokemon-card.is-expanded .form-mark { color: #fff; }
@@ -615,11 +662,16 @@
 
 .pokemon-card[data-pokemon-type="Sombrio"] .stage-pill,
 .pokemon-card[data-pokemon-type="Sombrio"] .pokemon-info,
-.pokemon-card[data-pokemon-type="Sombrio"] .stats-flags,
-.pokemon-card[data-pokemon-type="Sombrio"] .ability-block {
+.pokemon-card[data-pokemon-type="Sombrio"] .stats-flags {
   color: #f4f5f6;
   border-color: rgba(222, 226, 228, .24);
   background: rgba(38, 41, 46, .88);
+}
+
+.pokemon-card[data-pokemon-type="Sombrio"] .ability-block {
+  color: #f4f5f6;
+  border-top-color: rgba(222, 226, 228, .30);
+  background: transparent;
 }
 
 .pokemon-card[data-pokemon-type="Sombrio"] .previous-evolution-copy small,

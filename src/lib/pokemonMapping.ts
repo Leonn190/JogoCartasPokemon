@@ -5,18 +5,18 @@ export type TypeMeta = { color: string; deep: string; light: string; symbol: str
 export const TYPE_META: Record<GameType, TypeMeta> = {
   // Paletas inspiradas na aparência das cartas Pokémon padrão modernas:
   // pigmento forte, highlight claro e sombra da mesma família cromática.
-  Fogo: { color: '#F36A42', deep: '#B93628', light: '#FFAA68', symbol: '△', icon: 'Tipos/fogo.png' },
-  Água: { color: '#43B7DF', deep: '#187FAF', light: '#A2DFF1', symbol: '≋', icon: 'Tipos/agua.png' },
-  Planta: { color: '#95CC3F', deep: '#5A982E', light: '#D0EB70', symbol: '❧', icon: 'Tipos/planta.png' },
-  Elétrico: { color: '#FFD52A', deep: '#C99C08', light: '#FFF17B', symbol: 'ϟ', icon: 'Tipos/eletrico.png' },
-  Gelo: { color: '#73D3DF', deep: '#2F9BAE', light: '#C0EEF3', symbol: '✣', icon: 'Tipos/gelo.png' },
-  Lutador: { color: '#F1A62A', deep: '#C97118', light: '#FFD36C', symbol: '◆', icon: 'Tipos/lutador.png' },
-  Terra: { color: '#D49756', deep: '#945A2F', light: '#EBC18A', symbol: '⬟', icon: 'Tipos/terrestre.png' },
-  Voador: { color: '#79BDE2', deep: '#477FA8', light: '#C2E2F4', symbol: '⌁', icon: 'Tipos/voador.png' },
-  Psíquico: { color: '#C37ABF', deep: '#884A8D', light: '#E5B2DE', symbol: '◉', icon: 'Tipos/psiquico.png' },
-  Sombrio: { color: '#3C3E45', deep: '#14161A', light: '#787B83', symbol: '☾', icon: 'Tipos/sombrio.png' },
-  Metal: { color: '#A8B6BA', deep: '#687B82', light: '#E0E7E9', symbol: '⬢', icon: 'Tipos/metal.png' },
-  Místico: { color: '#D987C8', deep: '#9A4E91', light: '#F0B9E3', symbol: '✦', icon: 'Tipos/mistico.png' },
+  Fogo: { color: '#EA4F2A', deep: '#8F2018', light: '#FF8246', symbol: '△', icon: 'Tipos/fogo.png' },
+  Água: { color: '#219ED2', deep: '#0B5F91', light: '#62C5E4', symbol: '≋', icon: 'Tipos/agua.png' },
+  Planta: { color: '#72B632', deep: '#3F7E22', light: '#A7D85B', symbol: '❧', icon: 'Tipos/planta.png' },
+  Elétrico: { color: '#F2C515', deep: '#A67A00', light: '#FBE15A', symbol: 'ϟ', icon: 'Tipos/eletrico.png' },
+  Gelo: { color: '#43BED0', deep: '#267D96', light: '#83DCE7', symbol: '✣', icon: 'Tipos/gelo.png' },
+  Lutador: { color: '#E48B20', deep: '#9A4C13', light: '#F4B44A', symbol: '◆', icon: 'Tipos/lutador.png' },
+  Terra: { color: '#B96C37', deep: '#744020', light: '#D99C64', symbol: '⬟', icon: 'Tipos/terrestre.png' },
+  Voador: { color: '#4D9FD0', deep: '#316B99', light: '#82BFE3', symbol: '⌁', icon: 'Tipos/voador.png' },
+  Psíquico: { color: '#A856A6', deep: '#713A79', light: '#D086CA', symbol: '◉', icon: 'Tipos/psiquico.png' },
+  Sombrio: { color: '#363941', deep: '#0D0F13', light: '#656A74', symbol: '☾', icon: 'Tipos/sombrio.png' },
+  Metal: { color: '#899BA0', deep: '#52666D', light: '#BAC7CA', symbol: '⬢', icon: 'Tipos/metal.png' },
+  Místico: { color: '#C655B2', deep: '#84347D', light: '#E58AD4', symbol: '✦', icon: 'Tipos/mistico.png' },
 };
 
 const POKE_TYPE_TO_GAME: Record<string, GameType | null> = {

@@ -7,7 +7,7 @@ const meta = TYPE_META[type];
 const iconSrc = `${import.meta.env.BASE_URL}${meta.icon}`;
 ---
 <div class="type-badge" data-role="type-badge" aria-label={`Tipo ${type}`} title={type}>
-  <span class="type-symbol" aria-hidden="true">
+  <span class="type-symbol" data-type={type} aria-hidden="true">
     <img class="type-icon" data-role="type-icon" src={iconSrc} alt="" onerror="this.style.display='none'" />
   </span>
 </div>

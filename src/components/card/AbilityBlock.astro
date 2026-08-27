@@ -4,7 +4,9 @@ interface Props { card: PokemonCardData }
 const { card } = Astro.props;
 ---
 <section class="ability-block">
-  <div class="ability-kicker"><span></span> HABILIDADE <span></span></div>
-  <h3 data-role="ability-name">{card.abilityName}</h3>
+  <div class="ability-heading">
+    <span class="ability-kicker">HABILIDADE</span>
+    <h3 data-role="ability-name">{card.abilityName}</h3>
+  </div>
   <p data-role="ability-description">{card.abilityDescription}</p>
 </section>

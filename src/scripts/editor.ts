@@ -256,6 +256,8 @@ function renderPokemon(node: HTMLElement, value: PokemonCardData) {
   setTextIn(node, 'stage', value.stage);
   setTextIn(node, 'previous-name', value.previousEvolution || '');
   setTypeIcon(node, 'type-icon', meta.icon);
+  const typeSymbol = q<HTMLElement>('.type-symbol', node);
+  if (typeSymbol) typeSymbol.dataset.type = value.type;
   setTextIn(node, 'dex-number', `#${String(value.pokedexNumber ?? 0).padStart(4, '0')}`);
   setTextIn(node, 'genus', value.genus || 'Pokémon');
   setTextIn(node, 'height', value.height || '—');

@@ -5,9 +5,9 @@ const { card } = Astro.props;
 const dex = `#${String(card.pokedexNumber ?? 0).padStart(4, '0')}`;
 ---
 <div class="pokemon-info" aria-label="Informações da espécie">
-  <span data-role="dex-number">{dex}</span><i></i>
-  <span data-role="genus">{card.genus}</span><i></i>
-  <span data-role="height">{card.height}</span><i></i>
-  <span data-role="weight">{card.weight}</span><i></i>
-  <span data-role="region">{card.region}</span>
+  <span class="dex-id" data-role="dex-number">{dex}</span>
+  <span class="species-name" data-role="genus">{card.genus}</span>
+  <span data-role="height">{card.height}</span>
+  <span data-role="weight">{card.weight}</span>
+  <span class="region-name" data-role="region">{card.region}</span>
 </div>

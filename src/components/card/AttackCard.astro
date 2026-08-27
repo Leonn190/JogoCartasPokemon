@@ -31,12 +31,6 @@ const attackTypeIcon = `${import.meta.env.BASE_URL}${attackTypeMeta.icon}`;
 
     <div class="tcg-name-row attack-name-row">
       <h2 data-role="attack-name-top">{card.attackName}</h2>
-      <div class="attack-name-meta">
-        <span class="attack-power-badge" data-role="attack-power">{card.power}%</span>
-        <span class="attack-type-badge" aria-label={`Tipo ${card.type}`} title={card.type}>
-          <img data-role="attack-type-icon" src={attackTypeIcon} alt="" onerror="this.style.display='none'" />
-        </span>
-      </div>
     </div>
 
     <SharedArtwork artwork={card.artwork} name={card.attackName} />
@@ -58,6 +52,18 @@ const attackTypeIcon = `${import.meta.env.BASE_URL}${attackTypeMeta.icon}`;
         <h3 data-role="attack-name-bottom">{card.attackName}</h3>
       </div>
       <p class="attack-rule-copy" data-role="attack-description">{card.attackDescription}</p>
+      <div class="attack-bottom-meta" aria-label="Potência e tipo do ataque">
+        <div class="attack-bottom-power">
+          <span>POTÊNCIA</span>
+          <strong class="attack-power-badge" data-role="attack-power">{card.power}%</strong>
+        </div>
+        <div class="attack-bottom-type">
+          <span>TIPO</span>
+          <span class="attack-type-badge" aria-label={`Tipo ${card.type}`} title={card.type}>
+            <img data-role="attack-type-icon" src={attackTypeIcon} alt="" onerror="this.style.display='none'" />
+          </span>
+        </div>
+      </div>
     </section>
 
     <footer class="simple-footer tcg-footer attack-module-footer">

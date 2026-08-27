@@ -28,187 +28,8 @@
 }
 
 /* Pokémon --------------------------------------------------------------- */
-.pokemon-card { --type:#e84a32; --type-deep:#7e1f1a; --type-light:#ff9a74; }
-.pokemon-card .card-shell {
-  z-index: 2;
-  display: grid;
-  grid-template-rows: 70px 382px 96px 132px 124px;
-  gap: 6px;
-  padding: 12px;
-  background:
-    radial-gradient(circle at 18% 9%, color-mix(in srgb, var(--type-light) 50%, white) 0 2%, transparent 18%),
-    radial-gradient(circle at 80% 34%, color-mix(in srgb, var(--type) 28%, transparent) 0 8%, transparent 34%),
-    repeating-linear-gradient(132deg, rgba(255,255,255,.10) 0 2px, rgba(46,38,27,.025) 2px 5px),
-    linear-gradient(160deg, color-mix(in srgb, var(--type) 50%, #f2ead1) 0%, color-mix(in srgb, var(--type-light) 32%, #dfd3b1) 46%, color-mix(in srgb, var(--type) 44%, #efe8d1) 100%);
-  box-shadow:
-    inset 0 0 0 1px rgba(255,255,255,.38),
-    inset 0 0 30px color-mix(in srgb, var(--type-deep) 20%, transparent);
-}
-.pokemon-card .card-shell::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  opacity: .48;
-  background:
-    repeating-radial-gradient(ellipse at 25% 20%, rgba(255,255,255,.15) 0 1px, transparent 1px 8px),
-    repeating-linear-gradient(16deg, transparent 0 12px, rgba(255,255,255,.055) 12px 13px, transparent 13px 26px);
-  mix-blend-mode: soft-light;
-}
-.pokemon-card .card-shell > * { position: relative; z-index: 1; }
 
-.card-full-art {
-  position: absolute;
-  inset: 14px;
-  z-index: 0;
-  display: none;
-  overflow: hidden;
-  border-radius: 17px;
-  cursor: grab;
-  background: #24272a;
-}
-.card-full-art:active { cursor: grabbing; }
-.card-full-art img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transform: translate(calc(var(--art-x,0) * 1%), calc(var(--art-y,0) * 1%)) scale(var(--art-scale,1));
-  transform-origin: center;
-  pointer-events: none;
-}
-.card-full-art::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(180deg, rgba(5,7,9,.34) 0%, transparent 22%, transparent 60%, rgba(5,7,9,.46) 100%);
-}
 
-.card-header {
-  position: relative;
-  display: grid;
-  grid-template-columns: 165px 1fr 130px;
-  align-items: center;
-  min-height: 0;
-  padding: 0 5px;
-}
-.evolution-zone { display: flex; align-items: center; gap: 7px; min-width: 0; }
-.stage-pill {
-  flex: 0 0 auto;
-  min-height: 23px;
-  display: inline-flex;
-  align-items: center;
-  padding: 0 8px;
-  border: 1px solid rgba(30,29,25,.32);
-  border-radius: 5px;
-  background: rgba(247,242,220,.94);
-  font-size: 8.5px;
-  font-weight: 900;
-  letter-spacing: .08em;
-  white-space: nowrap;
-}
-.previous-evolution { display: flex; align-items: center; gap: 5px; min-width: 0; }
-.previous-evolution.is-empty { display: none; }
-.previous-medallion {
-  width: 47px;
-  height: 47px;
-  flex: 0 0 47px;
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-  border: 2px solid rgba(36,34,29,.48);
-  border-radius: 50%;
-  background: rgba(247,242,220,.86);
-}
-.previous-medallion img { width: 41px; height: 41px; object-fit: contain; }
-.previous-medallion img[src=""] { display: none; }
-.previous-evolution strong {
-  max-width: 63px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 8px;
-  line-height: 1.05;
-}
-.name-zone {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 276px;
-  transform: translate(-50%,-50%);
-  text-align: center;
-  pointer-events: none;
-}
-.name-zone h2 {
-  margin: 0;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 28px;
-  line-height: .98;
-  letter-spacing: -.04em;
-  font-weight: 900;
-  text-transform: uppercase;
-}
-.form-mark {
-  display: inline-block;
-  margin-top: 4px;
-  color: rgba(22,24,26,.72);
-  font-size: 8px;
-  font-weight: 900;
-  letter-spacing: .19em;
-  text-transform: uppercase;
-}
-.form-mark.is-normal { visibility: hidden; }
-.type-zone { grid-column: 3; justify-self: end; }
-.type-badge { min-width: 100px; display: flex; align-items: center; justify-content: flex-end; gap: 7px; }
-.type-symbol {
-  width: 34px;
-  height: 34px;
-  display: grid;
-  place-items: center;
-  border: 2px solid rgba(255,255,255,.84);
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at 34% 24%, rgba(255,255,255,.58), transparent 30%),
-    linear-gradient(145deg, color-mix(in srgb,var(--type) 74%,white), var(--type-deep) 64%, color-mix(in srgb,var(--type-deep) 78%,black));
-  color: #faf8ef;
-  box-shadow: inset 0 0 0 1px rgba(0,0,0,.25), 0 2px 4px rgba(0,0,0,.22);
-  text-shadow: 0 1px 2px rgba(0,0,0,.46);
-  font-size: 18px;
-  font-weight: 900;
-}
-.type-name {
-  max-width: 62px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 9px;
-  font-weight: 900;
-  letter-spacing: .04em;
-  text-transform: uppercase;
-}
-
-.artwork-frame {
-  position: relative;
-  overflow: hidden;
-  border: 3px solid rgba(50,48,43,.74);
-  border-radius: 5px;
-  background: #282c30;
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.55),
-    0 3px 7px rgba(33,25,17,.2),
-    inset 0 0 0 1px rgba(255,255,255,.16);
-}
-.artwork-inner {
-  position: absolute;
-  inset: 0 0 27px;
-  overflow: hidden;
-  cursor: grab;
-  background: color-mix(in srgb,var(--type) 28%,#30353a);
-}
-.artwork-inner:active { cursor: grabbing; }
 .artwork-image {
   width: 100%;
   height: 100%;
@@ -229,7 +50,6 @@
   color: rgba(255,255,255,.74);
   text-shadow: 0 1px 5px rgba(0,0,0,.35);
 }
-.artwork-frame.has-artwork .artwork-placeholder,
 .shared-artwork.has-artwork .artwork-placeholder { display: none; }
 .placeholder-orbit {
   width: 58px;
@@ -244,97 +64,9 @@
 .artwork-placeholder strong { font-size: 13px; letter-spacing: .02em; }
 .artwork-placeholder small { margin-top: 4px; font-size: 9px; opacity: .68; }
 
-.pokemon-info {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 27px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  padding: 0 9px;
-  overflow: hidden;
-  background:
-    repeating-linear-gradient(180deg, rgba(86,78,63,.045) 0 1px, transparent 1px 4px),
-    linear-gradient(180deg, rgba(255,255,255,.92), color-mix(in srgb,var(--type-light) 13%,#eee7d1));
-  white-space: nowrap;
-  font-size: 8.2px;
-  font-weight: 750;
-  letter-spacing: .005em;
-}
-.pokemon-info span { overflow: hidden; text-overflow: ellipsis; }
-.pokemon-info i { width: 2px; height: 2px; flex: 0 0 auto; border-radius: 50%; background: rgba(20,20,18,.55); }
 
-.stats-flags { display: grid; grid-template-columns: repeat(6,1fr); gap: 5px; align-items: start; padding: 0 5px; }
-.stat-flag {
-  --stat:#666;
-  position: relative;
-  height: 91px;
-  padding: 11px 4px 16px;
-  clip-path: polygon(0 0,100% 0,100% 73%,50% 100%,0 73%);
-  background:
-    linear-gradient(90deg, transparent 0 8%, rgba(255,255,255,.22) 22%, transparent 36% 64%, rgba(255,255,255,.12) 78%, transparent 92%),
-    linear-gradient(180deg, color-mix(in srgb,var(--stat) 42%,white) 0%, var(--stat) 29%, color-mix(in srgb,var(--stat) 82%,black) 72%, color-mix(in srgb,var(--stat) 68%,black) 100%);
-  color: #fff;
-  text-align: center;
-  filter: drop-shadow(0 2px 1px rgba(0,0,0,.2));
-  box-shadow: inset 0 1px rgba(255,255,255,.42), inset 0 -8px 14px rgba(0,0,0,.12);
-}
-.stat-flag::before {
-  content: "";
-  position: absolute;
-  inset: 2px 4px 17px;
-  border-top: 1px solid rgba(255,255,255,.56);
-  border-bottom: 1px solid rgba(0,0,0,.18);
-  pointer-events: none;
-}
-.stat-flag span { display: block; font-size: 8px; font-weight: 900; letter-spacing: .12em; opacity: .9; }
-.stat-flag strong { display: block; margin-top: 6px; font-size: 25px; line-height: 1; font-weight: 900; font-variant-numeric: tabular-nums; text-shadow: 0 1px 2px rgba(0,0,0,.25); }
-.stat-flag b { position: absolute; left: 50%; bottom: 11px; width: 20px; height: 1px; transform: translateX(-50%); background: rgba(255,255,255,.36); }
-.stat-hp { --stat:#3f995d; }
-.stat-attack { --stat:#d96735; }
-.stat-defense { --stat:#b88d2c; }
-.stat-specialAttack { --stat:#a8469f; }
-.stat-specialDefense { --stat:#357ec2; }
-.stat-speed { --stat:#c8433e; }
-
-.ability-block {
-  position: relative;
-  min-height: 0;
-  overflow: hidden;
-  padding: 12px 25px 10px;
-  border: 1px solid rgba(45,39,31,.28);
-  border-radius: 5px;
-  background:
-    repeating-linear-gradient(180deg, rgba(70,62,49,.045) 0 1px, transparent 1px 5px),
-    linear-gradient(180deg, rgba(255,255,255,.88), color-mix(in srgb,var(--type-light) 12%,#eee6ce));
-  text-align: center;
-}
-.ability-kicker { display: flex; justify-content: center; align-items: center; gap: 8px; color: var(--type-deep); font-size: 7.5px; font-weight: 900; letter-spacing: .19em; }
-.ability-kicker span { width: 28px; height: 1px; background: currentColor; opacity: .35; }
-.ability-block h3 { margin: 7px 0 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 17px; line-height: 1; letter-spacing: .01em; text-transform: uppercase; }
-.ability-block p { margin: 0 auto; max-width: 500px; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; font-size: 10.5px; line-height: 1.42; }
-
-.card-footer { display: flex; flex-direction: column; min-height: 0; padding: 5px 10px 0; }
-.card-footer > p {
-  margin: 0 auto;
-  width: 94%;
-  min-height: 55px;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 4;
-  overflow: hidden;
-  color: rgba(18,20,22,.8);
-  text-align: center;
-  font-family: Georgia,"Times New Roman",serif;
-  font-style: italic;
-  font-size: 10.3px;
-  line-height: 1.4;
-}
-.footer-rule { height: 1px; margin: auto 0 7px; background: rgba(30,30,27,.24); }
-.card-identity,.simple-footer,.attack-module-footer {
+.simple-footer,
+.attack-module-footer {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
@@ -342,7 +74,7 @@
   font-weight: 850;
   letter-spacing: .08em;
 }
-.card-identity { height: 29px; }
+
 .set-stamp { justify-self: start; min-width: 42px; height: 22px; display: grid; place-items: center; padding: 0 8px; border: 1px solid rgba(20,20,20,.35); border-radius: 4px; background: rgba(255,255,255,.22); }
 .collector-number { display: flex; align-items: baseline; gap: 3px; font-variant-numeric: tabular-nums; }
 .collector-number strong { font-size: 15px; letter-spacing: .02em; }
@@ -351,74 +83,10 @@
 .edition-mark { justify-self: end; font-size: 7.5px; opacity: .58; }
 
 /* Formas especiais: diferenças contidas, sem quebrar a família gráfica. */
-.pokemon-card[data-form="EX"] { background: repeating-linear-gradient(135deg,rgba(255,255,255,.16) 0 1px,rgba(0,0,0,.035) 1px 3px), linear-gradient(145deg,#e2e5e6,#aeb5b9 48%,#dde0e1); box-shadow: 0 24px 70px rgba(0,0,0,.45), 0 0 22px color-mix(in srgb,var(--type) 24%,transparent); }
-.pokemon-card[data-form="EX"] .form-mark { color: var(--type-deep); }
-.pokemon-card[data-form="Mega"] { background: repeating-linear-gradient(132deg,rgba(255,255,255,.16) 0 1px,rgba(0,0,0,.035) 1px 3px), linear-gradient(145deg,#d8dadd,#a4a7ac 50%,#d7d8db); }
-.pokemon-card[data-form="Mega"] .artwork-frame { border-radius: 4px 9px; }
-.pokemon-card[data-form="Mega"] .form-mark::before { content:"M // "; opacity:.62; }
-.pokemon-card[data-form="Radiante"] { background: linear-gradient(125deg,#eee9d7 0%,#d8d9e7 25%,#e8d8e5 49%,#d7e7df 72%,#e9e4d5 100%); }
-.pokemon-card[data-form="Radiante"] .card-shell { background: color-mix(in srgb,var(--type) 30%,#e8ddd9); }
-.pokemon-card[data-form="Gigantamax"] { background: repeating-linear-gradient(135deg,rgba(255,255,255,.12) 0 1px,rgba(0,0,0,.04) 1px 3px), linear-gradient(145deg,#c9b0be,#9b758a 52%,#bea2b1); }
-.pokemon-card[data-form="Gigantamax"] .card-shell { background: color-mix(in srgb,var(--type) 42%,#ccb6c5); }
+
 
 /* Full Art real: o quadro da imagem deixa de participar da composição. */
-.pokemon-card.is-expanded { background: #d2c7a0; color: #fff; }
-.pokemon-card.is-expanded .card-full-art { display: block; }
-.pokemon-card.is-expanded .card-shell::before { display: none; }
-.pokemon-card.is-expanded .card-shell {
-  grid-template-rows: 70px 1fr 108px 150px 124px;
-  gap: 7px;
-  background: transparent;
-  pointer-events: none;
-}
-.pokemon-card.is-expanded .artwork-frame { display: none; }
-.pokemon-card.is-expanded .card-header { grid-row: 1; }
-.pokemon-card.is-expanded .stats-flags { grid-row: 3; }
-.pokemon-card.is-expanded .ability-block { grid-row: 4; }
-.pokemon-card.is-expanded .card-footer { grid-row: 5; }
-.pokemon-card.is-expanded .card-header,
-.pokemon-card.is-expanded .stats-flags,
-.pokemon-card.is-expanded .ability-block,
-.pokemon-card.is-expanded .card-footer { position: relative; z-index: 2; }
-.pokemon-card.is-expanded .card-header,
-.pokemon-card.is-expanded .card-footer,
-.pokemon-card.is-expanded .ability-block {
-  text-shadow: 0 1px 3px rgba(0,0,0,.9), 0 0 5px rgba(0,0,0,.36);
-}
-.pokemon-card.is-expanded .name-zone h2,
-.pokemon-card.is-expanded .form-mark,
-.pokemon-card.is-expanded .stage-pill,
-.pokemon-card.is-expanded .previous-evolution strong,
-.pokemon-card.is-expanded .type-name,
-.pokemon-card.is-expanded .ability-block h3,
-.pokemon-card.is-expanded .ability-block p,
-.pokemon-card.is-expanded .card-footer > p,
-.pokemon-card.is-expanded .card-identity {
-  -webkit-text-stroke: .45px rgba(8,10,12,.82);
-  paint-order: stroke fill;
-}
-.pokemon-card.is-expanded .stage-pill {
-  color: #fff;
-  border-color: rgba(255,255,255,.42);
-  background: rgba(15,17,19,.42);
-}
-.pokemon-card.is-expanded .previous-medallion { border-color: rgba(255,255,255,.66); background: rgba(18,20,22,.38); }
-.pokemon-card.is-expanded .type-symbol { border-color: rgba(255,255,255,.86); }
-.pokemon-card.is-expanded .form-mark { color: #fff; }
-.pokemon-card.is-expanded .stat-flag { opacity: .8; }
-.pokemon-card.is-expanded .ability-block {
-  border: 0;
-  border-top: 1px solid rgba(255,255,255,.36);
-  border-bottom: 1px solid rgba(255,255,255,.3);
-  border-radius: 0;
-  background: linear-gradient(90deg, transparent, rgba(7,9,11,.31) 18%, rgba(7,9,11,.31) 82%, transparent);
-  color: #fff;
-}
-.pokemon-card.is-expanded .ability-kicker { color: #fff; }
-.pokemon-card.is-expanded .card-footer { padding-top: 12px; background: linear-gradient(180deg, transparent 0%, rgba(6,8,10,.32) 42%, rgba(6,8,10,.5) 100%); }
-.pokemon-card.is-expanded .card-footer > p { color: rgba(255,255,255,.97); }
-.pokemon-card.is-expanded .footer-rule { background: rgba(255,255,255,.32); }
-.pokemon-card.is-expanded .set-stamp { border-color: rgba(255,255,255,.44); background: rgba(0,0,0,.18); }
+
 
 /* Arte compartilhada ---------------------------------------------------- */
 .shared-artwork {
@@ -875,18 +543,9 @@
 .attack-module-footer .collector-number strong { font-size:15px; }
 .attack-module-footer .edition-mark { font-size:7.5px; }
 
-.pokemon-card.is-api-loading .card-shell { opacity:.74; filter:saturate(.75); transition:opacity .16s ease; }
 
 /* Mantém a identidade discreta das formas também em Full Art. */
-.pokemon-card.is-expanded[data-form="EX"] { background:#c8ced1; }
-.pokemon-card.is-expanded[data-form="Mega"] { background:#bebfc2; }
-.pokemon-card.is-expanded[data-form="Radiante"] { background:#d9d7ce; }
-.pokemon-card.is-expanded[data-form="Gigantamax"] { background:#b79aa9; }
-.pokemon-card.is-expanded .stat-flag span,
-.pokemon-card.is-expanded .stat-flag strong {
-  -webkit-text-stroke:.35px rgba(5,7,9,.72);
-  paint-order:stroke fill;
-}
+
 
 /* ----------------------------------------------------------------------
    Refinamento 2026: moldura prata moderna, textura de impressão e cores
@@ -905,142 +564,26 @@
     inset 0 0 0 4px rgba(86,92,96,.24),
     inset 0 0 0 6px rgba(232,235,236,.42);
 }
-.pokemon-card[data-form],
-.pokemon-card.is-expanded[data-form] {
-  background:
-    linear-gradient(112deg, rgba(255,255,255,.96) 0 1.6%, transparent 6% 88%, rgba(255,255,255,.5) 93%, transparent 98%),
-    repeating-linear-gradient(132deg, rgba(255,255,255,.24) 0 1px, rgba(55,60,63,.055) 1px 3px),
-    linear-gradient(145deg, #e5e7e8 0%, #9ca3a7 24%, #dfe2e3 49%, #8f979b 73%, #d9ddde 100%);
-}
+
 .card-shell { inset: 13px; }
 
 /* Fundo Pokémon: camada pigmentada + microtextura, menos “cor chapada”. */
-.pokemon-card .card-shell {
-  background:
-    linear-gradient(122deg, rgba(255,255,255,.34) 0 2%, transparent 7% 36%, rgba(255,255,255,.10) 47% 49%, transparent 56% 100%),
-    radial-gradient(ellipse at 18% 5%, color-mix(in srgb, var(--type-light) 72%, white) 0%, transparent 31%),
-    radial-gradient(ellipse at 84% 42%, color-mix(in srgb, var(--type-deep) 34%, transparent) 0%, transparent 42%),
-    repeating-linear-gradient(17deg, rgba(255,255,255,.075) 0 1px, transparent 1px 6px),
-    repeating-linear-gradient(103deg, color-mix(in srgb, var(--type-deep) 9%, transparent) 0 1px, transparent 1px 9px),
-    linear-gradient(155deg,
-      color-mix(in srgb, var(--type) 78%, #f1eee4) 0%,
-      color-mix(in srgb, var(--type-light) 58%, var(--type)) 35%,
-      color-mix(in srgb, var(--type) 73%, #d8d2c1) 66%,
-      color-mix(in srgb, var(--type-deep) 55%, var(--type)) 100%);
-  box-shadow:
-    inset 0 0 0 1px rgba(255,255,255,.42),
-    inset 0 0 26px color-mix(in srgb, var(--type-deep) 23%, transparent),
-    inset 0 12px 28px rgba(255,255,255,.08);
-}
-.pokemon-card .card-shell::before {
-  opacity: .58;
-  background:
-    repeating-radial-gradient(ellipse at 22% 18%, rgba(255,255,255,.16) 0 1px, transparent 1px 7px),
-    repeating-linear-gradient(14deg, transparent 0 11px, rgba(255,255,255,.06) 11px 12px, transparent 12px 24px),
-    repeating-linear-gradient(104deg, transparent 0 19px, rgba(25,28,30,.035) 19px 20px, transparent 20px 38px);
-}
+
 
 /* Tipo Sombrio = carta realmente preta, com tipografia clara. */
-.pokemon-card[data-pokemon-type="Sombrio"] { color: #f5f6f7; }
-.pokemon-card[data-pokemon-type="Sombrio"] .card-shell {
-  background:
-    linear-gradient(118deg, rgba(255,255,255,.13) 0 2%, transparent 8% 71%, rgba(255,255,255,.055) 82%, transparent 94%),
-    radial-gradient(ellipse at 18% 8%, #3f4148 0%, transparent 30%),
-    radial-gradient(ellipse at 84% 45%, #090a0d 0%, transparent 44%),
-    repeating-linear-gradient(16deg, rgba(255,255,255,.04) 0 1px, transparent 1px 6px),
-    linear-gradient(155deg, #25262b 0%, #111216 48%, #050609 100%);
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,.15), inset 0 0 34px rgba(0,0,0,.52);
-}
-.pokemon-card[data-pokemon-type="Sombrio"] .name-zone h2,
-.pokemon-card[data-pokemon-type="Sombrio"] .form-mark,
-.pokemon-card[data-pokemon-type="Sombrio"] .previous-evolution strong,
-.pokemon-card[data-pokemon-type="Sombrio"] .type-name,
-.pokemon-card[data-pokemon-type="Sombrio"] .card-footer,
-.pokemon-card[data-pokemon-type="Sombrio"] .card-footer > p { color: #f7f7f7; }
-.pokemon-card[data-pokemon-type="Sombrio"] .stage-pill {
-  color: #f5f5f5;
-  border-color: rgba(211,217,221,.55);
-  background: linear-gradient(180deg, #303238, #17181d);
-}
-.pokemon-card[data-pokemon-type="Sombrio"] .pokemon-info {
-  color: #f4f5f6;
-  background: linear-gradient(180deg, #33353a, #17181c);
-}
-.pokemon-card[data-pokemon-type="Sombrio"] .pokemon-info i { background: rgba(255,255,255,.62); }
-.pokemon-card[data-pokemon-type="Sombrio"] .ability-block {
-  color: #f6f6f6;
-  border-color: rgba(206,213,217,.62);
-  background:
-    repeating-linear-gradient(180deg, rgba(255,255,255,.035) 0 1px, transparent 1px 5px),
-    linear-gradient(180deg, #2a2b30, #111216);
-}
-.pokemon-card[data-pokemon-type="Sombrio"] .ability-kicker { color: #cfd3da; }
-.pokemon-card[data-pokemon-type="Sombrio"] .footer-rule { background: rgba(230,233,235,.34); }
-.pokemon-card[data-pokemon-type="Sombrio"] .set-stamp { border-color: rgba(218,223,226,.55); background: rgba(255,255,255,.08); }
+
 
 /* Ícones reais de /public/Tipos, sem símbolo gráfico desenhado por baixo. */
-.type-symbol {
-  position: relative;
-  width: 40px;
-  height: 40px;
-  flex: 0 0 40px;
-  padding: 0;
-  overflow: visible;
-  border: 0;
-  background: transparent;
-  box-shadow: none;
-}
-.type-icon {
-  position: absolute;
-  inset: -1px;
-  width: 42px;
-  height: 42px;
-  object-fit: contain;
-  filter: drop-shadow(0 1px 1px rgba(0,0,0,.28));
-}
+
 
 /* Quadro da arte com filete de prata, como moldura física moderna. */
-.artwork-frame {
-  border: 2px solid #aeb6ba;
-  box-shadow:
-    0 0 0 1px rgba(245,247,248,.86),
-    0 3px 7px rgba(25,27,28,.24),
-    inset 0 0 0 1px rgba(71,77,81,.22);
-}
-.artwork-inner { inset: 0 0 26px; }
-.pokemon-info {
-  height: 26px;
-  font-size: 8.65px;
-  font-weight: 780;
-}
+
 
 /* Blocos de status: acabamento metalizado e filete prateado fino. */
-.stat-flag {
-  background:
-    linear-gradient(108deg, transparent 0 9%, rgba(255,255,255,.38) 17%, transparent 29% 55%, rgba(255,255,255,.15) 67%, transparent 82%),
-    repeating-linear-gradient(176deg, rgba(255,255,255,.055) 0 1px, transparent 1px 5px),
-    linear-gradient(180deg,
-      color-mix(in srgb,var(--stat) 30%,#f0f2f3) 0%,
-      color-mix(in srgb,var(--stat) 82%,#c4c9cc) 12%,
-      var(--stat) 39%,
-      color-mix(in srgb,var(--stat) 76%,#11161a) 72%,
-      color-mix(in srgb,var(--stat) 58%,#080b0e) 100%);
-  filter:
-    drop-shadow(0 0 .7px rgba(240,244,246,.95))
-    drop-shadow(0 2px 1px rgba(0,0,0,.24));
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.72),
-    inset 1px 0 0 rgba(226,232,235,.42),
-    inset -1px 0 0 rgba(100,108,113,.48),
-    inset 0 -7px 13px rgba(0,0,0,.15);
-}
-.stat-flag::before { border-top-color: rgba(248,250,251,.74); border-bottom-color: rgba(211,217,220,.44); }
+
 
 /* Medalhão da pré-evolução preserva uma moldura prateada mais limpa. */
-.previous-medallion {
-  border-color: #aab1b5;
-  box-shadow: 0 0 0 1px rgba(255,255,255,.78), inset 0 0 0 1px rgba(78,83,87,.14);
-}
+
 
 /* Treinador/Ataque: papel prateado com pigmento do subtipo nas bordas. */
 .trainer-card {
@@ -1079,10 +622,10 @@
 .attack-card[data-attack-kind="normal"] { --accent:#cc484b; --accent-deep:#752429; --ribbon-start:#e86364; --ribbon-end:#a93239; }
 .attack-card[data-attack-kind="special"] { --accent:#8658b3; --accent-deep:#4c306d; --ribbon-start:#a87ad0; --ribbon-end:#6b4397; }
 
-/* Compatibilidade agora vem primeiro; efeito fica no final do módulo. */
+/* Compatibilidade vem primeiro; efeito fica acima do resumo mecânico inferior. */
 .attack-module {
   display: grid;
-  grid-template-rows: 151px 47px minmax(0,1fr);
+  grid-template-rows: 125px 40px minmax(0, 1fr) 46px;
 }
 .attack-module .compatibility-zone {
   height: auto;
@@ -1096,8 +639,8 @@
 }
 .attack-module .attack-rule-copy {
   height: auto;
-  padding: 14px 18px 11px;
-  -webkit-line-clamp: 6;
+  padding: 12px 18px 9px;
+  -webkit-line-clamp: 5;
 }
 
 /* +5% aproximadamente nos medalhões dos Pokémon compatíveis. */
@@ -1127,7 +670,7 @@
 }
 
 /* Full art continua com borda externa prata e blocos translúcidos. */
-.pokemon-card.is-expanded .stat-flag { opacity: .82; }
+
 
 /* Os detalhes menores de Treinador também herdam a cor do subtipo. */
 .utility-card .tcg-usage-pill {
@@ -1149,105 +692,19 @@
    ---------------------------------------------------------------------- */
 
 /* Moldura Pokémon consistentemente prateada, sem alterar a cor principal do tipo. */
-.pokemon-card::before {
-  content:"";
-  position:absolute;
-  inset:8px;
-  z-index:1;
-  pointer-events:none;
-  border:2px solid #b9c0c4;
-  border-radius:21px;
-  box-shadow:
-    0 0 0 1px rgba(255,255,255,.88),
-    inset 0 0 0 1px rgba(74,82,87,.34),
-    0 0 12px rgba(230,235,238,.2);
-}
-.pokemon-card .card-shell {
-  border:1px solid rgba(205,212,216,.76);
-  box-shadow:
-    inset 0 0 0 1px rgba(255,255,255,.34),
-    inset 0 0 30px color-mix(in srgb, var(--type-deep) 20%, transparent),
-    0 0 0 1px rgba(91,99,104,.24);
-}
-.card-header::after {
-  content:"";
-  position:absolute;
-  left:5px;
-  right:5px;
-  bottom:-2px;
-  height:1px;
-  background:linear-gradient(90deg,transparent,#c7cdd0 12%,#f5f6f6 50%,#aab2b6 88%,transparent);
-  opacity:.72;
-}
+
 
 /* Pokémon: o tipo é comunicado somente pelo ícone e ele ganha mais presença. */
-.type-zone { min-width:58px; }
-.type-badge { min-width:0; width:56px; justify-content:center; gap:0; }
-.type-symbol { width:52px; height:52px; flex-basis:52px; }
-.type-icon { inset:-2px; width:56px; height:56px; filter:drop-shadow(0 2px 2px rgba(0,0,0,.32)); }
-.type-name { display:none !important; }
+
 
 /* A faixa de dados da espécie fica discretamente mais baixa/compacta. */
-.artwork-inner { inset:0 0 22px; }
-.pokemon-info {
-  height:22px;
-  padding:3px 9px 0;
-  border-top:1px solid rgba(190,198,202,.92);
-  background:
-    linear-gradient(180deg,rgba(255,255,255,.94),color-mix(in srgb,var(--type-light) 16%,#e5e7e6));
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.78);
-}
+
 
 /* Habilidade recebe uma tonalidade própria baseada no tipo, mantendo filetes prata. */
-.ability-block {
-  border:1px solid #aeb7bb;
-  background:
-    repeating-linear-gradient(180deg,rgba(255,255,255,.075) 0 1px,transparent 1px 5px),
-    linear-gradient(155deg,
-      color-mix(in srgb,var(--type-light) 38%,#f1f2ef) 0%,
-      color-mix(in srgb,var(--type) 32%,#e4e6e3) 53%,
-      color-mix(in srgb,var(--type-deep) 18%,#d8dcda) 100%);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.84),
-    inset 0 -1px 0 rgba(80,87,91,.22),
-    0 0 0 1px rgba(244,247,248,.46);
-}
-.ability-kicker { color:color-mix(in srgb,var(--type-deep) 86%,#1b1e20); }
-.pokemon-card[data-pokemon-type="Sombrio"] .ability-block {
-  color:#f6f7f7;
-  border-color:#9ea6aa;
-  background:
-    repeating-linear-gradient(180deg,rgba(255,255,255,.04) 0 1px,transparent 1px 5px),
-    linear-gradient(155deg,#373941,#22242a 55%,#111318);
-}
+
 
 /* Símbolos de raridade no rodapé Pokémon. */
-.rarity-mark {
-  min-width:32px;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  margin-left:auto;
-  color:#232629;
-  font-size:15px;
-  line-height:1;
-  font-weight:950;
-  letter-spacing:-.08em;
-  text-shadow:0 1px 0 rgba(255,255,255,.7);
-}
-.rarity-mark[data-rarity="common"] { font-size:12px; }
-.rarity-mark[data-rarity="uncommon"] { font-size:13px; }
-.rarity-mark[data-rarity="rare"] { font-size:14px; text-shadow:0 1px 0 #fff,0 0 3px rgba(255,255,255,.65); }
-.rarity-mark[data-rarity="ultraRare"],
-.rarity-mark[data-rarity="illustrationRare"],
-.rarity-mark[data-rarity="illustrationRareUltra"] {
-  color:#b88719;
-  text-shadow:0 1px 0 #fff3ba,0 0 3px rgba(173,121,17,.35);
-}
-.pokemon-card[data-pokemon-type="Sombrio"] .rarity-mark { color:#f5f6f7; text-shadow:0 1px 2px #000; }
-.pokemon-card[data-pokemon-type="Sombrio"] .rarity-mark[data-rarity="ultraRare"],
-.pokemon-card[data-pokemon-type="Sombrio"] .rarity-mark[data-rarity="illustrationRare"],
-.pokemon-card[data-pokemon-type="Sombrio"] .rarity-mark[data-rarity="illustrationRareUltra"] { color:#f3cf61; }
+
 
 /* Item Raro é o subtipo rosa solicitado. */
 .utility-card[data-utility-type="rareItem"] {
@@ -1257,48 +714,75 @@
   --ribbon-end:#c9538d;
 }
 
-/* Tipagem e potência próprias no cabeçalho dos Ataques. */
-.attack-name-row { padding-right:104px; }
-.attack-name-row h2 { max-width:410px; }
-.attack-name-meta {
-  position:absolute;
-  right:14px;
-  top:50%;
-  transform:translateY(-50%);
-  z-index:3;
-  display:flex;
-  align-items:center;
-  gap:7px;
+/* Potência e tipo pertencem ao resumo inferior da carta de Ataque. */
+.attack-name-row { padding-right:18px; }
+.attack-name-row h2 { max-width:500px; }
+.attack-bottom-meta {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 0 15px;
+  border-top: 1px solid rgba(64,68,70,.20);
+  background: linear-gradient(180deg, rgba(255,255,255,.60), color-mix(in srgb,var(--accent) 12%,#d8dcde));
+}
+.attack-bottom-power,
+.attack-bottom-type {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.attack-bottom-meta > div > span:first-child {
+  color: var(--accent-deep);
+  font-size: 7.2px;
+  line-height: 1;
+  font-weight: 950;
+  letter-spacing: .15em;
 }
 .attack-power-badge {
-  min-width:48px;
-  height:29px;
-  display:grid;
-  place-items:center;
-  padding:0 7px;
-  border:1px solid color-mix(in srgb,var(--accent-deep) 70%,#5e6264);
-  border-radius:15px;
-  background:linear-gradient(180deg,rgba(255,255,255,.88),color-mix(in srgb,var(--accent) 20%,#d8dcde));
-  color:var(--accent-deep);
-  font-size:12px;
-  font-weight:950;
-  box-shadow:inset 0 1px 0 #fff,0 1px 2px rgba(0,0,0,.14);
+  min-width: 50px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #171a1c;
+  font-size: 18px;
+  line-height: 1;
+  font-weight: 950;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.03em;
 }
 .attack-type-badge {
-  position:relative;
-  width:39px;
-  height:39px;
-  flex:0 0 39px;
-  display:grid;
-  place-items:center;
+  position: relative;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 4px solid #fff;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 1px rgba(0,0,0,.44), 0 1px 2px rgba(0,0,0,.18);
+}
+.attack-type-badge::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #090a0b;
 }
 .attack-type-badge img {
-  position:absolute;
-  inset:-1px;
-  width:41px;
-  height:41px;
-  object-fit:contain;
-  filter:drop-shadow(0 1px 1px rgba(0,0,0,.25));
+  position: relative;
+  z-index: 1;
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  filter: none;
 }
 
 /* Campeão possui estrutura própria em vez da caixa genérica de Treinador. */
@@ -1387,8 +871,6 @@
 .champion-starting-config strong { color:var(--accent-deep); font-size:8px; letter-spacing:.12em; }
 .champion-starting-config span { text-align:center; font-size:9px; font-weight:700; }
 .champion-starting-config b { display:block; color:var(--accent-deep); font-size:18px; line-height:1; }
-.pokemon-card .card-identity { grid-template-columns:1fr auto auto 1fr; column-gap:10px; }
-.pokemon-card .rarity-mark { margin-left:0; justify-self:center; }
 
 
 /* === FINAL 2026 STANDARD-PALETTE + UNIFIED SPECIAL-FORM PASS ========== */
@@ -1408,236 +890,43 @@
 */
 
 /* Variáveis de acabamento. O Normal é propositalmente mais fosco. */
-.pokemon-card[data-form="Normal"] {
-  --trim-light:#eef0f1;
-  --trim-mid:#c7cbcd;
-  --trim-deep:#9da3a6;
-  --trim-dark:#7f8588;
-  --trim-glint:rgba(255,255,255,.42);
-}
-.pokemon-card[data-form="EX"] {
-  --trim-light:#ffffff;
-  --trim-mid:#c9d0d4;
-  --trim-deep:#7f8a90;
-  --trim-dark:#4f595f;
-  --trim-glint:rgba(255,255,255,.88);
-}
-.pokemon-card[data-form="Mega"] {
-  --trim-light:#858b90;
-  --trim-mid:#34383c;
-  --trim-deep:#15181b;
-  --trim-dark:#050607;
-  --trim-glint:rgba(255,255,255,.36);
-}
-.pokemon-card[data-form="Radiante"] {
-  --trim-light:#fff2a8;
-  --trim-mid:#e0b84b;
-  --trim-deep:#a27619;
-  --trim-dark:#76520b;
-  --trim-glint:rgba(255,250,206,.78);
-}
-.pokemon-card[data-form="Gigantamax"] {
-  --trim-light:#ff9287;
-  --trim-mid:#d43b38;
-  --trim-deep:#8d191d;
-  --trim-dark:#5c0d11;
-  --trim-glint:rgba(255,226,220,.68);
-}
+
 
 /* Fundo padrão: saturado e macio, como papel pigmentado/marmorizado. */
-.pokemon-card:not([data-pokemon-type="Sombrio"]) .card-shell {
-  border:1px solid color-mix(in srgb,var(--trim-mid) 82%,white);
-  background:
-    /* grandes áreas claras, lembrando as nuvens dos templates */
-    radial-gradient(ellipse at 14% 10%, color-mix(in srgb,var(--type-light) 78%,white) 0%, transparent 29%),
-    radial-gradient(ellipse at 75% 17%, rgba(255,255,255,.20) 0%, transparent 26%),
-    radial-gradient(ellipse at 38% 58%, rgba(255,255,255,.19) 0%, transparent 31%),
-    radial-gradient(ellipse at 86% 67%, color-mix(in srgb,var(--type-light) 43%,transparent) 0%, transparent 30%),
-    radial-gradient(ellipse at 22% 91%, color-mix(in srgb,var(--type-deep) 19%,transparent) 0%, transparent 34%),
-    /* pigmento principal */
-    linear-gradient(180deg,
-      color-mix(in srgb,var(--type-light) 84%,var(--type)) 0%,
-      color-mix(in srgb,var(--type) 90%,var(--type-light)) 23%,
-      var(--type) 56%,
-      color-mix(in srgb,var(--type) 84%,var(--type-deep)) 100%);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.42),
-    inset 0 -18px 34px color-mix(in srgb,var(--type-deep) 13%,transparent),
-    0 0 0 1px color-mix(in srgb,var(--trim-deep) 48%,transparent);
-}
+
 
 /* Microtextura orgânica/bokeh em vez de listras metálicas. */
-.pokemon-card:not([data-pokemon-type="Sombrio"]) .card-shell::before {
-  opacity:.72;
-  mix-blend-mode:soft-light;
-  background:
-    radial-gradient(circle at 8% 56%, rgba(255,255,255,.28) 0 1.1%, transparent 1.7%),
-    radial-gradient(circle at 17% 63%, rgba(255,255,255,.20) 0 1.5%, transparent 2.2%),
-    radial-gradient(circle at 29% 52%, rgba(255,255,255,.22) 0 1.2%, transparent 1.9%),
-    radial-gradient(circle at 43% 67%, rgba(255,255,255,.20) 0 1.8%, transparent 2.5%),
-    radial-gradient(circle at 55% 57%, rgba(255,255,255,.23) 0 1.1%, transparent 1.8%),
-    radial-gradient(circle at 67% 72%, rgba(255,255,255,.18) 0 1.6%, transparent 2.4%),
-    radial-gradient(circle at 79% 53%, rgba(255,255,255,.24) 0 1.4%, transparent 2.1%),
-    radial-gradient(circle at 91% 65%, rgba(255,255,255,.19) 0 1.2%, transparent 1.9%),
-    radial-gradient(ellipse at 49% 45%, rgba(255,255,255,.13), transparent 39%),
-    repeating-radial-gradient(circle at 28% 72%, rgba(255,255,255,.055) 0 1px, transparent 1px 7px);
-}
+
 
 /* Sombrio segue pigmentado/preto, não cromado. */
-.pokemon-card[data-pokemon-type="Sombrio"] .card-shell {
-  border:1px solid color-mix(in srgb,var(--trim-mid) 78%,#777);
-  background:
-    radial-gradient(ellipse at 15% 8%, #565861 0%, transparent 31%),
-    radial-gradient(ellipse at 74% 22%, rgba(255,255,255,.065) 0%, transparent 28%),
-    radial-gradient(ellipse at 44% 62%, #292b31 0%, transparent 37%),
-    radial-gradient(ellipse at 88% 78%, #08090b 0%, transparent 38%),
-    linear-gradient(180deg,#34363c 0%,#202227 42%,#101216 75%,#08090c 100%);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.13),
-    inset 0 -22px 38px rgba(0,0,0,.32),
-    0 0 0 1px color-mix(in srgb,var(--trim-deep) 46%,transparent);
-}
-.pokemon-card[data-pokemon-type="Sombrio"] .card-shell::before {
-  opacity:.5;
-  background:
-    radial-gradient(circle at 14% 60%,rgba(255,255,255,.10) 0 1.2%,transparent 2%),
-    radial-gradient(circle at 38% 52%,rgba(255,255,255,.08) 0 1.6%,transparent 2.4%),
-    radial-gradient(circle at 62% 69%,rgba(255,255,255,.08) 0 1.3%,transparent 2.1%),
-    radial-gradient(circle at 83% 58%,rgba(255,255,255,.07) 0 1.5%,transparent 2.3%);
-}
+
 
 /* Painéis internos ficam tonalizados pelo tipo e sem creme/bege. */
-.pokemon-card:not([data-pokemon-type="Sombrio"]) .ability-block {
-  border:1px solid color-mix(in srgb,var(--trim-mid) 76%,var(--type-deep));
-  background:
-    radial-gradient(ellipse at 22% 0%,rgba(255,255,255,.30),transparent 38%),
-    linear-gradient(180deg,
-      color-mix(in srgb,var(--type-light) 58%,white) 0%,
-      color-mix(in srgb,var(--type-light) 66%,var(--type)) 45%,
-      color-mix(in srgb,var(--type) 67%,white) 100%);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.58),
-    0 0 0 1px color-mix(in srgb,var(--trim-light) 48%,transparent);
-}
-.pokemon-card:not([data-pokemon-type="Sombrio"]) .pokemon-info {
-  border-top:1px solid color-mix(in srgb,var(--trim-mid) 78%,var(--type-deep));
-  background:linear-gradient(180deg,
-    rgba(255,255,255,.88),
-    color-mix(in srgb,var(--type-light) 34%,white));
-}
+
 
 /* NORMAL: prata real/fosca, sem o efeito de metal polido. */
-.pokemon-card[data-form="Normal"],
-.pokemon-card.is-expanded[data-form="Normal"] {
-  background:linear-gradient(145deg,#d9dcde 0%,#c9cdcf 48%,#b7bdc0 100%);
-  box-shadow:
-    0 24px 70px rgba(0,0,0,.43),
-    inset 0 0 0 1px #f0f2f3,
-    inset 0 0 0 5px rgba(124,130,134,.18);
-}
+
 
 /* EX: prata metálica limpa, com reflexo curto. */
-.pokemon-card[data-form="EX"],
-.pokemon-card.is-expanded[data-form="EX"] {
-  background:
-    linear-gradient(116deg,transparent 0 18%,rgba(255,255,255,.82) 25%,transparent 33% 67%,rgba(255,255,255,.30) 75%,transparent 84%),
-    linear-gradient(145deg,#f4f6f7 0%,#9da6ab 22%,#eef1f2 47%,#7e898f 72%,#dce2e4 100%);
-  box-shadow:
-    0 24px 70px rgba(0,0,0,.45),
-    inset 0 0 0 1px rgba(255,255,255,.96),
-    inset 0 0 0 5px rgba(82,91,96,.22);
-}
+
 
 /* Mega: preto metálico, sem arco-íris. */
-.pokemon-card[data-form="Mega"],
-.pokemon-card.is-expanded[data-form="Mega"] {
-  background:
-    linear-gradient(116deg,transparent 0 21%,rgba(255,255,255,.28) 29%,transparent 37% 66%,rgba(255,255,255,.11) 75%,transparent 84%),
-    linear-gradient(145deg,#656a6e 0%,#24282b 24%,#090b0d 48%,#373b3f 69%,#101215 100%);
-  box-shadow:
-    0 24px 72px rgba(0,0,0,.56),
-    inset 0 0 0 1px rgba(179,186,190,.56),
-    inset 0 0 0 5px rgba(0,0,0,.58);
-}
+
 
 /* Radiante: dourado metálico. */
-.pokemon-card[data-form="Radiante"],
-.pokemon-card.is-expanded[data-form="Radiante"] {
-  background:
-    linear-gradient(116deg,transparent 0 20%,rgba(255,248,205,.76) 28%,transparent 36% 65%,rgba(255,236,159,.31) 74%,transparent 84%),
-    linear-gradient(145deg,#fff0a0 0%,#b88720 22%,#f3cf63 47%,#9a6c14 72%,#e5b941 100%);
-  box-shadow:
-    0 24px 72px rgba(0,0,0,.47),
-    inset 0 0 0 1px rgba(255,248,202,.92),
-    inset 0 0 0 5px rgba(112,78,9,.24);
-}
+
 
 /* Gigantamax: vermelho metálico. */
-.pokemon-card[data-form="Gigantamax"],
-.pokemon-card.is-expanded[data-form="Gigantamax"] {
-  background:
-    linear-gradient(116deg,transparent 0 20%,rgba(255,224,218,.62) 28%,transparent 36% 65%,rgba(255,174,166,.25) 74%,transparent 84%),
-    linear-gradient(145deg,#ff8c80 0%,#a91f22 23%,#e74a46 48%,#781116 72%,#c92d2f 100%);
-  box-shadow:
-    0 24px 72px rgba(0,0,0,.49),
-    inset 0 0 0 1px rgba(255,213,208,.8),
-    inset 0 0 0 5px rgba(91,8,12,.28);
-}
+
 
 /* Um único layout para EX, Mega, Radiante e Gigantamax. */
-.pokemon-card[data-form="EX"]:not(.is-expanded) .artwork-frame,
-.pokemon-card[data-form="Mega"]:not(.is-expanded) .artwork-frame,
-.pokemon-card[data-form="Radiante"]:not(.is-expanded) .artwork-frame,
-.pokemon-card[data-form="Gigantamax"]:not(.is-expanded) .artwork-frame {
-  margin-inline:-12px;
-  border-left:0;
-  border-right:0;
-  border-radius:0;
-}
+
 
 /* Mesmos detalhes de moldura, mudando só o material/cor pela forma. */
-.pokemon-card .artwork-frame {
-  border-top-color:var(--trim-light);
-  border-bottom-color:var(--trim-deep);
-  box-shadow:
-    0 -1px 0 var(--trim-glint),
-    0 1px 0 color-mix(in srgb,var(--trim-dark) 76%,black),
-    inset 0 0 0 1px color-mix(in srgb,var(--trim-light) 30%,transparent);
-}
-.pokemon-card .ability-block,
-.pokemon-card .pokemon-info,
-.pokemon-card .stage-pill,
-.pokemon-card .set-stamp {
-  border-color:color-mix(in srgb,var(--trim-mid) 82%,var(--trim-dark));
-}
-.pokemon-card .card-header::after,
-.pokemon-card .footer-rule {
-  background:linear-gradient(90deg,transparent,var(--trim-mid) 15% 85%,transparent);
-}
-.pokemon-card .form-mark {
-  color:color-mix(in srgb,var(--trim-dark) 82%,var(--type-deep));
-  text-shadow:0 1px 0 color-mix(in srgb,var(--trim-light) 58%,transparent);
-}
+
 
 /* Normal não recebe sheen. Especiais recebem só um reflexo muito sutil no aro. */
-.pokemon-card[data-form="EX"]::after,
-.pokemon-card[data-form="Mega"]::after,
-.pokemon-card[data-form="Radiante"]::after,
-.pokemon-card[data-form="Gigantamax"]::after {
-  content:"";
-  position:absolute;
-  inset:4px;
-  z-index:12;
-  border-radius:23px;
-  pointer-events:none;
-  opacity:.24;
-  background:linear-gradient(118deg,transparent 0 25%,rgba(255,255,255,.42) 33%,transparent 41% 100%);
-  mix-blend-mode:screen;
-}
-.pokemon-card[data-form="Mega"]::after { opacity:.15; }
-.pokemon-card[data-form="Radiante"]::after { opacity:.20; }
-.pokemon-card[data-form="Gigantamax"]::after { opacity:.18; }
-.pokemon-card.is-expanded::after { opacity:.12; }
+
 
 /* Campeão: mesma imagem de Treinador, configuração fina logo abaixo e apenas Passiva. */
 .champion-shell {
@@ -1721,168 +1010,27 @@
    ====================================================================== */
 
 /* Borda externa limpa: sem faixas diagonais, sem aros empilhados e sem sheen. */
-.pokemon-card,
-.pokemon-card[data-form],
-.pokemon-card.is-expanded[data-form] {
-  background: linear-gradient(145deg,#eef1f2 0%,#c9cfd2 48%,#adb5b9 100%);
-  box-shadow:
-    0 24px 70px rgba(0,0,0,.44),
-    inset 0 0 0 1px rgba(255,255,255,.9),
-    inset 0 0 0 3px rgba(96,104,109,.12);
-}
-.pokemon-card[data-form="Mega"],
-.pokemon-card.is-expanded[data-form="Mega"] {
-  background: linear-gradient(145deg,#5b6064 0%,#24282b 52%,#0b0d0f 100%);
-}
-.pokemon-card[data-form="Radiante"],
-.pokemon-card.is-expanded[data-form="Radiante"] {
-  background: linear-gradient(145deg,#f5dc79 0%,#c59a32 52%,#9a6f17 100%);
-}
-.pokemon-card[data-form="Gigantamax"],
-.pokemon-card.is-expanded[data-form="Gigantamax"] {
-  background: linear-gradient(145deg,#e86a62 0%,#b62f31 52%,#781318 100%);
-}
-.pokemon-card::before,
-.pokemon-card::after { display:none !important; }
+
 
 /* Cabeçalho menor; o medalhão invade levemente a área de arte como nas cartas TCG. */
-.pokemon-card .card-shell {
-  grid-template-rows: 58px 394px 96px 132px 124px;
-}
-.card-header {
-  grid-template-columns: 205px 1fr 64px;
-  min-height:58px;
-  padding:0 3px;
-  overflow:visible;
-}
-.card-header::after { bottom:-3px; }
-.evolution-zone {
-  position:relative;
-  width:205px;
-  height:58px;
-  display:block;
-  overflow:visible;
-}
-.previous-evolution {
-  position:absolute;
-  left:0;
-  top:5px;
-  height:58px;
-  display:flex;
-  align-items:center;
-  gap:8px;
-  min-width:0;
-}
-.previous-evolution.is-empty { display:none; }
-.previous-medallion {
-  width:62px;
-  height:62px;
-  flex:0 0 62px;
-  border:3px solid #aeb5b9;
-  background:rgba(247,248,246,.92);
-  box-shadow:
-    0 0 0 2px rgba(255,255,255,.9),
-    0 2px 5px rgba(31,35,37,.2),
-    inset 0 0 0 1px rgba(71,78,82,.12);
-}
-.previous-medallion img {
-  width:55px;
-  height:55px;
-  object-fit:contain;
-}
-.stage-pill {
-  position:absolute;
-  left:-1px;
-  top:-8px;
-  z-index:4;
-  min-height:20px;
-  padding:0 9px;
-  border:1px solid #8f979b;
-  border-radius:10px 10px 8px 3px;
-  background:linear-gradient(180deg,#f8f9f8,#d8dddf);
-  box-shadow:0 1px 2px rgba(0,0,0,.16), inset 0 1px 0 #fff;
-  font-size:8px;
-  letter-spacing:.075em;
-}
-.previous-evolution-copy {
-  min-width:0;
-  max-width:126px;
-  display:flex;
-  flex-direction:column;
-  gap:1px;
-  padding-top:8px;
-  line-height:1.05;
-}
-.previous-evolution-copy small {
-  color:rgba(26,29,31,.64);
-  font-size:7.3px;
-  font-style:italic;
-  font-weight:750;
-  letter-spacing:.01em;
-  white-space:nowrap;
-}
-.previous-evolution-copy strong,
-.previous-evolution strong {
-  max-width:126px;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-  font-size:9.2px;
-  line-height:1.05;
-  font-weight:900;
-}
-.pokemon-card[data-pokemon-type="Sombrio"] .previous-evolution-copy small { color:rgba(255,255,255,.65); }
 
-.name-zone { width:292px; }
-.name-zone h2 { font-size:26px; }
-.form-mark { margin-top:2px; }
 
 /* Ícones: símbolo real sobre círculo preto com borda branca grossa. */
-.type-zone { min-width:60px; }
-.type-badge { width:58px; min-width:58px; justify-content:center; }
-.type-symbol {
-  position:relative;
-  width:50px;
-  height:50px;
-  flex:0 0 50px;
+
+
+/* Compatibilidade por tipo usa o mesmo aro físico das demais cartas. */
+.compatible-type-symbol {
+  width:46px;
+  height:46px;
+  flex-basis:46px;
   display:grid;
   place-items:center;
-  overflow:hidden;
-  padding:0;
-  border:5px solid #fff;
-  border-radius:50%;
-  background:#090a0b;
-  box-shadow:
-    0 0 0 1px rgba(0,0,0,.5),
-    0 2px 4px rgba(0,0,0,.28),
-    inset 0 0 0 1px rgba(255,255,255,.08);
-}
-.type-icon {
-  position:static;
-  width:34px;
-  height:34px;
-  object-fit:contain;
-  filter:drop-shadow(0 1px 1px rgba(0,0,0,.42));
-}
-.pokemon-card.is-expanded .type-symbol { border-color:#fff; background:#08090a; }
-
-/* Mesma linguagem para os ícones de tipo da carta de Ataque. */
-.attack-type-badge,
-.compatible-type-symbol {
   overflow:hidden;
   border:4px solid #fff;
   border-radius:50%;
   background:#090a0b;
   box-shadow:0 0 0 1px rgba(0,0,0,.45),0 2px 3px rgba(0,0,0,.2);
 }
-.attack-type-badge { width:42px; height:42px; flex-basis:42px; }
-.attack-type-badge img {
-  position:static;
-  width:29px;
-  height:29px;
-  object-fit:contain;
-}
-.compatible-type-symbol { width:46px; height:46px; flex-basis:46px; display:grid; place-items:center; }
 .compatible-type-symbol img {
   position:static;
   width:31px;
@@ -1892,16 +1040,11 @@
 
 /* A imagem original é preservada inteira: ela fica atrás da abertura da carta.
    O usuário recorta visualmente apenas pelo enquadramento, usando drag + wheel. */
-.artwork-inner,
-.card-full-art,
 .shared-artwork-inner {
   touch-action:none;
 }
-.artwork-inner.is-dragging,
-.card-full-art.is-dragging,
 .shared-artwork-inner.is-dragging { cursor:grabbing; }
-.artwork-image,
-.card-full-art img {
+.artwork-image {
   width:100%;
   height:100%;
   object-fit:contain;
@@ -1909,20 +1052,5 @@
   user-select:none;
   -webkit-user-drag:none;
 }
-.artwork-inner,
-.card-full-art {
-  background:
-    linear-gradient(45deg,rgba(255,255,255,.045) 25%,transparent 25% 75%,rgba(255,255,255,.045) 75%),
-    linear-gradient(45deg,rgba(255,255,255,.045) 25%,transparent 25% 75%,rgba(255,255,255,.045) 75%),
-    color-mix(in srgb,var(--type) 15%,#24292d);
-  background-size:24px 24px;
-  background-position:0 0,12px 12px;
-}
-.previous-evolution-copy small strong {
-  display:inline;
-  max-width:none;
-  overflow:visible;
-  font-size:8.5px;
-  line-height:inherit;
-  vertical-align:baseline;
-}
+
+

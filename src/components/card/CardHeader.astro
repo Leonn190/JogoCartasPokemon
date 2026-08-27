@@ -6,13 +6,14 @@ const { card } = Astro.props;
 ---
 <header class="card-header">
   <div class="evolution-zone" data-role="evolution-zone">
-    <div class="stage-pill" data-role="stage">{card.stage}</div>
+    <span class="stage-pill" data-role="stage">{card.stage}</span>
     <div class:list={['previous-evolution', { 'is-empty': !card.previousEvolution }]} data-role="previous-wrap">
       <span class="previous-medallion">
         <img src={card.previousEvolutionImage} data-role="previous-image" alt={card.previousEvolution ? `Pré-evolução ${card.previousEvolution}` : ''} crossorigin="anonymous" />
       </span>
       <span class="previous-evolution-copy">
-        <small>Evolui de <strong data-role="previous-name">{card.previousEvolution}</strong></small>
+        <small>Evolui de</small>
+        <strong data-role="previous-name">{card.previousEvolution}</strong>
       </span>
     </div>
   </div>
@@ -22,7 +23,13 @@ const { card } = Astro.props;
     <span class:list={['form-mark', { 'is-normal': card.form === 'Normal' }]} data-role="form-mark">{card.form}</span>
   </div>
 
-  <div class="type-zone">
-    <TypeBadge type={card.type} />
+  <div class="header-stats-zone">
+    <div class="header-hp" aria-label={`HP ${card.hp}`}>
+      <span>HP</span>
+      <strong data-role="stat-hp">{card.hp}</strong>
+    </div>
+    <div class="type-zone">
+      <TypeBadge type={card.type} />
+    </div>
   </div>
 </header>

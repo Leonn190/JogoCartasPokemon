@@ -3,11 +3,10 @@ import type { PokemonCardData } from '../../types/card';
 interface Props { card: PokemonCardData }
 const { card } = Astro.props;
 const stats = [
-  ['HP', 'hp', card.hp],
   ['ATK', 'attack', card.attack],
   ['DEF', 'defense', card.defense],
-  ['SPA', 'specialAttack', card.specialAttack],
-  ['SPD', 'specialDefense', card.specialDefense],
+  ['SP. ATK', 'specialAttack', card.specialAttack],
+  ['SP. DEF', 'specialDefense', card.specialDefense],
   ['VEL', 'speed', card.speed],
 ] as const;
 ---
@@ -16,7 +15,6 @@ const stats = [
     <div class={`stat-flag stat-${key}`}>
       <span>{label}</span>
       <strong data-role={`stat-${key}`}>{value}</strong>
-      <b aria-hidden="true"></b>
     </div>
   ))}
 </div>

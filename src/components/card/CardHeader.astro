@@ -3,6 +3,18 @@ import TypeBadge from './TypeBadge.astro';
 import type { PokemonCardData } from '../../types/card';
 interface Props { card: PokemonCardData }
 const { card } = Astro.props;
+
+const modifierPrefix = card.form === 'Mega' ? 'Mega' : '';
+const modifierSuffix = card.form === 'Normal' || card.form === 'Mega' ? '' : card.form;
+const displayName = [modifierPrefix, card.pokemonName, modifierSuffix].filter(Boolean).join(' ');
+const combinedNameLength = displayName.length;
+const initialNameSize = combinedNameLength <= 10 ? 33
+  : combinedNameLength <= 14 ? 31.5
+  : combinedNameLength <= 18 ? 28.5
+  : combinedNameLength <= 22 ? 25.5
+  : combinedNameLength <= 26 ? 23
+  : combinedNameLength <= 32 ? 20.5
+  : 18.5;
 ---
 <header class="card-header">
   <div class="evolution-zone" data-role="evolution-zone">
@@ -19,8 +31,16 @@ const { card } = Astro.props;
   </div>
 
   <div class="name-zone">
-    <h2 data-role="pokemon-name">{card.pokemonName}</h2>
-    <span class:list={['form-mark', { 'is-normal': card.form === 'Normal' }]} data-role="form-mark">{card.form}</span>
+    <h2
+      class="pokemon-display-name"
+      data-role="pokemon-display-name"
+      aria-label={displayName}
+      style={`--pokemon-name-size:${initialNameSize}px;`}
+    >
+      <span class="pokemon-form pokemon-form-prefix" data-role="pokemon-form-prefix">{modifierPrefix}</span>
+      <span class="pokemon-name-text" data-role="pokemon-name">{card.pokemonName}</span>
+      <span class="pokemon-form pokemon-form-suffix" data-role="pokemon-form-suffix">{modifierSuffix}</span>
+    </h2>
   </div>
 
   <div class="header-stats-zone">

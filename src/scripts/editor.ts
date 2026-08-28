@@ -239,6 +239,46 @@ function applyArtworkToNode(node: HTMLElement) {
   qa<HTMLImageElement>('[data-role="artwork-image"]', node).forEach((image) => { image.src = card.artwork || ''; });
 }
 
+function pokemonHeaderNameSize(name: string, form: PokemonForm) {
+  const modifier = form === 'Normal' ? '' : form;
+  const length = `${name} ${modifier}`.trim().length;
+  if (length <= 10) return 33;
+  if (length <= 14) return 31.5;
+  if (length <= 18) return 28.5;
+  if (length <= 22) return 25.5;
+  if (length <= 26) return 23;
+  if (length <= 32) return 20.5;
+  return 18.5;
+}
+
+function renderPokemonHeaderName(node: HTMLElement, value: PokemonCardData) {
+  const baseName = value.pokemonName || 'Novo Pokémon';
+  const prefix = value.form === 'Mega' ? 'Mega' : '';
+  const suffix = value.form === 'Normal' || value.form === 'Mega' ? '' : value.form;
+  setTextIn(node, 'pokemon-form-prefix', prefix);
+  setTextIn(node, 'pokemon-name', baseName);
+  setTextIn(node, 'pokemon-form-suffix', suffix);
+
+  const heading = q<HTMLElement>('[data-role="pokemon-display-name"]', node);
+  if (heading) {
+    let size = pokemonHeaderNameSize(baseName, value.form);
+    heading.style.setProperty('--pokemon-name-size', `${size}px`);
+    heading.setAttribute('aria-label', [prefix, baseName, suffix].filter(Boolean).join(' '));
+
+    // Ajuste óptico final pelo espaço real do cabeçalho: reduz somente o
+    // necessário e preserva um piso legível para nomes excepcionalmente longos.
+    if (heading.clientWidth > 0) {
+      const baseText = q<HTMLElement>('[data-role="pokemon-name"]', heading);
+      const isClipped = () => heading.scrollWidth > heading.clientWidth
+        || Boolean(baseText && baseText.scrollWidth > baseText.clientWidth);
+      while (isClipped() && size > 18.5) {
+        size = Math.max(18.5, size - 0.5);
+        heading.style.setProperty('--pokemon-name-size', `${size}px`);
+      }
+    }
+  }
+}
+
 function renderPokemon(node: HTMLElement, value: PokemonCardData) {
   const meta = TYPE_META[value.type];
   node.style.setProperty('--type', meta.color);
@@ -250,9 +290,7 @@ function renderPokemon(node: HTMLElement, value: PokemonCardData) {
   node.dataset.expanded = String(value.expandedArtwork);
   node.classList.toggle('is-expanded', value.expandedArtwork);
 
-  setTextIn(node, 'pokemon-name', value.pokemonName || 'Novo Pokémon');
-  setTextIn(node, 'form-mark', value.form);
-  q<HTMLElement>('[data-role="form-mark"]', node)?.classList.toggle('is-normal', value.form === 'Normal');
+  renderPokemonHeaderName(node, value);
   setTextIn(node, 'stage', value.stage);
   setTextIn(node, 'previous-name', value.previousEvolution || '');
   setTypeIcon(node, 'type-icon', meta.icon);

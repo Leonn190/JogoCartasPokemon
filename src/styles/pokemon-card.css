@@ -30,23 +30,23 @@
   inset: 13px;
   z-index: 2;
   display: grid;
-  grid-template-rows: 78px 384px 60px 112px 160px;
-  gap: 10px;
+  grid-template-rows: 66px 422px 58px 102px 150px;
+  gap: 9px;
   padding: 10px;
   overflow: hidden;
   border: 2px solid color-mix(in srgb, var(--form-accent) 52%, #69757b);
   border-radius: 17px;
   background:
-    radial-gradient(ellipse at 18% 3%, color-mix(in srgb, var(--type-light) 46%, rgba(255,255,255,.48)), transparent 29%),
-    repeating-linear-gradient(17deg, rgba(255, 255, 255, .034) 0 1px, transparent 1px 8px),
+    radial-gradient(ellipse at 18% 3%, color-mix(in srgb, var(--type-light) 34%, rgba(255,255,255,.54)), transparent 31%),
+    repeating-linear-gradient(17deg, rgba(255, 255, 255, .028) 0 1px, transparent 1px 8px),
     linear-gradient(155deg,
-      color-mix(in srgb, var(--type) 92%, #c9ceca) 0%,
-      color-mix(in srgb, var(--type-light) 72%, #c8cecb) 49%,
-      color-mix(in srgb, var(--type) 90%, #bfc7c3) 100%);
+      color-mix(in srgb, var(--type) 80%, #c9ceca) 0%,
+      color-mix(in srgb, var(--type-light) 58%, #c8cecb) 50%,
+      color-mix(in srgb, var(--type) 76%, #bfc7c3) 100%);
   box-shadow:
     inset 0 0 0 1px rgba(255, 255, 255, .20),
-    inset 0 -30px 46px color-mix(in srgb, var(--type-deep) 23%, transparent),
-    inset 0 18px 34px color-mix(in srgb, var(--type-light) 17%, transparent);
+    inset 0 -24px 38px color-mix(in srgb, var(--type-deep) 18%, transparent),
+    inset 0 16px 30px color-mix(in srgb, var(--type-light) 12%, transparent);
 }
 
 .pokemon-card .card-shell > * {
@@ -54,93 +54,55 @@
   z-index: 1;
 }
 
-/* Cabeçalho -------------------------------------------------------------
-   O cabeçalho imita a composição das cartas físicas modernas: faixa
-   metálica contínua, estágio no canto, pré-evolução em medalhão, nome na
-   mesma linha do PS e ícone de tipo compacto no extremo direito. */
+/* Cabeçalho ------------------------------------------------------------- */
 .card-header {
-  position: relative;
+  display: grid;
+  grid-template-columns: 166px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
   min-width: 0;
-  overflow: visible;
-  border: 0;
-  background: transparent;
+  padding: 0 5px 4px 2px;
+  border-bottom: 1px solid color-mix(in srgb, var(--type-deep) 34%, rgba(62, 70, 74, .48));
 }
 
-.card-header::before {
-  content: "";
-  position: absolute;
-  left: 35px;
-  right: 1px;
-  top: 8px;
-  height: 53px;
-  z-index: 0;
-  border: 1px solid rgba(82, 91, 96, .58);
-  border-radius: 18px 13px 13px 5px;
-  clip-path: polygon(0 0, 91% 0, 100% 18%, 100% 74%, 96% 100%, 55% 100%, 50% 88%, 0 88%, 4% 44%);
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.96) 0%, rgba(255,255,255,.46) 26%, rgba(122,135,142,.23) 44%, rgba(255,255,255,.62) 65%, rgba(171,181,185,.86) 100%),
-    linear-gradient(90deg, #c8d0d4 0%, #f4f6f6 23%, #aeb9be 58%, #eef1f1 82%, #a7b2b8 100%);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.95),
-    inset 0 -2px 5px rgba(75,84,89,.19),
-    0 1px 2px rgba(49,56,60,.16);
-}
-
-.card-header::after {
-  content: "";
-  position: absolute;
-  left: 95px;
-  right: 55px;
-  top: 59px;
-  z-index: 1;
-  height: 3px;
-  border-radius: 999px;
-  background: linear-gradient(90deg,
-    color-mix(in srgb, var(--type-deep) 72%, #41525d),
-    color-mix(in srgb, var(--type) 92%, #d7e2e7) 68%,
-    transparent);
-  opacity: .82;
+.card-header:has(.previous-evolution.is-empty) {
+  grid-template-columns: 88px minmax(0, 1fr) auto;
 }
 
 .evolution-zone {
-  position: absolute;
-  inset: 0 auto 0 0;
-  z-index: 4;
-  width: 220px;
+  position: relative;
+  height: 64px;
   min-width: 0;
-  pointer-events: none;
+  display: flex;
+  align-items: center;
+  padding-top: 7px;
 }
 
 .stage-pill {
   position: absolute;
   top: 0;
-  left: 0;
-  z-index: 6;
-  min-height: 21px;
+  left: 1px;
+  z-index: 3;
+  min-height: 18px;
   display: inline-flex;
   align-items: center;
-  padding: 1px 10px 0 8px;
-  border: 1px solid rgba(94, 101, 105, .58);
-  border-radius: 11px 4px 9px 3px;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.98), rgba(200,207,210,.86));
-  color: #30373b;
-  box-shadow: inset 0 1px 0 #fff, 0 1px 1px rgba(0,0,0,.10);
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 9.4px;
-  font-style: italic;
-  font-weight: 950;
-  letter-spacing: .035em;
+  padding: 0 8px;
+  border: 1px solid rgba(86, 93, 97, .48);
+  border-radius: 9px 9px 7px 3px;
+  background: rgba(247, 249, 248, .94);
+  color: #343a3e;
+  font-size: 7.5px;
+  font-weight: 900;
+  letter-spacing: .08em;
   text-transform: uppercase;
   white-space: nowrap;
-  transform: skewX(-7deg);
 }
 
 .previous-evolution {
-  position: absolute;
-  inset: 0;
   min-width: 0;
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .previous-evolution.is-empty {
@@ -148,28 +110,21 @@
 }
 
 .previous-medallion {
-  position: absolute;
-  left: 3px;
-  top: 17px;
-  z-index: 5;
-  width: 72px;
-  height: 72px;
+  width: 55px;
+  height: 55px;
+  flex: 0 0 55px;
   display: grid;
   place-items: center;
   overflow: hidden;
-  border: 2px solid rgba(246, 248, 248, .98);
+  border: 2px solid #aab2b6;
   border-radius: 50%;
-  background:
-    radial-gradient(circle at 38% 31%, #f8faf9 0 34%, #c7d0d4 67%, #8d9aa0 100%);
-  box-shadow:
-    0 0 0 1px rgba(95, 104, 109, .56),
-    0 2px 4px rgba(0, 0, 0, .20),
-    inset 0 0 0 2px rgba(255,255,255,.46);
+  background: rgba(250, 251, 250, .94);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, .85);
 }
 
 .previous-medallion img {
-  width: 66px;
-  height: 66px;
+  width: 50px;
+  height: 50px;
   object-fit: contain;
 }
 
@@ -178,46 +133,34 @@
 }
 
 .previous-evolution-copy {
-  position: absolute;
-  left: 102px;
-  top: 48px;
-  z-index: 5;
   min-width: 0;
-  max-width: 275px;
   display: flex;
-  align-items: baseline;
-  gap: 3px;
-  white-space: nowrap;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 5px;
 }
 
 .previous-evolution-copy small {
-  color: rgba(34, 40, 43, .68);
-  font-size: 8.5px;
-  font-style: italic;
-  font-weight: 800;
+  color: rgba(35, 39, 41, .58);
+  font-size: 7px;
+  font-weight: 760;
   line-height: 1;
+  letter-spacing: .02em;
 }
 
 .previous-evolution-copy strong {
-  min-width: 0;
-  max-width: 170px;
+  max-width: 92px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: #24292c;
-  font-size: 9.6px;
-  line-height: 1;
-  font-style: italic;
-  font-weight: 950;
+  font-size: 10px;
+  line-height: 1.05;
+  font-weight: 900;
 }
 
 .name-zone {
-  position: absolute;
-  left: 102px;
-  right: 170px;
-  top: 13px;
-  z-index: 3;
   min-width: 0;
+  align-self: center;
   text-align: left;
 }
 
@@ -227,24 +170,21 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: #11181c;
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 32px;
-  line-height: .96;
-  letter-spacing: -.045em;
-  font-weight: 950;
+  font-size: 29px;
+  line-height: .98;
+  letter-spacing: -.035em;
+  font-weight: 900;
   text-transform: none;
-  text-shadow: 0 1px 0 rgba(255,255,255,.72);
 }
 
 .form-mark {
   display: inline-block;
-  margin-top: 5px;
+  margin-top: 4px;
   color: color-mix(in srgb, var(--form-accent) 72%, #293034);
-  font-size: 8.5px;
+  font-size: 8px;
   line-height: 1;
   font-weight: 950;
-  letter-spacing: .11em;
+  letter-spacing: .13em;
   text-transform: uppercase;
 }
 
@@ -253,39 +193,32 @@
 }
 
 .header-stats-zone {
-  position: absolute;
-  right: 4px;
-  top: 9px;
-  z-index: 4;
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 8px;
+  gap: 9px;
 }
 
 .header-hp {
   display: flex;
   align-items: baseline;
-  gap: 4px;
+  gap: 5px;
   white-space: nowrap;
 }
 
 .header-hp span {
-  color: rgba(25, 31, 34, .72);
-  font-size: 9.5px;
-  font-weight: 950;
-  letter-spacing: .03em;
+  color: rgba(31, 35, 37, .68);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .06em;
 }
 
 .header-hp strong {
-  color: #11181c;
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 31px;
+  font-size: 27px;
   line-height: 1;
   font-weight: 950;
   font-variant-numeric: tabular-nums;
-  letter-spacing: -.05em;
-  text-shadow: 0 1px 0 rgba(255,255,255,.72);
+  letter-spacing: -.045em;
 }
 
 .type-zone,
@@ -295,27 +228,30 @@
   justify-content: center;
 }
 
-.type-zone { min-width: 50px; }
-.type-badge { width: 48px; min-width: 48px; height: 48px; }
+.type-zone { min-width: 61px; }
+.type-badge { width: 60px; min-width: 60px; height: 60px; }
 .type-name { display: none !important; }
 
-/* Ícone de tipo: aro branco fino e sem o antigo contorno preto externo. */
+/* Selo de tipo no padrão TCG: aro branco espesso, núcleo preto e o ícone
+   real centralizado por coordenadas absolutas. box-sizing evita que a
+   borda aumente o tamanho calculado do círculo e cause desalinhamento. */
 .type-symbol {
   --type-icon-x: 0px;
   --type-icon-y: 0px;
-  --type-icon-scale: 1.04;
+  --type-icon-scale: 1.08;
   position: relative;
-  width: 48px;
-  height: 48px;
-  flex: 0 0 48px;
+  width: 58px;
+  height: 58px;
+  flex: 0 0 58px;
   box-sizing: border-box;
   overflow: hidden;
-  border: 2px solid rgba(255,255,255,.98);
+  border: 5px solid #fff;
   border-radius: 50%;
   background: #08090a;
   box-shadow:
-    0 2px 4px rgba(0, 0, 0, .17),
-    inset 0 0 0 1px rgba(255, 255, 255, .10);
+    0 0 0 1.5px rgba(18, 21, 23, .76),
+    0 2px 5px rgba(0, 0, 0, .24),
+    inset 0 0 0 1px rgba(255, 255, 255, .08);
 }
 
 .type-symbol::before {
@@ -324,8 +260,8 @@
   left: 50%;
   top: 50%;
   z-index: 0;
-  width: 39px;
-  height: 39px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
   background: #070809;
   transform: translate(-50%, -50%);
@@ -336,8 +272,8 @@
   left: 50%;
   top: 50%;
   z-index: 1;
-  width: 42px;
-  height: 42px;
+  width: 49px;
+  height: 49px;
   max-width: none;
   object-fit: contain;
   object-position: 50% 50%;
@@ -350,8 +286,8 @@
    microajuste centraliza o desenho óptico sem alterar os demais tipos. */
 .type-symbol[data-type="Terra"] {
   --type-icon-x: -1px;
-  --type-icon-y: -1px;
-  --type-icon-scale: 1.06;
+  --type-icon-y: -1.5px;
+  --type-icon-scale: 1.10;
 }
 
 /* Arte e faixa Pokédex -------------------------------------------------- */
@@ -399,62 +335,61 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  padding: 0 8px;
+  gap: 0;
+  padding: 0 10px;
   overflow: hidden;
   border-top: 1px solid rgba(67, 75, 79, .42);
-  background: rgba(235, 239, 237, .92);
-  color: rgba(22, 27, 29, .88);
+  background: rgba(235, 239, 237, .90);
+  color: rgba(22, 27, 29, .84);
   white-space: nowrap;
   font-size: 7.6px;
   line-height: 1;
-  font-weight: 760;
-  letter-spacing: .008em;
+  font-weight: 730;
+  letter-spacing: .015em;
 }
 
-.pokemon-info .info-item {
+.pokemon-info span {
   min-width: 0;
-  display: inline-flex;
-  align-items: baseline;
-  gap: 2px;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.pokemon-info b {
-  flex: 0 0 auto;
+.pokemon-info span + span::before {
+  content: "·";
+  display: inline-block;
+  margin: 0 7px;
+  color: rgba(34, 38, 40, .42);
+}
+
+.pokemon-info .dex-id {
   font-weight: 950;
+  letter-spacing: .045em;
 }
 
-.pokemon-info i {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-style: normal;
+.pokemon-info .species-name {
+  max-width: 170px;
+  font-style: italic;
 }
 
-.pokemon-info .dex-id { font-weight: 950; }
-.pokemon-info .species-name { max-width: 175px; }
-.pokemon-info .species-name i { font-style: italic; }
-.pokemon-info .region-name { font-weight: 850; }
+.pokemon-info .region-name {
+  font-weight: 850;
+}
 
-/* Atributos: uma única faixa do tipo, com um detalhe cromático mínimo para
-   cada status basilar. */
+/* Atributos: uma única faixa, sem seis materiais/cores concorrentes. */
 .stats-flags {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
   align-items: stretch;
   gap: 0;
   overflow: hidden;
-  border-top: 1px solid rgba(255, 255, 255, .42);
-  border-bottom: 1px solid color-mix(in srgb, var(--type-deep) 48%, rgba(60, 67, 71, .52));
-  border-radius: 4px;
-  background: color-mix(in srgb, var(--type) 58%, rgba(224, 230, 226, .88));
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.16);
+  border-top: 1px solid rgba(255, 255, 255, .34);
+  border-bottom: 1px solid color-mix(in srgb, var(--type-deep) 42%, rgba(60, 67, 71, .48));
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--type) 46%, rgba(224, 230, 226, .88));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.13);
 }
 
 .stat-flag {
-  --stat-accent: #6f7c82;
   position: relative;
   min-width: 0;
   display: flex;
@@ -466,31 +401,13 @@
   text-align: center;
 }
 
-.stat-flag::before {
-  content: "";
-  position: absolute;
-  left: 9px;
-  right: 9px;
-  top: 0;
-  height: 3px;
-  border-radius: 0 0 3px 3px;
-  background: var(--stat-accent);
-  opacity: .92;
-}
-
-.stat-attack { --stat-accent: #E78322; }
-.stat-defense { --stat-accent: #E5C82A; }
-.stat-specialAttack { --stat-accent: #824BB7; }
-.stat-specialDefense { --stat-accent: #2F82D4; }
-.stat-speed { --stat-accent: #D94B4B; }
-
 .stat-flag + .stat-flag {
-  border-left: 1px solid rgba(70, 76, 79, .20);
+  border-left: 1px solid rgba(70, 76, 79, .18);
 }
 
 .stat-flag span {
-  color: color-mix(in srgb, var(--stat-accent) 54%, #20282c);
-  font-size: 8.7px;
+  color: color-mix(in srgb, var(--type-deep) 72%, #343a3d);
+  font-size: 7.8px;
   line-height: 1;
   font-weight: 950;
   letter-spacing: .08em;
@@ -498,38 +415,37 @@
 }
 
 .stat-flag strong {
-  font-size: 26px;
+  font-size: 24px;
   line-height: 1;
   font-weight: 950;
   font-variant-numeric: tabular-nums;
   letter-spacing: -.025em;
 }
 
-/* Habilidade editorial: uma única habilidade, portanto o bloco é centrado
-   no eixo da carta em vez de se comportar como uma lista lateral. */
+/* Habilidade editorial: sem caixa, sem painel independente. Ela nasce do
+   próprio fundo da carta e é organizada somente por tipografia e filete. */
 .ability-block {
   min-height: 0;
   overflow: hidden;
-  padding: 15px 28px 10px;
+  padding: 11px 21px 8px;
   border: 0;
   border-top: 2px solid color-mix(in srgb, var(--type-deep) 58%, rgba(54, 61, 65, .46));
   background: transparent;
-  text-align: center;
+  text-align: left;
 }
 
 .ability-heading {
   min-width: 0;
   display: flex;
   align-items: baseline;
-  justify-content: center;
   gap: 10px;
-  margin-bottom: 9px;
+  margin-bottom: 7px;
 }
 
 .ability-kicker {
   flex: 0 0 auto;
   color: color-mix(in srgb, var(--type-deep) 88%, #202528);
-  font-size: 8.4px;
+  font-size: 7.7px;
   line-height: 1;
   font-weight: 950;
   letter-spacing: .16em;
@@ -540,7 +456,7 @@
   content: "";
   display: inline-block;
   width: 4px;
-  height: 10px;
+  height: 9px;
   margin-right: 6px;
   border-radius: 1px;
   background: var(--type-deep);
@@ -553,22 +469,21 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 19px;
+  font-size: 17.5px;
   line-height: 1;
-  font-weight: 950;
+  font-weight: 900;
   text-transform: none;
 }
 
 .ability-block p {
-  margin: 0 auto;
-  max-width: 500px;
+  margin: 0 0 0 10px;
+  max-width: calc(100% - 10px);
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
   overflow: hidden;
-  font-size: 11.2px;
-  line-height: 1.42;
-  text-align: center;
+  font-size: 10.7px;
+  line-height: 1.40;
 }
 
 /* Rodapé --------------------------------------------------------------- */

@@ -3,26 +3,20 @@ import type { GameType } from '../types/card';
 export type TypeMeta = { color: string; deep: string; light: string; symbol: string; icon: string };
 
 export const TYPE_META: Record<GameType, TypeMeta> = {
-  // Paletas deliberadamente mais intensas para que o corpo da carta preserve
-  // a leitura cromática mesmo depois dos overlays metálicos/texturizados.
-  Fogo: { color: '#F04A24', deep: '#8F1C13', light: '#FF8050', symbol: '△', icon: 'Tipos/fogo.png' },
-  Água: { color: '#159FDB', deep: '#075B91', light: '#67CCEE', symbol: '≋', icon: 'Tipos/agua.png' },
-  Planta: { color: '#64B72E', deep: '#34791C', light: '#A1DD55', symbol: '❧', icon: 'Tipos/planta.png' },
-  Elétrico: { color: '#F4C900', deep: '#A67600', light: '#FFE25A', symbol: 'ϟ', icon: 'Tipos/eletrico.png' },
-  // Gelo: ciano bem evidente, sem cair para o azul acinzentado.
-  Gelo: { color: '#17D4E6', deep: '#08798E', light: '#8AF4FF', symbol: '✣', icon: 'Tipos/gelo.png' },
-  Lutador: { color: '#E98A18', deep: '#963F0D', light: '#FFB647', symbol: '◆', icon: 'Tipos/lutador.png' },
-  Terra: { color: '#C36A31', deep: '#713817', light: '#E39A5A', symbol: '⬟', icon: 'Tipos/terrestre.png' },
-  // Voador: quase branco, com somente o azul-gelo necessário para contraste.
-  Voador: { color: '#E7F1F6', deep: '#7996A7', light: '#FFFFFF', symbol: '⌁', icon: 'Tipos/voador.png' },
-  // Psíquico: roxo mais fechado e profundo.
-  Psíquico: { color: '#79358F', deep: '#3C1553', light: '#B76CCB', symbol: '◉', icon: 'Tipos/psiquico.png' },
-  // Sombrio: azul-marinho muito escuro, como nas cartas escuras modernas.
-  Sombrio: { color: '#162E4B', deep: '#071521', light: '#315578', symbol: '☾', icon: 'Tipos/sombrio.png' },
-  Metal: { color: '#869AA0', deep: '#4B626A', light: '#C1D0D3', symbol: '⬢', icon: 'Tipos/metal.png' },
-  // Místico cobre a família fada/dragão do jogo; o fundo fica rosa vivo para
-  // que a leitura de Fada seja inequívoca na carta.
-  Místico: { color: '#EA4FB0', deep: '#962766', light: '#FF8ED6', symbol: '✦', icon: 'Tipos/mistico.png' },
+  // Paletas inspiradas na aparência das cartas Pokémon padrão modernas:
+  // pigmento forte, highlight claro e sombra da mesma família cromática.
+  Fogo: { color: '#EA4F2A', deep: '#8F2018', light: '#FF8246', symbol: '△', icon: 'Tipos/fogo.png' },
+  Água: { color: '#219ED2', deep: '#0B5F91', light: '#62C5E4', symbol: '≋', icon: 'Tipos/agua.png' },
+  Planta: { color: '#72B632', deep: '#3F7E22', light: '#A7D85B', symbol: '❧', icon: 'Tipos/planta.png' },
+  Elétrico: { color: '#F2C515', deep: '#A67A00', light: '#FBE15A', symbol: 'ϟ', icon: 'Tipos/eletrico.png' },
+  Gelo: { color: '#43BED0', deep: '#267D96', light: '#83DCE7', symbol: '✣', icon: 'Tipos/gelo.png' },
+  Lutador: { color: '#E48B20', deep: '#9A4C13', light: '#F4B44A', symbol: '◆', icon: 'Tipos/lutador.png' },
+  Terra: { color: '#B96C37', deep: '#744020', light: '#D99C64', symbol: '⬟', icon: 'Tipos/terrestre.png' },
+  Voador: { color: '#4D9FD0', deep: '#316B99', light: '#82BFE3', symbol: '⌁', icon: 'Tipos/voador.png' },
+  Psíquico: { color: '#A856A6', deep: '#713A79', light: '#D086CA', symbol: '◉', icon: 'Tipos/psiquico.png' },
+  Sombrio: { color: '#363941', deep: '#0D0F13', light: '#656A74', symbol: '☾', icon: 'Tipos/sombrio.png' },
+  Metal: { color: '#899BA0', deep: '#52666D', light: '#BAC7CA', symbol: '⬢', icon: 'Tipos/metal.png' },
+  Místico: { color: '#C655B2', deep: '#84347D', light: '#E58AD4', symbol: '✦', icon: 'Tipos/mistico.png' },
 };
 
 const POKE_TYPE_TO_GAME: Record<string, GameType | null> = {

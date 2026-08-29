@@ -102,6 +102,17 @@ import '../styles/collections.css';
 
     <dialog class="confirm-dialog" data-role="delete-card-dialog"><div class="dialog-inner"><h3>Excluir esta carta?</h3><p>As cartas restantes desta categoria serão renumeradas. As outras faixas não mudam.</p><div class="dialog-actions"><button class="button subtle" type="button" data-action="cancel-delete-card">Cancelar</button><button class="button danger" type="button" data-action="confirm-delete-card">Excluir</button></div></div></dialog>
 
+    <dialog class="card-zoom-dialog" data-role="card-zoom-dialog">
+      <div class="card-zoom-shell">
+        <button class="card-zoom-close" type="button" data-action="close-card-zoom" aria-label="Fechar visualização">×</button>
+        <div class="card-zoom-stage" data-role="card-zoom-stage"></div>
+        <div class="card-zoom-footer">
+          <div><span class="eyebrow">VISUALIZAÇÃO</span><strong data-role="card-zoom-title">Carta</strong></div>
+          <button class="button primary" type="button" data-action="edit-zoom-card">Editar carta</button>
+        </div>
+      </div>
+    </dialog>
+
     <script src="../scripts/editor.ts"></script>
   </body>
 </html>

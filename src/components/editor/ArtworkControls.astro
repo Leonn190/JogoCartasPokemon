@@ -4,7 +4,7 @@ interface Props { card: CardData }
 const { card } = Astro.props;
 const expanded = card.cardType === 'pokemon' ? card.expandedArtwork : false;
 ---
-<details class="editor-section" open>
+<details class="editor-section essential-section artwork-editor-section" open>
   <summary><span class="section-index">ART</span><span><strong>Arte</strong><small>Upload, sugestões e ajuste direto com o mouse</small></span><i aria-hidden="true">⌄</i></summary>
   <div class="section-body">
     <div class="dropzone" data-role="dropzone" tabindex="0">
@@ -18,7 +18,7 @@ const expanded = card.cardType === 'pokemon' ? card.expandedArtwork : false;
       <button class="button subtle danger" type="button" data-action="remove-art">Remover</button>
     </div>
 
-    <div class="tcg-art-panel" data-pokemon-only>
+    <div class="tcg-art-panel advanced-only" data-pokemon-only>
       <div class="tcg-art-copy">
         <strong>Sugestões de artes oficiais</strong>
         <small>Ao carregar um Pokémon pela Pokédex, o editor busca cartas normais em segundo plano. EX, GX, V, Mega e artes especiais são descartadas.</small>
@@ -39,7 +39,7 @@ const expanded = card.cardType === 'pokemon' ? card.expandedArtwork : false;
       </details>
     </div>
 
-    <div class="mouse-artwork-help" role="note">
+    <div class="mouse-artwork-help advanced-only" role="note">
       <strong>Ajuste pelo mouse</strong>
       <span>Arraste para reposicionar • use a roda do mouse para aproximar/afastar • dê dois cliques para resetar.</span>
     </div>
@@ -49,6 +49,6 @@ const expanded = card.cardType === 'pokemon' ? card.expandedArtwork : false;
       <input class="sr-only" type="checkbox" data-field="expandedArtwork" checked={expanded} />
       <span class="toggle" aria-hidden="true"><i></i></span>
     </label>
-    <p class="section-note">A imagem é preservada inteira no carregamento e fica atrás da moldura. O enquadramento é feito diretamente no preview.</p>
+    <p class="section-note advanced-only">A imagem é preservada inteira no carregamento e fica atrás da moldura. O enquadramento é feito diretamente no preview.</p>
   </div>
 </details>

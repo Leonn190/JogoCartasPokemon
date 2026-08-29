@@ -5,7 +5,7 @@ interface Props { card: AttackCardData }
 const { card } = Astro.props;
 ---
 <div class="editor-kind" data-editor-kind="attack" hidden>
-  <details class="editor-section" open>
+  <details class="editor-section essential-section" open>
     <summary><span class="section-index">01</span><span><strong>Ataque</strong><small>Nome, tipagem e potência</small></span><i aria-hidden="true">⌄</i></summary>
     <div class="section-body grid-2">
       <div class="field span-2">
@@ -28,7 +28,7 @@ const { card } = Astro.props;
     </div>
   </details>
 
-  <details class="editor-section" open>
+  <details class="editor-section advanced-only-section" open>
     <summary><span class="section-index">02</span><span><strong>Compatibilidade</strong><small>Aparece antes do efeito na carta</small></span><i aria-hidden="true">⌄</i></summary>
     <div class="section-body">
       <div class="segmented-choice" role="radiogroup" aria-label="Modo de compatibilidade">
@@ -59,7 +59,7 @@ const { card } = Astro.props;
     </div>
   </details>
 
-  <details class="editor-section" open>
+  <details class="editor-section advanced-only-section" open>
     <summary><span class="section-index">03</span><span><strong>Efeito</strong><small>Fica no bloco final do ataque</small></span><i aria-hidden="true">⌄</i></summary>
     <div class="section-body grid-2">
       <div class="field span-2">
@@ -70,7 +70,7 @@ const { card } = Astro.props;
     </div>
   </details>
 
-  <details class="editor-section">
+  <details class="editor-section advanced-only-section">
     <summary><span class="section-index">04</span><span><strong>Carta</strong><small>Numeração e coleção</small></span><i aria-hidden="true">⌄</i></summary>
     <div class="section-body grid-2">
       <div class="field"><label for="attack-card-number">Número da carta</label><input id="attack-card-number" data-field="cardNumber" data-derived readonly value={card.cardNumber} /></div>

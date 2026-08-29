@@ -771,3 +771,17 @@
   filter: saturate(.75);
   transition: opacity .16s ease;
 }
+
+/* Descendentes como g, j, p, q e y precisam de folga vertical no nome. */
+.pokemon-display-name {
+  line-height: 1.08;
+  padding-block: 2px 5px;
+  margin-block: -2px -5px;
+}
+.pokemon-name-text,
+.pokemon-form { line-height: 1.08; }
+
+/* No Full Art a camada visual do template fica transparente aos eventos para
+   que o arraste/scroll chegue à arte de fundo em toda a superfície da carta. */
+.pokemon-card.is-expanded .card-shell { pointer-events: none; }
+.pokemon-card.is-expanded .card-full-art { pointer-events: auto; }

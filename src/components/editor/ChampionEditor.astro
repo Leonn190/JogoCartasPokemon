@@ -4,7 +4,7 @@ interface Props { card: ChampionCardData }
 const { card } = Astro.props;
 ---
 <div class="editor-kind" data-editor-kind="champion" hidden>
-  <details class="editor-section" open>
+  <details class="editor-section essential-section" open>
     <summary><span class="section-index">01</span><span><strong>Campeão</strong><small>Identidade e condições pessoais</small></span><i aria-hidden="true">⌄</i></summary>
     <div class="section-body grid-2">
       <div class="field span-2"><label for="champion-name">Nome</label><input id="champion-name" data-field="name" value={card.name} maxlength="34" /></div>
@@ -13,7 +13,7 @@ const { card } = Astro.props;
     </div>
   </details>
 
-  <details class="editor-section" open>
+  <details class="editor-section advanced-only-section" open>
     <summary><span class="section-index">02</span><span><strong>Passiva</strong><small>Única habilidade permanente do Campeão</small></span><i aria-hidden="true">⌄</i></summary>
     <div class="section-body grid-2">
       <div class="field span-2"><label for="passive-name">Nome da Passiva</label><input id="passive-name" data-field="passiveName" value={card.passiveName} maxlength="34" /></div>
@@ -21,7 +21,7 @@ const { card } = Astro.props;
     </div>
   </details>
 
-  <details class="editor-section" open>
+  <details class="editor-section advanced-only-section" open>
     <summary><span class="section-index">03</span><span><strong>Configuração Inicial</strong><small>Recursos extras determinados pelo Campeão</small></span><i aria-hidden="true">⌄</i></summary>
     <div class="section-body grid-3">
       <div class="field"><label for="initial-pokemon-count">Pokémon</label><input id="initial-pokemon-count" data-field="initialPokemonCount" type="number" min="0" max="12" step="1" value={card.initialPokemonCount} /></div>
@@ -30,7 +30,7 @@ const { card } = Astro.props;
     </div>
   </details>
 
-  <details class="editor-section">
+  <details class="editor-section advanced-only-section">
     <summary><span class="section-index">04</span><span><strong>Carta</strong><small>Numeração e coleção</small></span><i aria-hidden="true">⌄</i></summary>
     <div class="section-body grid-2">
       <div class="field"><label for="champion-card-number">Número da carta</label><input id="champion-card-number" data-field="cardNumber" data-derived readonly value={card.cardNumber} /></div>

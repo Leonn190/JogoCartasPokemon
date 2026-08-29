@@ -60,6 +60,7 @@ let workspace: WorkspaceState = createEmptyWorkspace();
 let activeCollectionId: string | null = null;
 let activeCardId: string | null = null;
 let pendingDeleteCardId: string | null = null;
+let activeZoomCardId: string | null = null;
 
 const scaleBox = q<HTMLElement>('.card-scale-box')!;
 const previewStage = q<HTMLElement>('.preview-stage')!;
@@ -193,6 +194,148 @@ function collectionProgress(collection: CardCollection) {
   return { created: collection.cards.length, total, percent: Math.min(100, Math.round((collection.cards.length / total) * 100)) };
 }
 
+
+function normalizePokemonVersionKey(value: PokemonCardData) {
+  if (value.pokemonId) return `id:${value.pokemonId}`;
+  return `name:${value.pokemonName.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '')}`;
+}
+
+function pokemonVersionLabel(value: CardData, cardId?: string | null) {
+  if (value.cardType !== 'pokemon' || value.form !== 'Normal') return '';
+  const key = normalizePokemonVersionKey(value);
+  const versions = workspace.collections.flatMap((collection) => collection.cards.map((entry) => {
+    const data = entry.id === activeCardId && isPokemon(card) ? card : entry.data;
+    return { id: entry.id, data, createdAt: entry.createdAt, collectionCreatedAt: collection.createdAt };
+  })).filter((entry) => entry.data.cardType === 'pokemon'
+    && entry.data.form === 'Normal'
+    && normalizePokemonVersionKey(entry.data) === key)
+    .sort((a, b) => a.createdAt.localeCompare(b.createdAt)
+      || a.collectionCreatedAt.localeCompare(b.collectionCreatedAt)
+      || a.id.localeCompare(b.id));
+
+  const targetId = cardId || activeCardId;
+  const index = targetId ? versions.findIndex((entry) => entry.id === targetId) : -1;
+  if (index >= 0) return `V${index + 1}`;
+  return `V${Math.max(1, versions.length + 1)}`;
+}
+
+function pokemonSelfImage(value: PokemonCardData) {
+  if (!value.pokemonId) return value.previousEvolutionImage || '';
+  return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${value.pokemonId}.png`;
+}
+
+function galleryAccent(value: CardData) {
+  if (value.cardType === 'pokemon') return TYPE_META[value.type].color;
+  if (value.cardType === 'attack') return ATTACK_KIND_META[value.attackKind].accent;
+  return CARD_CATEGORY_META[value.cardType].accent;
+}
+
+function gallerySubtitle(value: CardData) {
+  if (value.cardType === 'pokemon') return value.form === 'Normal' ? value.type : `${value.form} · ${value.type}`;
+  if (value.cardType === 'attack') return value.attackKind === 'special' ? 'Ataque Especial' : 'Ataque Normal';
+  return CARD_TYPE_LABELS[value.cardType];
+}
+
+function galleryCardMarkup(value: CardData, cardId: string, zoom = false) {
+  const artwork = value.artwork;
+  const transform = value.artworkTransform || { scale: 1, x: 0, y: 0 };
+  const version = pokemonVersionLabel(value, cardId);
+  const fullArt = value.cardType === 'pokemon' && value.expandedArtwork;
+  const name = cardDisplayName(value);
+  const accent = galleryAccent(value);
+  const formClass = fullArt ? ' is-full-art' : '';
+  const zoomClass = zoom ? ' is-zoom' : '';
+  const image = artwork
+    ? `<img class="gallery-card-art-image" src="${escapeHtml(artwork)}" alt="" style="--gallery-art-scale:${Number(transform.scale) || 1};--gallery-art-x:${Number(transform.x) || 0};--gallery-art-y:${Number(transform.y) || 0};" />`
+    : '<div class="gallery-card-art-placeholder">✦</div>';
+  return `<div class="gallery-card-face${formClass}${zoomClass}" data-tilt-card style="--gallery-accent:${escapeHtml(accent)}">
+    <div class="gallery-card-topline"><span>${escapeHtml(gallerySubtitle(value))}</span>${version ? `<b>${escapeHtml(version)}</b>` : ''}</div>
+    <div class="gallery-card-name">${escapeHtml(name)}</div>
+    <div class="gallery-card-art">${image}</div>
+    <div class="gallery-card-bottom"><span>${String(value.cardNumber).padStart(3, '0')}/${value.setTotal}</span><strong>${escapeHtml(value.setCode)}</strong></div>
+    <i class="gallery-card-glare" aria-hidden="true"></i>
+  </div>`;
+}
+
+function bindTiltEffects(root: ParentNode = document) {
+  qa<HTMLElement>('[data-tilt-card]', root).forEach((face) => {
+    if (face.dataset.tiltBound === 'true') return;
+    face.dataset.tiltBound = 'true';
+    face.addEventListener('pointermove', (event) => {
+      if (event.pointerType === 'touch') return;
+      const rect = face.getBoundingClientRect();
+      const px = clamp((event.clientX - rect.left) / Math.max(1, rect.width), 0, 1);
+      const py = clamp((event.clientY - rect.top) / Math.max(1, rect.height), 0, 1);
+      const rotateY = (px - .5) * 11;
+      const rotateX = (.5 - py) * 11;
+      face.style.setProperty('--gallery-rx', `${rotateX.toFixed(2)}deg`);
+      face.style.setProperty('--gallery-ry', `${rotateY.toFixed(2)}deg`);
+      face.style.setProperty('--gallery-mx', `${(px * 100).toFixed(1)}%`);
+      face.style.setProperty('--gallery-my', `${(py * 100).toFixed(1)}%`);
+      face.classList.add('is-tilting');
+    });
+    face.addEventListener('pointerleave', () => {
+      face.style.setProperty('--gallery-rx', '0deg');
+      face.style.setProperty('--gallery-ry', '0deg');
+      face.style.setProperty('--gallery-mx', '50%');
+      face.style.setProperty('--gallery-my', '50%');
+      face.classList.remove('is-tilting');
+    });
+  });
+}
+
+function exactCardZoomMarkup(value: CardData, cardId: string) {
+  const previousCard = cloneCard(card);
+  const previousCardId = activeCardId;
+  const previousNaturalStage = naturalStage;
+  try {
+    card = mergeDraft(value);
+    activeCardId = cardId;
+    if (isPokemon(card)) naturalStage = card.form === 'Normal' ? card.stage : naturalStage;
+    renderCard();
+    const clone = getActiveCardNode().cloneNode(true) as HTMLElement;
+    clone.removeAttribute('id');
+    clone.setAttribute('aria-label', `Visualização ampliada de ${cardDisplayName(value)}`);
+    return `<div class="card-zoom-exact-card" data-tilt-card>${clone.outerHTML}<i class="gallery-card-glare" aria-hidden="true"></i></div>`;
+  } finally {
+    card = previousCard;
+    activeCardId = previousCardId;
+    naturalStage = previousNaturalStage;
+    renderCard();
+  }
+}
+
+function openCardZoom(cardId: string) {
+  const collection = currentCollection();
+  const stored = collection?.cards.find((entry) => entry.id === cardId);
+  const zoomDialog = q<HTMLDialogElement>('[data-role="card-zoom-dialog"]');
+  const stage = q<HTMLElement>('[data-role="card-zoom-stage"]');
+  const title = q<HTMLElement>('[data-role="card-zoom-title"]');
+  if (!stored || !zoomDialog || !stage) return;
+  activeZoomCardId = cardId;
+  stage.innerHTML = exactCardZoomMarkup(stored.data, stored.id);
+  if (title) title.textContent = cardDisplayName(stored.data);
+  bindTiltEffects(stage);
+  zoomDialog.showModal();
+}
+
+function closeCardZoom() {
+  activeZoomCardId = null;
+  q<HTMLDialogElement>('[data-role="card-zoom-dialog"]')?.close();
+}
+
+function setEditorMode(mode: 'essential' | 'advanced') {
+  const panel = q<HTMLElement>('.editor-panel');
+  if (panel) panel.dataset.editorMode = mode;
+  qa<HTMLButtonElement>('[data-editor-mode-tab]').forEach((button) => {
+    const active = button.dataset.editorModeTab === mode;
+    button.classList.toggle('is-active', active);
+    button.setAttribute('aria-selected', String(active));
+  });
+  // Campos essenciais ficam abertos e imediatamente utilizáveis no modo rápido.
+  if (mode === 'essential') qa<HTMLDetailsElement>('.essential-section').forEach((section) => { section.open = true; });
+}
+
 function renderHub() {
   const grid = q<HTMLElement>('[data-role="collections-grid"]');
   const empty = q<HTMLElement>('[data-role="empty-hub"]');
@@ -235,15 +378,17 @@ function renderCollectionCards(collection: CardCollection) {
   const cards = collection.cards.filter((entry) => filter === 'all' || entry.data.cardType === filter);
   empty.hidden = cards.length > 0;
   grid.hidden = cards.length === 0;
-  grid.innerHTML = cards.map((entry) => {
-    const artwork = entry.data.artwork;
-    const thumb = artwork ? `<img src="${escapeHtml(artwork)}" alt="" />` : '<span class="card-library-placeholder">✦</span>';
-    return `<article class="card-library-item">
+  grid.innerHTML = cards.map((entry) => `<article class="card-library-item">
       <button class="card-delete" type="button" data-delete-card="${escapeHtml(entry.id)}" title="Excluir carta">×</button>
-      <div class="card-library-thumb" data-open-card="${escapeHtml(entry.id)}">${thumb}</div>
-      <div class="card-library-copy" data-open-card="${escapeHtml(entry.id)}"><small>${escapeHtml(CARD_TYPE_LABELS[entry.data.cardType])}</small><strong>${escapeHtml(cardDisplayName(entry.data))}</strong><div class="card-library-number"><span>${String(entry.data.cardNumber).padStart(3, '0')}/${entry.data.setTotal}</span><span>${escapeHtml(entry.data.setCode)}</span></div></div>
-    </article>`;
-  }).join('');
+      <button class="card-library-preview" type="button" data-zoom-card="${escapeHtml(entry.id)}" aria-label="Ampliar ${escapeHtml(cardDisplayName(entry.data))}">
+        ${galleryCardMarkup(entry.data, entry.id)}
+      </button>
+      <div class="card-library-copy">
+        <div><small>${escapeHtml(gallerySubtitle(entry.data))}</small><strong>${escapeHtml(cardDisplayName(entry.data))}</strong></div>
+        <button class="card-library-edit" type="button" data-open-card="${escapeHtml(entry.id)}">Editar</button>
+      </div>
+    </article>`).join('');
+  bindTiltEffects(grid);
 }
 
 function renderCollectionView() {
@@ -320,7 +465,7 @@ function openStoredCard(cardId: string) {
   pokemonSearchInput.value = stored.data.cardType === 'pokemon' ? stored.data.pokemonName : '';
   attackSearchInput.value = '';
   cardFamilySelector.disabled = true;
-  trainerSubtypeSelector.disabled = true;
+  trainerSubtypeSelector.disabled = false;
   syncDerivedCollectionFields();
   setAppView('editor');
   if (card.cardType === 'pokemon' && card.form === 'Normal' && card.pokemonName && card.pokemonName !== 'Novo Pokémon') void preloadTcgArtworkSuggestions(card.pokemonName);
@@ -344,7 +489,7 @@ async function createAndOpenCard(type: CardType) {
   resetTcgArtworkCandidates();
   applyState(stored.data);
   cardFamilySelector.disabled = true;
-  trainerSubtypeSelector.disabled = true;
+  trainerSubtypeSelector.disabled = false;
   syncDerivedCollectionFields();
   setAppView('editor');
   dialog?.close();
@@ -599,7 +744,9 @@ function renderPokemon(node: HTMLElement, value: PokemonCardData) {
 
   renderPokemonHeaderName(node, value);
   setTextIn(node, 'stage', value.stage);
-  setTextIn(node, 'previous-name', value.previousEvolution || '');
+  const displayedPreviousName = value.form === 'Normal' ? value.previousEvolution : value.pokemonName;
+  const displayedPreviousImage = value.form === 'Normal' ? value.previousEvolutionImage : pokemonSelfImage(value);
+  setTextIn(node, 'previous-name', displayedPreviousName || '');
   setTypeIcon(node, 'type-icon', meta.icon);
   const typeSymbol = q<HTMLElement>('.type-symbol', node);
   if (typeSymbol) typeSymbol.dataset.type = value.type;
@@ -631,10 +778,17 @@ function renderPokemon(node: HTMLElement, value: PokemonCardData) {
 
   const previousWrap = q<HTMLElement>('[data-role="previous-wrap"]', node);
   const previousImage = q<HTMLImageElement>('[data-role="previous-image"]', node);
-  previousWrap?.classList.toggle('is-empty', !value.previousEvolution);
+  previousWrap?.classList.toggle('is-empty', !displayedPreviousName);
   if (previousImage) {
-    previousImage.src = value.previousEvolutionImage || '';
-    previousImage.alt = value.previousEvolution ? `Pré-evolução ${value.previousEvolution}` : '';
+    previousImage.src = displayedPreviousImage || '';
+    previousImage.alt = displayedPreviousName ? `Evolui de ${displayedPreviousName}` : '';
+  }
+
+  const editionMark = q<HTMLElement>('[data-role="edition-mark"]', node);
+  if (editionMark) {
+    const label = pokemonVersionLabel(value, activeCardId);
+    editionMark.textContent = label;
+    editionMark.hidden = !label;
   }
 
   const expandedImage = q<HTMLImageElement>('[data-role="expanded-image"]', node);
@@ -1464,12 +1618,31 @@ function fitPreview() {
 
 function switchCardType(nextType: CardType) {
   if (nextType === card.cardType) return;
+  const collection = currentCollection();
+  if (collection && categoryFull(collection, nextType)) {
+    toast(`${CARD_TYPE_LABELS[nextType]} já atingiu o limite desta coleção.`, 'error');
+    syncTypeSelectorUI();
+    return;
+  }
   pokemonSearchAbort?.abort();
   attackPokemonAbort?.abort();
   tcgArtworkSearchAbort?.abort();
   tcgArtworkCropAbort?.abort();
-  cardCache[card.cardType] = cloneCard(card);
+  const previous = cloneCard(card);
+  cardCache[card.cardType] = previous;
   const next = cardCache[nextType] ? cloneCard(cardCache[nextType]!) : createEmptyCard(nextType);
+  if (familyForCard(previous) === 'trainer' && familyForCard(next) === 'trainer') {
+    next.artwork = previous.artwork;
+    next.artworkSource = previous.artworkSource;
+    next.artworkSourceCardId = previous.artworkSourceCardId;
+    next.artworkSourceLabel = previous.artworkSourceLabel;
+    next.artworkTransform = { ...previous.artworkTransform };
+    next.cardNumber = previous.cardNumber;
+    next.setTotal = previous.setTotal;
+    next.setCode = previous.setCode;
+    if ('name' in previous && 'name' in next) next.name = previous.name;
+    if ('effectText' in previous && 'effectText' in next) next.effectText = previous.effectText;
+  }
   resetTcgArtworkCandidates();
   if (nextType === 'pokemon' && next.cardType === 'pokemon') naturalStage = next.stage;
   applyState(next);
@@ -1480,6 +1653,10 @@ function switchCardType(nextType: CardType) {
 }
 
 function bindEvents() {
+  qa<HTMLButtonElement>('[data-editor-mode-tab]').forEach((button) => {
+    button.addEventListener('click', () => setEditorMode(button.dataset.editorModeTab === 'advanced' ? 'advanced' : 'essential'));
+  });
+
   qa<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>('[data-field]').forEach((input) => {
     input.addEventListener('input', () => updateField(input));
   });
@@ -1734,9 +1911,25 @@ function bindEvents() {
       q<HTMLDialogElement>('[data-role="delete-card-dialog"]')?.showModal();
       return;
     }
+    const zoom = (event.target as Element).closest<HTMLElement>('[data-zoom-card]');
+    if (zoom?.dataset.zoomCard) {
+      openCardZoom(zoom.dataset.zoomCard);
+      return;
+    }
     const open = (event.target as Element).closest<HTMLElement>('[data-open-card]');
     if (open?.dataset.openCard) openStoredCard(open.dataset.openCard);
   });
+
+  q<HTMLButtonElement>('[data-action="close-card-zoom"]')?.addEventListener('click', closeCardZoom);
+  q<HTMLButtonElement>('[data-action="edit-zoom-card"]')?.addEventListener('click', () => {
+    const id = activeZoomCardId;
+    closeCardZoom();
+    if (id) openStoredCard(id);
+  });
+  q<HTMLDialogElement>('[data-role="card-zoom-dialog"]')?.addEventListener('click', (event) => {
+    if (event.target === event.currentTarget) closeCardZoom();
+  });
+  q<HTMLDialogElement>('[data-role="card-zoom-dialog"]')?.addEventListener('close', () => { activeZoomCardId = null; });
 
   q<HTMLButtonElement>('[data-action="cancel-delete-card"]')?.addEventListener('click', () => {
     pendingDeleteCardId = null;
@@ -1775,6 +1968,7 @@ function bindEvents() {
 
 async function init() {
   bindEvents();
+  setEditorMode('essential');
   setReferenceStats();
   setAbilitySuggestions();
   await bootstrapWorkspace();

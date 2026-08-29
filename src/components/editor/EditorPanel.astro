@@ -17,7 +17,7 @@ import ClimateEditor from './ClimateEditor.astro';
 interface Props { card: PokemonCardData }
 const { card } = Astro.props;
 ---
-<aside class="editor-panel" aria-label="Painel de edição">
+<aside class="editor-panel" data-editor-mode="essential" aria-label="Painel de edição">
   <div class="panel-heading">
     <div>
       <span class="eyebrow">EDITOR</span>
@@ -27,13 +27,21 @@ const { card } = Astro.props;
     <span class="autosave-pill" data-role="autosave-status"><i></i> Salvo localmente</span>
   </div>
 
+  <div class="editor-mode-tabs" role="tablist" aria-label="Modo do editor">
+    <button class="editor-mode-tab is-active" type="button" role="tab" aria-selected="true" data-editor-mode-tab="essential">
+      <strong>Essencial</strong><small>rápido e compacto</small>
+    </button>
+    <button class="editor-mode-tab" type="button" role="tab" aria-selected="false" data-editor-mode-tab="advanced">
+      <strong>Avançado</strong><small>todos os ajustes</small>
+    </button>
+  </div>
+
   <CardTypeSelector cardType={card.cardType} pokemonForm={card.form} attackKind="normal" />
 
   <div class="editor-kind" data-editor-kind="pokemon">
     <PokemonForm card={card} />
     <StatsEditor card={card} />
     <AbilityEditor card={card} />
-    <div class="editor-mode-label advanced-label"><span>AVANÇADO</span><small>Dados preenchidos automaticamente e ajustes ocasionais</small></div>
     <EvolutionEditor card={card} />
     <PokedexEditor card={card} />
     <AbilityDescriptionEditor card={card} />

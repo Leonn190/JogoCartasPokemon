@@ -372,3 +372,112 @@
 .editor-panel[data-editor-mode="essential"] .dropzone { display:grid; align-items:center; justify-content:stretch; column-gap:10px; }
 .editor-panel[data-editor-mode="essential"] .dropzone strong,
 .editor-panel[data-editor-mode="essential"] .dropzone > span { margin-top:0; }
+
+
+/* ======================================================================
+   Essencial v2 — sem divisórias numeradas, só controles compactos
+   ====================================================================== */
+.editor-panel[data-editor-mode="essential"] .essential-section {
+  margin: 0;
+  border: 0 !important;
+  background: transparent;
+}
+.editor-panel[data-editor-mode="essential"] .essential-section > summary {
+  display: none !important;
+}
+.editor-panel[data-editor-mode="essential"] .essential-section > .section-body {
+  padding: 5px 0 6px !important;
+}
+.editor-panel[data-editor-mode="essential"] .editor-kind {
+  display: block;
+}
+.editor-panel[data-editor-mode="essential"] .editor-kind[hidden] {
+  display: none !important;
+}
+.editor-panel[data-editor-mode="essential"] .grid-2,
+.editor-panel[data-editor-mode="essential"] .grid-3 {
+  gap: 6px 8px;
+}
+.editor-panel[data-editor-mode="essential"] .field > label {
+  margin-bottom: 3px;
+  font-size: 8.5px;
+}
+.editor-panel[data-editor-mode="essential"] .field input,
+.editor-panel[data-editor-mode="essential"] .field select,
+.editor-panel[data-editor-mode="essential"] .field textarea {
+  min-height: 31px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  font-size: 10.5px;
+}
+.editor-panel[data-editor-mode="essential"] .field textarea {
+  min-height: 52px;
+  max-height: 70px;
+}
+.editor-panel[data-editor-mode="essential"] .stats-editor-grid {
+  grid-template-columns: repeat(6, minmax(0,1fr));
+  gap: 4px;
+  margin: 1px 0 5px;
+}
+.editor-panel[data-editor-mode="essential"] .stat-input {
+  min-width: 0;
+}
+.editor-panel[data-editor-mode="essential"] .stat-input > span {
+  padding: 4px 5px 0;
+  font-size: 7.5px;
+}
+.editor-panel[data-editor-mode="essential"] .stat-input input {
+  height: 28px;
+  min-height: 28px;
+  padding: 0 5px;
+  font-size: 13px;
+}
+.editor-panel[data-editor-mode="essential"] [data-action="use-official-stats"] {
+  min-height: 28px;
+  padding-block: 4px;
+}
+.editor-panel[data-editor-mode="essential"] .artwork-editor-section > .section-body {
+  padding-bottom: 0 !important;
+}
+.editor-panel[data-editor-mode="essential"] .dropzone {
+  min-height: 58px;
+  padding: 8px 10px;
+}
+.editor-panel[data-editor-mode="essential"] .toggle-row {
+  min-height: 42px;
+  margin-top: 5px;
+  padding-block: 5px;
+}
+.editor-panel[data-editor-mode="essential"] .card-type-selector {
+  min-height: 66px;
+  padding: 7px 9px;
+  margin-bottom: 3px;
+}
+.editor-panel[data-editor-mode="essential"] .advanced-type-select {
+  display: none !important;
+}
+.editor-panel[data-editor-mode="advanced"] .essential-type-buttons {
+  display: none !important;
+}
+.editor-panel[data-editor-mode="essential"] .essential-type-buttons {
+  display: flex !important;
+  margin-top: 0;
+  gap: 5px;
+}
+.editor-panel[data-editor-mode="essential"] .essential-type-buttons .type-candidate-button {
+  flex: 1 1 0;
+  min-height: 31px;
+  padding: 5px 8px;
+  border-radius: 7px;
+  font-size: 10px;
+}
+.editor-panel[data-editor-mode="advanced"] .advanced-type-select {
+  display: block;
+}
+.full-art-control[hidden] { display: none !important; }
+
+@media (max-width: 720px) {
+  .editor-panel[data-editor-mode="essential"] .stats-editor-grid {
+    grid-template-columns: repeat(3,minmax(0,1fr));
+  }
+}

@@ -70,7 +70,7 @@ export function categoryEnd(size: CollectionSize, cardType: CardType) {
 }
 
 export function categoryCount(collection: CardCollection, cardType: CardType) {
-  return collection.cards.filter((entry) => entry.data.cardType === cardType).length;
+  return collection.cards.filter((entry) => entry.data.cardType === cardType && !entry.data.expandedArtwork).length;
 }
 
 export function categoryFull(collection: CardCollection, cardType: CardType) {

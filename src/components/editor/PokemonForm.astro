@@ -19,13 +19,13 @@ const { card } = Astro.props;
         {CARD_FORMS.map((form) => <option value={form} selected={form === card.form}>{form}</option>)}
       </select>
     </div>
-    <div class="field">
+    <div class="field pokemon-type-field">
       <label for="pokemon-type">Tipo do jogo</label>
-      <select id="pokemon-type" data-field="type">
+      <div class="type-candidate-row essential-type-buttons" data-role="type-candidates"></div>
+      <select id="pokemon-type" class="advanced-type-select" data-field="type">
         {GAME_TYPES.map((type) => <option value={type} selected={type === card.type}>{type}</option>)}
       </select>
-      <div class="type-candidate-row" data-role="type-candidates" hidden></div>
-      <p class="field-hint" data-role="type-suggestion">A PokéAPI reduz esta lista automaticamente quando possível.</p>
+      <p class="field-hint" data-role="type-suggestion">No Essencial aparecem só os tipos sugeridos pela PokéAPI. No Avançado, todos ficam disponíveis.</p>
     </div>
   </div>
 </details>

@@ -1055,3 +1055,54 @@
 
 
 .edition-mark-empty { visibility: hidden; }
+
+
+/* Full Art também pode ser forçado no modo Avançado.
+   Para Pokémon continua valendo o tratamento específico existente. */
+.game-card.is-expanded:not(.pokemon-card) .card-shell {
+  position: absolute;
+  background: transparent;
+  box-shadow: none;
+}
+.game-card.is-expanded:not(.pokemon-card) .card-shell > *:not(.shared-artwork) {
+  position: relative;
+  z-index: 2;
+}
+.game-card.is-expanded:not(.pokemon-card) .shared-artwork {
+  position: absolute;
+  inset: 8px;
+  z-index: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 18px;
+  box-shadow: none;
+}
+.game-card.is-expanded:not(.pokemon-card) .shared-artwork::after {
+  box-shadow: inset 0 0 70px rgba(0,0,0,.18);
+  background: linear-gradient(180deg,rgba(0,0,0,.18),transparent 28%,transparent 62%,rgba(0,0,0,.24));
+}
+.game-card.is-expanded:not(.pokemon-card) .tcg-title-rail,
+.game-card.is-expanded:not(.pokemon-card) .tcg-name-row {
+  backdrop-filter: blur(2px);
+}
+.game-card.is-expanded:not(.pokemon-card) .tcg-name-row {
+  margin-inline: 8px;
+  padding-inline: 8px;
+  border-radius: 8px;
+  background: rgba(242,244,243,.68);
+}
+.game-card.is-expanded:not(.pokemon-card) .tcg-rules-panel,
+.game-card.is-expanded:not(.pokemon-card) .champion-rules-panel {
+  border-radius: 9px;
+  background:
+    linear-gradient(90deg, rgba(225,228,227,.82), rgba(250,250,247,.88) 10%, rgba(247,247,243,.88) 90%, rgba(214,218,217,.82));
+  backdrop-filter: blur(3px);
+}
+.game-card.is-expanded:not(.pokemon-card) .simple-footer,
+.game-card.is-expanded:not(.pokemon-card) .tcg-footer {
+  margin-inline: 8px;
+  padding-inline: 8px;
+  border-radius: 7px;
+  background: rgba(236,238,237,.70);
+  backdrop-filter: blur(2px);
+}

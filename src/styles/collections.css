@@ -318,3 +318,151 @@
   .gallery-card-face.is-tilting,
   .card-zoom-exact-card.is-tilting { transform: none !important; }
 }
+
+
+/* ======================================================================
+   Galeria v2 — usa o template REAL da carta, como uma vitrine física
+   ====================================================================== */
+.collection-view {
+  width: min(1600px, calc(100% - 40px));
+}
+.collection-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(176px, 1fr));
+  gap: 24px 18px;
+  align-items: start;
+}
+.card-library-item {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  display: grid;
+  place-items: start center;
+  overflow: visible;
+  border: 0;
+  background: transparent;
+  border-radius: 0;
+}
+.card-library-preview {
+  width: 176.4px;
+  height: 246.4px;
+  margin: 0 auto;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  perspective: 1000px;
+  cursor: zoom-in;
+}
+.card-library-exact-card {
+  --gallery-rx: 0deg;
+  --gallery-ry: 0deg;
+  --gallery-mx: 50%;
+  --gallery-my: 50%;
+  position: relative;
+  width: 176.4px;
+  height: 246.4px;
+  transform: rotateX(var(--gallery-rx)) rotateY(var(--gallery-ry));
+  transform-style: preserve-3d;
+  transform-origin: 50% 50%;
+  transition: transform .18s ease, filter .18s ease;
+  will-change: transform;
+}
+.card-library-exact-card.is-tilting {
+  transform: rotateX(var(--gallery-rx)) rotateY(var(--gallery-ry)) translateY(-4px) scale(1.025);
+  transition: transform .045s linear;
+  filter: drop-shadow(0 18px 18px rgba(0,0,0,.38));
+}
+.card-library-exact-card > .game-card {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: scale(.28);
+  transform-origin: 0 0;
+  pointer-events: none;
+  box-shadow: 0 24px 48px rgba(0,0,0,.34);
+}
+.card-library-exact-card > .gallery-card-glare {
+  inset: 0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.card-library-exact-card.is-tilting > .gallery-card-glare {
+  opacity: .62;
+}
+.card-library-item .card-delete {
+  left: calc(50% - 84px);
+  right: auto;
+  top: 5px;
+  z-index: 20;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  opacity: 0;
+  background: rgba(7,9,12,.84);
+  backdrop-filter: blur(6px);
+  transition: opacity .15s ease, transform .15s ease;
+}
+.card-library-item:hover .card-delete,
+.card-library-item:focus-within .card-delete {
+  opacity: .88;
+}
+.card-library-item .card-delete:hover {
+  opacity: 1;
+  transform: scale(1.08);
+}
+.card-problem-badge {
+  position: absolute;
+  right: calc(50% - 84px);
+  top: 5px;
+  z-index: 21;
+  width: 25px;
+  height: 25px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255,213,107,.66);
+  border-radius: 50%;
+  background: rgba(65,42,8,.9);
+  color: #ffe29a;
+  box-shadow: 0 5px 18px rgba(0,0,0,.34);
+  font: 900 13px/1 system-ui,sans-serif;
+  cursor: help;
+}
+.card-library-item.has-problem .card-library-exact-card {
+  filter: drop-shadow(0 0 9px rgba(221,171,68,.12));
+}
+.card-library-copy,
+.card-library-edit {
+  display: none !important;
+}
+
+@media (max-width: 900px) {
+  .collection-view { width: min(100% - 24px, 1600px); }
+  .collection-card-grid {
+    grid-template-columns: repeat(auto-fill, minmax(151px, 1fr));
+    gap: 20px 12px;
+  }
+  .card-library-preview,
+  .card-library-exact-card {
+    width: 151.2px;
+    height: 211.2px;
+  }
+  .card-library-exact-card > .game-card { transform: scale(.24); }
+  .card-library-item .card-delete { left: calc(50% - 72px); }
+  .card-problem-badge { right: calc(50% - 72px); }
+}
+
+@media (max-width: 560px) {
+  .collection-card-grid {
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    gap: 18px 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-library-exact-card,
+  .card-library-exact-card.is-tilting {
+    transform: none !important;
+    transition: none;
+  }
+}

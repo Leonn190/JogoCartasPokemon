@@ -1,6 +1,6 @@
 import { CARD_TYPE_LABELS } from '../types/card';
 import type { CardCollection, CardData, CardType, CollectionSize, StoredCard, WorkspaceState } from '../types/card';
-import { categoryLimit, categoryStart, collectionTotal } from '../data/gameConfig';
+import { COLLECTION_CATEGORY_ORDER, categoryLimit, categoryStart, collectionTotal } from '../data/gameConfig';
 
 export function stableId(prefix = 'id') {
   if (globalThis.crypto?.randomUUID) return `${prefix}-${globalThis.crypto.randomUUID()}`;
@@ -73,6 +73,10 @@ export function cardDisplayName(card: CardData) {
   return card.name || CARD_TYPE_LABELS[card.cardType];
 }
 
+export function isFullArtCard(card: CardData) {
+  return Boolean(card.expandedArtwork);
+}
+
 export function applyCollectionMetadata(card: CardData, collection: CardCollection, positionInCategory: number) {
   card.setCode = collection.code;
   card.setTotal = collectionTotal(collection.size);
@@ -80,24 +84,69 @@ export function applyCollectionMetadata(card: CardData, collection: CardCollecti
   return card;
 }
 
+function categoryOrder(type: CardType) {
+  const index = COLLECTION_CATEGORY_ORDER.indexOf(type);
+  return index >= 0 ? index : COLLECTION_CATEGORY_ORDER.length;
+}
+
+function sortCollectionCards(collection: CardCollection) {
+  collection.cards.sort((a, b) =>
+    a.data.cardNumber - b.data.cardNumber
+    || categoryOrder(a.data.cardType) - categoryOrder(b.data.cardType)
+    || a.createdAt.localeCompare(b.createdAt)
+    || a.id.localeCompare(b.id));
+}
+
 export function renumberCategory(collection: CardCollection, type: CardType) {
   const entries = collection.cards
-    .filter((entry) => entry.data.cardType === type)
-    .sort((a, b) => a.data.cardNumber - b.data.cardNumber || a.createdAt.localeCompare(b.createdAt));
+    .filter((entry) => entry.data.cardType === type && !isFullArtCard(entry.data))
+    .sort((a, b) => a.data.cardNumber - b.data.cardNumber || a.createdAt.localeCompare(b.createdAt) || a.id.localeCompare(b.id));
   entries.forEach((entry, index) => applyCollectionMetadata(entry.data, collection, index));
-  collection.cards.sort((a, b) => a.data.cardNumber - b.data.cardNumber || a.createdAt.localeCompare(b.createdAt));
   collection.updatedAt = new Date().toISOString();
   return collection;
 }
 
+/**
+ * A coleção-base continua terminando em 130/160. Full Arts são cartas extras:
+ * 131+, 132+... ou 161+, 162+..., sempre agrupadas pela ordem oficial das
+ * categorias (Pokémon → Ataque → Treinadores/Clima/Campeão).
+ */
 export function renumberCollection(collection: CardCollection) {
-  const categories = new Set(collection.cards.map((entry) => entry.data.cardType));
-  for (const type of categories) renumberCategory(collection, type);
+  for (const type of COLLECTION_CATEGORY_ORDER) renumberCategory(collection, type);
+
+  const baseTotal = collectionTotal(collection.size);
+  const bonusCards = collection.cards
+    .filter((entry) => isFullArtCard(entry.data))
+    .sort((a, b) =>
+      categoryOrder(a.data.cardType) - categoryOrder(b.data.cardType)
+      || a.createdAt.localeCompare(b.createdAt)
+      || a.id.localeCompare(b.id));
+
+  bonusCards.forEach((entry, index) => {
+    entry.data.setCode = collection.code;
+    entry.data.setTotal = baseTotal;
+    entry.data.cardNumber = baseTotal + index + 1;
+  });
+
+  sortCollectionCards(collection);
+  collection.updatedAt = new Date().toISOString();
   return collection;
 }
 
 export function prepareCardForCollection(card: CardData, collection: CardCollection, currentCardId?: string | null) {
-  const siblings = collection.cards.filter((entry) => entry.id !== currentCardId && entry.data.cardType === card.cardType);
+  if (isFullArtCard(card)) {
+    const bonusSiblings = collection.cards.filter((entry) => entry.id !== currentCardId && isFullArtCard(entry.data));
+    card.setCode = collection.code;
+    card.setTotal = collectionTotal(collection.size);
+    card.cardNumber = collectionTotal(collection.size) + bonusSiblings.length + 1;
+    return card;
+  }
+
+  const siblings = collection.cards.filter((entry) =>
+    entry.id !== currentCardId
+    && entry.data.cardType === card.cardType
+    && !isFullArtCard(entry.data));
+
   if (siblings.length >= categoryLimit(collection.size, card.cardType)) {
     throw new Error(`${CARD_TYPE_LABELS[card.cardType]} está no limite da coleção.`);
   }
@@ -120,8 +169,6 @@ export function upsertCard(collection: CardCollection, card: CardData, cardId?: 
 }
 
 export function deleteCard(collection: CardCollection, cardId: string) {
-  const removedType = collection.cards.find((entry) => entry.id === cardId)?.data.cardType;
   collection.cards = collection.cards.filter((entry) => entry.id !== cardId);
-  if (removedType) return renumberCategory(collection, removedType);
-  return collection;
+  return renumberCollection(collection);
 }

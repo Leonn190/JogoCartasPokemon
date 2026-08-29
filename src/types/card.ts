@@ -74,6 +74,7 @@ export interface BaseCardData {
   artworkSourceCardId?: string;
   artworkSourceLabel?: string;
   artworkTransform: ArtworkTransform;
+  expandedArtwork?: boolean;
   cardNumber: number;
   setTotal: number;
   setCode: string;
@@ -109,7 +110,7 @@ export interface CompatiblePokemon {
 
 export type AttackCompatibilityMode = 'specific' | 'type';
 export type AttackKind = 'normal' | 'special';
-export type AttackPower = 0 | 50 | 100 | 150 | 200;
+export type AttackPower = number;
 
 export interface AttackCardData extends BaseCardData {
   cardType: 'attack';

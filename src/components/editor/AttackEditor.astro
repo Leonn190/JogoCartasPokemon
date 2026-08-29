@@ -21,9 +21,7 @@ const { card } = Astro.props;
       </div>
       <div class="field">
         <label for="attack-power">Potência</label>
-        <select id="attack-power" data-field="power">
-          {[0, 50, 100, 150, 200].map((power) => <option value={power} selected={power === card.power}>{power}%</option>)}
-        </select>
+        <input id="attack-power" data-field="power" type="number" step="1" value={card.power} />
       </div>
     </div>
   </details>
@@ -38,14 +36,14 @@ const { card } = Astro.props;
 
       <div data-role="specific-compatibility-editor">
         <div class="field search-field attack-search-field">
-          <label for="attack-pokemon-search">Adicionar Pokémon <span data-role="compatible-count">0/10</span></label>
+          <label for="attack-pokemon-search">Adicionar Pokémon <span data-role="compatible-count">0</span></label>
           <div class="search-control" data-role="attack-search-control">
             <span class="search-icon" aria-hidden="true">⌕</span>
             <input id="attack-pokemon-search" data-role="attack-pokemon-search" type="search" autocomplete="off" spellcheck="false" placeholder="Nome ou nº da Pokédex" aria-expanded="false" aria-controls="attack-pokemon-suggestions" />
             <span class="search-spinner" aria-hidden="true"></span>
           </div>
           <div id="attack-pokemon-suggestions" class="suggestions" data-role="attack-pokemon-suggestions" hidden></div>
-          <p class="field-hint" data-role="attack-api-status">Máximo de 10 Pokémon. Duplicatas são ignoradas.</p>
+          <p class="field-hint" data-role="attack-api-status">Sem limite rígido no Avançado. Duplicatas são ignoradas; excessos serão sinalizados na coleção.</p>
         </div>
         <div class="selected-pokemon-list" data-role="selected-pokemon-list"></div>
       </div>

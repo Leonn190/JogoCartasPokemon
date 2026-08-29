@@ -2,7 +2,7 @@
 import type { CardData } from '../../types/card';
 interface Props { card: CardData }
 const { card } = Astro.props;
-const expanded = card.cardType === 'pokemon' ? card.expandedArtwork : false;
+const expanded = Boolean(card.expandedArtwork);
 ---
 <details class="editor-section essential-section artwork-editor-section" open>
   <summary><span class="section-index">ART</span><span><strong>Arte</strong><small>Upload, sugestões e ajuste direto com o mouse</small></span><i aria-hidden="true">⌄</i></summary>
@@ -44,8 +44,8 @@ const expanded = card.cardType === 'pokemon' ? card.expandedArtwork : false;
       <span>Arraste para reposicionar • use a roda do mouse para aproximar/afastar • dê dois cliques para resetar.</span>
     </div>
 
-    <label class="toggle-row" data-pokemon-only>
-      <span><strong>Arte Expandida</strong><small>Full Art sem quadro de imagem e sem dados Pokédex</small></span>
+    <label class="toggle-row full-art-control" data-full-art-control>
+      <span><strong>Full Art</strong><small>Vira carta extra depois do total-base da coleção</small></span>
       <input class="sr-only" type="checkbox" data-field="expandedArtwork" checked={expanded} />
       <span class="toggle" aria-hidden="true"><i></i></span>
     </label>

@@ -2,7 +2,7 @@ import { ATTACK_KIND_META, CARD_CATEGORY_META } from '../data/cardCategories';
 import { DEFAULT_ATTACK_CARD, DEFAULT_POKEMON_CARD, createChampionCard, createClimateCard, createEmptyCard, createUtilityCard } from '../data/defaultCard';
 import { exportCardAsPng } from '../lib/exportCard';
 import { exportWorkspaceZip, importWorkspaceZip } from '../lib/contentZip';
-import { cardDisplayName, createCollection, createEmptyWorkspace, deleteCard, prepareCardForCollection, renumberCollection, upsertCard } from '../lib/collections';
+import { cardDisplayName, createCollection, createEmptyWorkspace, deleteCard, isFullArtCard, prepareCardForCollection, renumberCollection, upsertCard } from '../lib/collections';
 import { loadWorkspaceLocal, saveWorkspaceLocal, touchWorkspace } from '../lib/workspaceStorage';
 import { COLLECTION_CATEGORY_ORDER, categoryCount, categoryFull, categoryLimit, collectionTotal } from '../data/gameConfig';
 import { getPokemonIndex, loadAbilityDescription, loadPokemonEditorData, loadPokemonSummary } from '../lib/pokeapi';
@@ -165,6 +165,14 @@ function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
 
+function currentEditorMode(): 'essential' | 'advanced' {
+  return q<HTMLElement>('.editor-panel')?.dataset.editorMode === 'advanced' ? 'advanced' : 'essential';
+}
+
+function isAdvancedMode() {
+  return currentEditorMode() === 'advanced';
+}
+
 function toast(message: string, kind: 'success' | 'error' | 'neutral' = 'neutral') {
   const region = q<HTMLElement>('[data-role="toast-region"]');
   if (!region) return;
@@ -191,7 +199,9 @@ function setAppView(view: 'hub' | 'collection' | 'editor') {
 
 function collectionProgress(collection: CardCollection) {
   const total = collectionTotal(collection.size);
-  return { created: collection.cards.length, total, percent: Math.min(100, Math.round((collection.cards.length / total) * 100)) };
+  const created = collection.cards.filter((entry) => !isFullArtCard(entry.data)).length;
+  const extras = collection.cards.filter((entry) => isFullArtCard(entry.data)).length;
+  return { created, extras, total, percent: Math.min(100, Math.round((created / total) * 100)) };
 }
 
 
@@ -224,37 +234,55 @@ function pokemonSelfImage(value: PokemonCardData) {
   return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${value.pokemonId}.png`;
 }
 
-function galleryAccent(value: CardData) {
-  if (value.cardType === 'pokemon') return TYPE_META[value.type].color;
-  if (value.cardType === 'attack') return ATTACK_KIND_META[value.attackKind].accent;
-  return CARD_CATEGORY_META[value.cardType].accent;
+function cardProblems(value: CardData) {
+  const problems: string[] = [];
+  const hasText = (text: unknown) => String(text ?? '').trim().length > 0;
+
+  if (!value.artwork) problems.push('Sem imagem definida.');
+  if (value.expandedArtwork && !value.artwork) problems.push('Full Art sem imagem.');
+
+  if (value.cardType === 'pokemon') {
+    if (!hasText(value.pokemonName) || value.pokemonName === 'Novo Pokémon') problems.push('Pokémon sem nome final.');
+    if (value.typeCandidates?.length && !value.typeCandidates.includes(value.type)) {
+      problems.push(`Tipo ${value.type} não corresponde às sugestões da PokéAPI (${value.typeCandidates.join(' / ')}).`);
+    }
+    if (value.form !== 'Normal' && value.stage !== 'FINAL') {
+      problems.push(`${value.form} normalmente deve usar estágio FINAL.`);
+    }
+    if (value.hp > 300) problems.push('HP acima do limite padrão de 300.');
+    if ([value.hp, value.attack, value.defense, value.specialAttack, value.specialDefense, value.speed].some((stat) => stat % 10 !== 0)) {
+      problems.push('Há status fora da escala padrão de 10 em 10.');
+    }
+    if (value.form === 'Normal' && (value.rarity === 'ultraRare' || value.rarity === 'illustrationRareUltra')) {
+      problems.push('Raridade típica de forma final aplicada a um Pokémon Normal.');
+    }
+    if (value.form !== 'Normal' && ['common', 'uncommon', 'rare', 'illustrationRare'].includes(value.rarity)) {
+      problems.push(`Raridade ${POKEMON_RARITY_LABELS[value.rarity]} não é a convenção desta forma final.`);
+    }
+  } else if (value.cardType === 'attack') {
+    if (!hasText(value.attackName)) problems.push('Ataque sem nome.');
+    if (!Number.isFinite(value.power) || value.power < 0) problems.push('Potência inválida.');
+    else if (![0, 50, 100, 150, 200].includes(value.power)) problems.push('Potência fora dos valores padrão (0 / 50 / 100 / 150 / 200).');
+    if (value.compatibilityMode === 'specific' && value.compatiblePokemon.length > 10) problems.push('Mais de 10 Pokémon compatíveis.');
+  } else if (value.cardType === 'champion') {
+    if (!hasText(value.name)) problems.push('Campeão sem nome.');
+    if (!hasText(value.passiveName) || !hasText(value.passiveDescription)) problems.push('Passiva incompleta.');
+    if ([value.initialPokemonCount, value.initialAttackCount, value.initialTrainerCount].some((item) => item < 0)) problems.push('Configuração inicial inválida.');
+    if ([value.initialPokemonCount, value.initialAttackCount, value.initialTrainerCount].some((item) => item > 12)) problems.push('Configuração inicial acima do limite padrão de 12.');
+  } else if (value.cardType === 'climate') {
+    if (!hasText(value.name) || !hasText(value.effectText)) problems.push('Clima incompleto.');
+  } else {
+    if (!hasText(value.name) || !hasText(value.effectText)) problems.push(`${CARD_TYPE_LABELS[value.cardType]} incompleto.`);
+  }
+
+  return [...new Set(problems)];
 }
 
-function gallerySubtitle(value: CardData) {
-  if (value.cardType === 'pokemon') return value.form === 'Normal' ? value.type : `${value.form} · ${value.type}`;
-  if (value.cardType === 'attack') return value.attackKind === 'special' ? 'Ataque Especial' : 'Ataque Normal';
-  return CARD_TYPE_LABELS[value.cardType];
-}
-
-function galleryCardMarkup(value: CardData, cardId: string, zoom = false) {
-  const artwork = value.artwork;
-  const transform = value.artworkTransform || { scale: 1, x: 0, y: 0 };
-  const version = pokemonVersionLabel(value, cardId);
-  const fullArt = value.cardType === 'pokemon' && value.expandedArtwork;
-  const name = cardDisplayName(value);
-  const accent = galleryAccent(value);
-  const formClass = fullArt ? ' is-full-art' : '';
-  const zoomClass = zoom ? ' is-zoom' : '';
-  const image = artwork
-    ? `<img class="gallery-card-art-image" src="${escapeHtml(artwork)}" alt="" style="--gallery-art-scale:${Number(transform.scale) || 1};--gallery-art-x:${Number(transform.x) || 0};--gallery-art-y:${Number(transform.y) || 0};" />`
-    : '<div class="gallery-card-art-placeholder">✦</div>';
-  return `<div class="gallery-card-face${formClass}${zoomClass}" data-tilt-card style="--gallery-accent:${escapeHtml(accent)}">
-    <div class="gallery-card-topline"><span>${escapeHtml(gallerySubtitle(value))}</span>${version ? `<b>${escapeHtml(version)}</b>` : ''}</div>
-    <div class="gallery-card-name">${escapeHtml(name)}</div>
-    <div class="gallery-card-art">${image}</div>
-    <div class="gallery-card-bottom"><span>${String(value.cardNumber).padStart(3, '0')}/${value.setTotal}</span><strong>${escapeHtml(value.setCode)}</strong></div>
-    <i class="gallery-card-glare" aria-hidden="true"></i>
-  </div>`;
+function problemBadgeMarkup(value: CardData) {
+  const problems = cardProblems(value);
+  if (!problems.length) return '';
+  const title = escapeHtml(problems.join(' • '));
+  return `<span class="card-problem-badge" title="${title}" aria-label="${problems.length} problema(s) nesta carta">!</span>`;
 }
 
 function bindTiltEffects(root: ParentNode = document) {
@@ -284,7 +312,19 @@ function bindTiltEffects(root: ParentNode = document) {
   });
 }
 
-function exactCardZoomMarkup(value: CardData, cardId: string) {
+function renderedCardCloneHtml(value: CardData, variant: 'collection' | 'zoom') {
+  const clone = getActiveCardNode().cloneNode(true) as HTMLElement;
+  clone.removeAttribute('id');
+  qa<HTMLElement>('[id]', clone).forEach((node) => node.removeAttribute('id'));
+  qa<HTMLImageElement>('img', clone).forEach((image) => {
+    image.loading = 'lazy';
+    image.decoding = 'async';
+  });
+  clone.setAttribute('aria-label', `${variant === 'zoom' ? 'Visualização ampliada' : 'Carta'} de ${cardDisplayName(value)}`);
+  return clone.outerHTML;
+}
+
+function exactCardTemplateMarkup(value: CardData, cardId: string, variant: 'collection' | 'zoom') {
   const previousCard = cloneCard(card);
   const previousCardId = activeCardId;
   const previousNaturalStage = naturalStage;
@@ -293,10 +333,45 @@ function exactCardZoomMarkup(value: CardData, cardId: string) {
     activeCardId = cardId;
     if (isPokemon(card)) naturalStage = card.form === 'Normal' ? card.stage : naturalStage;
     renderCard();
-    const clone = getActiveCardNode().cloneNode(true) as HTMLElement;
-    clone.removeAttribute('id');
-    clone.setAttribute('aria-label', `Visualização ampliada de ${cardDisplayName(value)}`);
-    return `<div class="card-zoom-exact-card" data-tilt-card>${clone.outerHTML}<i class="gallery-card-glare" aria-hidden="true"></i></div>`;
+
+    const cloneHtml = renderedCardCloneHtml(value, variant);
+    const wrapper = variant === 'zoom' ? 'card-zoom-exact-card' : 'card-library-exact-card';
+    return `<div class="${wrapper}" data-tilt-card>${cloneHtml}<i class="gallery-card-glare" aria-hidden="true"></i></div>`;
+  } finally {
+    card = previousCard;
+    activeCardId = previousCardId;
+    naturalStage = previousNaturalStage;
+    renderCard();
+  }
+}
+
+function exactCardZoomMarkup(value: CardData, cardId: string) {
+  return exactCardTemplateMarkup(value, cardId, 'zoom');
+}
+
+function exactCollectionArticlesMarkup(entries: CardCollection['cards']) {
+  const previousCard = cloneCard(card);
+  const previousCardId = activeCardId;
+  const previousNaturalStage = naturalStage;
+
+  try {
+    return entries.map((entry) => {
+      card = mergeDraft(entry.data);
+      activeCardId = entry.id;
+      if (isPokemon(card)) naturalStage = card.form === 'Normal' ? card.stage : naturalStage;
+      renderCard();
+
+      const problems = cardProblems(entry.data);
+      const issueClass = problems.length ? ' has-problem' : '';
+      const exact = `<div class="card-library-exact-card" data-tilt-card>${renderedCardCloneHtml(entry.data, 'collection')}<i class="gallery-card-glare" aria-hidden="true"></i></div>`;
+      return `<article class="card-library-item${issueClass}">
+        <button class="card-library-preview" type="button" data-zoom-card="${escapeHtml(entry.id)}" aria-label="Ampliar ${escapeHtml(cardDisplayName(entry.data))}">
+          ${exact}
+        </button>
+        ${problemBadgeMarkup(entry.data)}
+        <button class="card-delete" type="button" data-delete-card="${escapeHtml(entry.id)}" title="Excluir carta">×</button>
+      </article>`;
+    }).join('');
   } finally {
     card = previousCard;
     activeCardId = previousCardId;
@@ -332,10 +407,22 @@ function setEditorMode(mode: 'essential' | 'advanced') {
     button.classList.toggle('is-active', active);
     button.setAttribute('aria-selected', String(active));
   });
-  // Campos essenciais ficam abertos e imediatamente utilizáveis no modo rápido.
-  if (mode === 'essential') qa<HTMLDetailsElement>('.essential-section').forEach((section) => { section.open = true; });
-}
 
+  if (mode === 'essential') {
+    qa<HTMLDetailsElement>('.essential-section').forEach((section) => { section.open = true; });
+  }
+
+  qa<HTMLInputElement>('[data-stat-scale]').forEach((input) => {
+    const essentialMax = input.dataset.essentialMax;
+    if (mode === 'essential' && essentialMax) input.max = essentialMax;
+    else input.removeAttribute('max');
+  });
+
+  const fullArtControl = q<HTMLElement>('[data-full-art-control]');
+  if (fullArtControl) fullArtControl.hidden = mode === 'essential' && !isPokemon(card);
+
+  if (isPokemon(card)) updatePokemonTypeChoices(card.typeCandidates ?? []);
+}
 function renderHub() {
   const grid = q<HTMLElement>('[data-role="collections-grid"]');
   const empty = q<HTMLElement>('[data-role="empty-hub"]');
@@ -347,7 +434,7 @@ function renderHub() {
     return `<article class="collection-tile" data-open-collection="${escapeHtml(collection.id)}" tabindex="0">
       <div class="collection-tile-head"><span class="collection-tile-code">${escapeHtml(collection.code)}</span><span class="collection-size-pill">${collection.size === 'large' ? 'Grande' : 'Normal'}</span></div>
       <h3>${escapeHtml(collection.name)}</h3>
-      <div class="collection-tile-progress"><span>${progress.created} / ${progress.total} cartas</span><strong>${progress.percent}%</strong></div>
+      <div class="collection-tile-progress"><span>${progress.created} / ${progress.total} cartas${progress.extras ? ` · +${progress.extras} Full Art` : ''}</span><strong>${progress.percent}%</strong></div>
       <div class="mini-progress"><i style="width:${progress.percent}%"></i></div>
     </article>`;
   }).join('');
@@ -375,22 +462,15 @@ function renderCollectionCards(collection: CardCollection) {
   const empty = q<HTMLElement>('[data-role="empty-collection"]');
   const filter = q<HTMLSelectElement>('[data-role="category-filter"]')?.value ?? 'all';
   if (!grid || !empty) return;
+
   const cards = collection.cards.filter((entry) => filter === 'all' || entry.data.cardType === filter);
   empty.hidden = cards.length > 0;
   grid.hidden = cards.length === 0;
-  grid.innerHTML = cards.map((entry) => `<article class="card-library-item">
-      <button class="card-delete" type="button" data-delete-card="${escapeHtml(entry.id)}" title="Excluir carta">×</button>
-      <button class="card-library-preview" type="button" data-zoom-card="${escapeHtml(entry.id)}" aria-label="Ampliar ${escapeHtml(cardDisplayName(entry.data))}">
-        ${galleryCardMarkup(entry.data, entry.id)}
-      </button>
-      <div class="card-library-copy">
-        <div><small>${escapeHtml(gallerySubtitle(entry.data))}</small><strong>${escapeHtml(cardDisplayName(entry.data))}</strong></div>
-        <button class="card-library-edit" type="button" data-open-card="${escapeHtml(entry.id)}">Editar</button>
-      </div>
-    </article>`).join('');
+
+  grid.innerHTML = exactCollectionArticlesMarkup(cards);
+
   bindTiltEffects(grid);
 }
-
 function renderCollectionView() {
   const collection = currentCollection();
   if (!collection) return showHub();
@@ -405,7 +485,7 @@ function renderCollectionView() {
   if (name) name.textContent = collection.name;
   if (code) code.textContent = collection.code;
   if (sizeSelect) { sizeSelect.value = collection.size; sizeSelect.disabled = collection.cards.length > 0; sizeSelect.title = collection.cards.length ? 'O tamanho fica bloqueado depois que a coleção possui cartas.' : 'Coleções vazias podem trocar de tamanho.'; }
-  if (label) label.textContent = `${progress.created} / ${progress.total} cartas`;
+  if (label) label.textContent = `${progress.created} / ${progress.total} cartas${progress.extras ? ` · +${progress.extras} Full Art` : ''}`;
   if (percent) percent.textContent = `${progress.percent}%`;
   if (bar) bar.style.width = `${progress.percent}%`;
   renderCapacity(collection);
@@ -505,6 +585,7 @@ async function persistActiveCard(showFeedback = false) {
     await saveWorkspaceLocal(workspace);
     dirty = false;
     syncDerivedCollectionFields();
+    renderCard();
     if (showFeedback) toast('Carta salva na coleção.', 'success');
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Não foi possível salvar a carta.';
@@ -595,7 +676,12 @@ function setTextIn(root: ParentNode, role: string, value: string | number) {
 
 function setInputValue(field: string, value: unknown) {
   qa<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>(`[data-field="${field}"]`).forEach((input) => {
-    if (input instanceof HTMLInputElement && input.type === 'checkbox') input.checked = Boolean(value);
+    if (input instanceof HTMLInputElement && input.type === 'checkbox') {
+      input.checked = Boolean(value);
+      return;
+    }
+    const scale = Number((input as HTMLElement).dataset.statScale || 1);
+    if (scale !== 1 && typeof value === 'number') input.value = String(value / scale);
     else input.value = String(value ?? '');
   });
 }
@@ -609,6 +695,8 @@ function updateEditorVisibility() {
     node.classList.toggle('is-active', active);
   });
   qa<HTMLElement>('[data-pokemon-only]').forEach((node) => { node.hidden = !isPokemon(card); });
+  const fullArtControl = q<HTMLElement>('[data-full-art-control]');
+  if (fullArtControl) fullArtControl.hidden = currentEditorMode() === 'essential' && !isPokemon(card);
   syncTypeSelectorUI();
   const previewTitle = q<HTMLElement>('[data-role="preview-title"]');
   if (previewTitle) {
@@ -623,6 +711,7 @@ function syncFormFromState() {
   updateEditorVisibility();
   setInputValue('cardNumber', card.cardNumber);
   setInputValue('setCode', card.setCode);
+  setInputValue('expandedArtwork', Boolean(card.expandedArtwork));
 
   qa<HTMLInputElement>('[data-transform]').forEach((input) => {
     const key = input.dataset.transform as keyof CardData['artworkTransform'];
@@ -672,17 +761,16 @@ function updatePokemonTypeChoices(candidates: GameType[]) {
   if (!select || !row || !isPokemon(card)) return;
   const pokemon = card;
   const distinct = candidates.filter((value, index, list) => list.indexOf(value) === index);
-  const choices = distinct.length ? distinct : [...GAME_TYPES];
-  select.innerHTML = choices.map((type) => `<option value="${escapeHtml(type)}"${type === pokemon.type ? ' selected' : ''}>${escapeHtml(type)}</option>`).join('');
-  if (!choices.includes(pokemon.type)) {
-    pokemon.type = choices[0] ?? 'Fogo';
-    select.value = pokemon.type;
-  }
-  select.disabled = distinct.length === 1;
-  row.hidden = distinct.length < 2;
-  row.innerHTML = distinct.length >= 2 ? distinct.map((type) => `<button type="button" class="type-candidate-button${pokemon.type === type ? ' is-active' : ''}" data-type-candidate="${escapeHtml(type)}">${escapeHtml(type)}</button>`).join('') : '';
-}
 
+  // Avançado nunca é limitado pela PokéAPI: todos os tipos do jogo continuam
+  // disponíveis. No Essencial mostramos somente os botões sugeridos.
+  select.innerHTML = GAME_TYPES.map((type) => `<option value="${escapeHtml(type)}"${type === pokemon.type ? ' selected' : ''}>${escapeHtml(type)}</option>`).join('');
+  select.disabled = false;
+
+  const quickChoices = distinct.length ? distinct : [pokemon.type];
+  row.hidden = false;
+  row.innerHTML = quickChoices.map((type) => `<button type="button" class="type-candidate-button${pokemon.type === type ? ' is-active' : ''}" data-type-candidate="${escapeHtml(type)}">${escapeHtml(type)}</button>`).join('');
+}
 function applyArtworkToNode(node: HTMLElement) {
   node.style.setProperty('--art-scale', String(card.artworkTransform.scale));
   node.style.setProperty('--art-x', String(card.artworkTransform.x));
@@ -797,6 +885,8 @@ function renderPokemon(node: HTMLElement, value: PokemonCardData) {
 
 function renderUtility(node: HTMLElement, value: UtilityCardData) {
   const meta = CARD_CATEGORY_META[value.cardType];
+  node.dataset.expanded = String(Boolean(value.expandedArtwork));
+  node.classList.toggle('is-expanded', Boolean(value.expandedArtwork));
   node.dataset.utilityType = value.cardType;
   node.style.setProperty('--accent', meta.accent);
   node.style.setProperty('--accent-deep', meta.deep);
@@ -815,6 +905,8 @@ function renderUtility(node: HTMLElement, value: UtilityCardData) {
 
 function renderClimate(node: HTMLElement, value: ClimateCardData) {
   const meta = CARD_CATEGORY_META.climate;
+  node.dataset.expanded = String(Boolean(value.expandedArtwork));
+  node.classList.toggle('is-expanded', Boolean(value.expandedArtwork));
   node.style.setProperty('--accent', meta.accent);
   node.style.setProperty('--accent-deep', meta.deep);
   node.style.setProperty('--utility-surface', meta.surface);
@@ -829,6 +921,8 @@ function renderClimate(node: HTMLElement, value: ClimateCardData) {
 
 function renderChampion(node: HTMLElement, value: ChampionCardData) {
   const meta = CARD_CATEGORY_META.champion;
+  node.dataset.expanded = String(Boolean(value.expandedArtwork));
+  node.classList.toggle('is-expanded', Boolean(value.expandedArtwork));
   node.style.setProperty('--accent', meta.accent);
   node.style.setProperty('--accent-deep', meta.deep);
   node.style.setProperty('--utility-surface', meta.surface);
@@ -872,7 +966,7 @@ function renderCompatiblePokemon(node: HTMLElement, value: AttackCardData) {
         <span><img src="${escapeHtml(pokemon.sprite)}" alt="${escapeHtml(pokemon.name)}" crossorigin="anonymous" /></span>
         <small>${escapeHtml(pokemon.name)}</small>
       </div>`).join('')
-    : '<div class="compatibility-empty">Selecione até 10 Pokémon no editor</div>';
+    : '<div class="compatibility-empty">Selecione Pokémon no editor</div>';
 
   qa<HTMLImageElement>('img', grid).forEach((image) => {
     image.addEventListener('error', () => {
@@ -884,6 +978,8 @@ function renderCompatiblePokemon(node: HTMLElement, value: AttackCardData) {
 
 function renderAttack(node: HTMLElement, value: AttackCardData) {
   const meta = ATTACK_KIND_META[value.attackKind];
+  node.dataset.expanded = String(Boolean(value.expandedArtwork));
+  node.classList.toggle('is-expanded', Boolean(value.expandedArtwork));
   const attackTypeMeta = TYPE_META[value.type];
   node.dataset.attackKind = value.attackKind;
   node.dataset.attackType = value.type;
@@ -957,12 +1053,12 @@ function updateAttackCompatibilityEditor() {
   if (!isAttack(card)) {
     if (specific) specific.hidden = false;
     if (byType) byType.hidden = true;
-    if (count) count.textContent = '0/10';
+    if (count) count.textContent = '0';
     return;
   }
   if (specific) specific.hidden = card.compatibilityMode !== 'specific';
   if (byType) byType.hidden = card.compatibilityMode !== 'type';
-  if (count) count.textContent = `${card.compatiblePokemon.length}/10`;
+  if (count) count.textContent = String(card.compatiblePokemon.length);
   renderSelectedPokemonEditor();
 }
 
@@ -1171,14 +1267,14 @@ function mergeDraft(restored: CardData): CardData {
   if (restored.cardType === 'pokemon') {
     const raw = restored as PokemonCardData & { form?: string; rarity?: PokemonRarity };
     const form: PokemonForm = CARD_FORMS.includes(raw.form as PokemonForm) ? raw.form as PokemonForm : 'Normal';
-    const rarity = normalizePokemonRarityForForm(raw.rarity || (form === 'Normal' ? 'common' : 'ultraRare'), form);
+    const rarity = raw.rarity || (form === 'Normal' ? 'common' : 'ultraRare');
     return {
       ...cloneCard(DEFAULT_POKEMON_CARD),
       ...restored,
       cardType: 'pokemon',
       form,
       rarity,
-      hp: normalizeStat(restored.hp, 300),
+      hp: normalizeStat(restored.hp),
       attack: normalizeStat(restored.attack),
       defense: normalizeStat(restored.defense),
       specialAttack: normalizeStat(restored.specialAttack),
@@ -1194,10 +1290,10 @@ function mergeDraft(restored: CardData): CardData {
       ...cloneCard(DEFAULT_ATTACK_CARD),
       ...restored,
       cardType: 'attack',
-      power: [0, 50, 100, 150, 200].includes(Number(restored.power)) ? restored.power : 100,
+      power: Number.isFinite(Number(restored.power)) ? Number(restored.power) : 100,
       type: restored.type || 'Água',
       setTotal: Number(restored.setTotal) || 160,
-      compatiblePokemon: Array.isArray(restored.compatiblePokemon) ? restored.compatiblePokemon.slice(0, 10) : [],
+      compatiblePokemon: Array.isArray(restored.compatiblePokemon) ? restored.compatiblePokemon : [],
       artworkSource: restored.artworkSource ?? (restored.artwork ? 'manual' : 'none'),
       artworkTransform: { ...DEFAULT_ATTACK_CARD.artworkTransform, ...restored.artworkTransform },
     };
@@ -1239,9 +1335,16 @@ function applyState(next: CardData, syncForm = true) {
 function applyPokemonForm(form: PokemonForm) {
   if (!isPokemon(card)) return;
   card.form = form;
-  card.rarity = normalizePokemonRarityForForm(card.rarity, form);
-  if (form !== 'Normal') card.stage = 'FINAL';
-  else card.stage = naturalStage;
+
+  // O modo Essencial mantém as convenções automáticas. No Avançado o usuário
+  // pode combinar forma, estágio e raridade livremente; inconsistências viram
+  // avisos na coleção em vez de serem corrigidas à força.
+  if (!isAdvancedMode()) {
+    card.rarity = normalizePokemonRarityForForm(card.rarity, form);
+    if (form !== 'Normal') card.stage = 'FINAL';
+    else card.stage = naturalStage;
+  }
+
   setInputValue('stage', card.stage);
   setInputValue('rarity', card.rarity);
   pokemonSubtypeSelector.value = card.form;
@@ -1267,22 +1370,26 @@ function updateField(input: HTMLInputElement | HTMLSelectElement | HTMLTextAreaE
   else if (input instanceof HTMLInputElement && input.type === 'number') value = input.value === '' ? 0 : Number(input.value);
 
   if (field === 'pokedexNumber') value = Number(value) || null;
+
   if (['hp', 'attack', 'defense', 'specialAttack', 'specialDefense', 'speed'].includes(field)) {
-    value = normalizeStat(Number(value), field === 'hp' ? 300 : Number.POSITIVE_INFINITY);
-    input.value = String(value);
+    const scale = Number((input as HTMLElement).dataset.statScale || 1);
+    const typed = Math.max(0, Math.round(Number(value) || 0));
+    value = typed * scale;
+    input.value = String(typed);
   }
+
   if (field === 'power' && isAttack(card)) {
-    const candidate = Number(value);
-    value = ([0, 50, 100, 150, 200].includes(candidate) ? candidate : 100);
+    value = Number.isFinite(Number(value)) ? Number(value) : 0;
   }
+
   if (['initialPokemonCount', 'initialAttackCount', 'initialTrainerCount'].includes(field) && isChampion(card)) {
-    value = clamp(Math.round(Number(value) || 0), 0, 12);
+    value = Math.max(0, Math.round(Number(value) || 0));
     input.value = String(value);
   }
 
   (card as unknown as Record<string, unknown>)[field] = value;
 
-  if (isPokemon(card) && field === 'rarity') {
+  if (isPokemon(card) && field === 'rarity' && !isAdvancedMode()) {
     card.rarity = normalizePokemonRarityForForm(card.rarity, card.form);
     input.value = card.rarity;
   }
@@ -1400,8 +1507,10 @@ async function selectPokemon(identifier: string | number, pokemonNameHint = '') 
       typeCandidates: p.typeCandidates,
       ...data.officialStats,
     });
-    if (p.typeCandidates.length === 1) card.type = p.typeCandidates[0]!;
-    else if (p.typeCandidates.length > 1 && !p.typeCandidates.includes(card.type)) card.type = p.typeCandidates[0]!;
+    if (!isAdvancedMode()) {
+      if (p.typeCandidates.length === 1) card.type = p.typeCandidates[0]!;
+      else if (p.typeCandidates.length > 1 && !p.typeCandidates.includes(card.type)) card.type = p.typeCandidates[0]!;
+    }
 
     reference.officialStats = data.officialStats;
     reference.abilities = data.abilities;
@@ -1438,10 +1547,6 @@ async function selectPokemon(identifier: string | number, pokemonNameHint = '') 
 async function addCompatiblePokemon(identifier: string | number) {
   if (!isAttack(card)) return;
   hideSuggestions(attackSuggestions, attackSearchInput, 'attack');
-  if (card.compatiblePokemon.length >= 10) {
-    toast('O limite é de 10 Pokémon compatíveis.', 'error');
-    return;
-  }
   attackPokemonAbort?.abort();
   attackPokemonAbort = new AbortController();
   attackSearchControl.classList.add('is-loading');
@@ -1538,8 +1643,17 @@ function bindArtworkDragging() {
 
   const getArtworkSurface = (target: EventTarget | null) => {
     const element = target instanceof Element ? target : null;
-    const artworkSurface = element?.closest<HTMLElement>('[data-role="artwork-drag-surface"]') || null;
-    if (!artworkSurface || !getActiveCardNode().contains(artworkSurface) || !card.artwork) return null;
+    const activeCard = getActiveCardNode();
+    let artworkSurface = element?.closest<HTMLElement>('[data-role="artwork-drag-surface"]') || null;
+
+    // Em Full Art, qualquer ponto da carta funciona como superfície de ajuste.
+    // Isso mantém drag + scroll disponíveis mesmo quando texto/painéis estão
+    // visualmente sobre a imagem.
+    if (!artworkSurface && card.expandedArtwork && element && activeCard.contains(element)) {
+      artworkSurface = q<HTMLElement>('[data-role="artwork-drag-surface"]', activeCard);
+    }
+
+    if (!artworkSurface || !activeCard.contains(artworkSurface) || !card.artwork) return null;
     return artworkSurface;
   };
 
@@ -1637,6 +1751,7 @@ function switchCardType(nextType: CardType) {
     next.artworkSourceCardId = previous.artworkSourceCardId;
     next.artworkSourceLabel = previous.artworkSourceLabel;
     next.artworkTransform = { ...previous.artworkTransform };
+    next.expandedArtwork = Boolean(previous.expandedArtwork);
     next.cardNumber = previous.cardNumber;
     next.setTotal = previous.setTotal;
     next.setCode = previous.setCode;
@@ -1944,7 +2059,7 @@ function bindEvents() {
     await saveWorkspaceLocal(workspace);
     q<HTMLDialogElement>('[data-role="delete-card-dialog"]')?.close();
     renderCollectionView();
-    toast('Carta excluída e categoria renumerada.', 'success');
+    toast('Carta excluída e coleção renumerada.', 'success');
   });
 
   qa<HTMLButtonElement>('[data-action="back-to-collection"]').forEach((button) => button.addEventListener('click', async () => {

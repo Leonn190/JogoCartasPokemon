@@ -2,13 +2,11 @@ import { ATTACK_KIND_META, CARD_CATEGORY_META } from '../data/cardCategories';
 import { DEFAULT_ATTACK_CARD, DEFAULT_POKEMON_CARD, createChampionCard, createClimateCard, createEmptyCard, createUtilityCard } from '../data/defaultCard';
 import { exportCardAsPng } from '../lib/exportCard';
 import { cardDisplayName, createCollection, createEmptyWorkspace, deleteCard, isFullArtCard, prepareCardForCollection, renumberCollection, upsertCard } from '../lib/collections';
-import { loadWorkspaceLocal, saveWorkspaceLocal, touchWorkspace } from '../lib/workspaceStorage';
 import { COLLECTION_CATEGORY_ORDER, categoryCount } from '../data/gameConfig';
 import { getPokemonIndex, loadAbilityDescription, loadPokemonEditorData, loadPokemonSummary } from '../lib/pokeapi';
 import { extractArtworkFromCandidate, findNormalPokemonArtworkCandidates } from '../lib/tcgArtwork';
 import type { TcgArtworkCandidate } from '../lib/tcgArtwork';
 import { TYPE_META, titleCasePokemon } from '../lib/pokemonMapping';
-import { clearDraft, loadDraft } from '../lib/storage';
 import { CARD_FORMS, CARD_TYPE_LABELS, GAME_TYPES, POKEMON_RARITY_LABELS } from '../types/card';
 import type {
   AttackCardData,
@@ -59,6 +57,11 @@ let activeCollectionId: string | null = null;
 let activeCardId: string | null = null;
 let pendingDeleteCardId: string | null = null;
 let activeZoomCardId: string | null = null;
+
+function touchWorkspace(value: WorkspaceState) {
+  value.revision += 1;
+  value.updatedAt = new Date().toISOString();
+}
 
 const scaleBox = q<HTMLElement>('.card-scale-box')!;
 const previewStage = q<HTMLElement>('.preview-stage')!;
@@ -543,7 +546,6 @@ async function createAndOpenCard(type: CardType) {
   const stored = upsertCard(collection, next);
   activeCardId = stored.id;
   touchWorkspace(workspace);
-  await saveWorkspaceLocal(workspace);
   cardCache = {};
   reference = { officialStats: null, abilities: [] };
   resetTcgArtworkCandidates();
@@ -562,7 +564,6 @@ async function persistActiveCard(showFeedback = false) {
     const stored = upsertCard(collection, card, activeCardId);
     card = cloneCard(stored.data);
     touchWorkspace(workspace);
-    await saveWorkspaceLocal(workspace);
     dirty = false;
     syncDerivedCollectionFields();
     renderCard();
@@ -593,22 +594,11 @@ async function exportCollectionFiles() {
       anchor.remove();
       setTimeout(() => URL.revokeObjectURL(url), 1500);
     }
-    await saveWorkspaceLocal(workspace);
     toast('Coleções exportadas em JSON. Coloque os arquivos em public/conteudo e publique o projeto.', 'success');
   } catch (error) {
     console.error(error);
     toast('Não foi possível exportar as coleções.', 'error');
   }
-}
-
-function contentFingerprint(value: unknown) {
-  const text = JSON.stringify(value);
-  let hash = 2166136261;
-  for (let index = 0; index < text.length; index += 1) {
-    hash ^= text.charCodeAt(index);
-    hash = Math.imul(hash, 16777619);
-  }
-  return (hash >>> 0).toString(16).padStart(8, '0');
 }
 
 function loadPublishedWorkspace() {
@@ -617,58 +607,29 @@ function loadPublishedWorkspace() {
     const node = q<HTMLScriptElement>('#published-collections');
     const collections = JSON.parse(node?.textContent || '[]') as CardCollection[];
     if (!Array.isArray(collections) || !collections.length) {
-      if (status) status.textContent = 'Sem JSON publicado · usando área de trabalho local';
+      if (status) status.textContent = 'Nenhuma coleção encontrada em public/conteudo';
       return null;
     }
     if (!collections.every((collection) => collection && Array.isArray(collection.cards))) throw new Error('Coleção JSON inválida.');
-    const fingerprint = contentFingerprint(collections);
     if (status) status.textContent = `${collections.length} coleção(ões) carregada(s) de public/conteudo`;
     return {
-      fingerprint,
       workspace: {
         schemaVersion: 1 as const,
         revision: 0,
         updatedAt: new Date(0).toISOString(),
-        publishedFingerprint: fingerprint,
         collections,
       },
     };
   } catch (error) {
     console.warn('Falha ao carregar coleções publicadas', error);
-    if (status) status.textContent = 'JSON publicado inválido · área local preservada';
+    if (status) status.textContent = 'JSON publicado inválido';
     return null;
   }
 }
 
 async function bootstrapWorkspace() {
-  const [local, published] = await Promise.all([loadWorkspaceLocal(), Promise.resolve(loadPublishedWorkspace())]);
-  const publishedIsNew = Boolean(published && local?.publishedFingerprint !== published.fingerprint);
-  if (published && publishedIsNew) {
-    workspace = published.workspace;
-    await saveWorkspaceLocal(workspace);
-  } else if (local) {
-    workspace = local;
-    const status = q<HTMLElement>('[data-role="snapshot-status"]');
-    if (published && status) status.textContent = 'Área local ativa · JSON publicado já sincronizado';
-  } else if (published) {
-    workspace = published.workspace;
-  } else {
-    workspace = createEmptyWorkspace();
-  }
-
-  if (!workspace.collections.length && !published) {
-    const legacy = await loadDraft();
-    if (legacy) {
-      const recovered = createCollection('Rascunhos locais', workspace.collections);
-      const restored = mergeDraft(legacy);
-      upsertCard(recovered, restored);
-      workspace.collections.push(recovered);
-      touchWorkspace(workspace);
-      await saveWorkspaceLocal(workspace);
-      await clearDraft();
-      toast('Rascunho antigo recuperado em “Rascunhos locais”.', 'success');
-    }
-  }
+  const published = loadPublishedWorkspace();
+  workspace = published?.workspace ?? createEmptyWorkspace();
   renderHub();
 }
 
@@ -1242,7 +1203,7 @@ function markChanged() {
       await persistActiveCard(false);
       dirty = false;
       autosaveStatus?.classList.remove('is-saving');
-      if (autosaveStatus) autosaveStatus.innerHTML = '<i></i> Salvo localmente';
+      if (autosaveStatus) autosaveStatus.innerHTML = '<i></i> Alteração na sessão';
     } catch {
       autosaveStatus?.classList.remove('is-saving');
       if (autosaveStatus) autosaveStatus.innerHTML = '<i></i> Falha ao salvar';
@@ -1968,7 +1929,6 @@ function bindEvents() {
     const collection = createCollection(name, workspace.collections);
     workspace.collections.push(collection);
     touchWorkspace(workspace);
-    await saveWorkspaceLocal(workspace);
     createDialog?.close();
     renderHub();
     openCollection(collection.id);
@@ -2040,7 +2000,6 @@ function bindEvents() {
     deleteCard(collection, pendingDeleteCardId);
     pendingDeleteCardId = null;
     touchWorkspace(workspace);
-    await saveWorkspaceLocal(workspace);
     q<HTMLDialogElement>('[data-role="delete-card-dialog"]')?.close();
     renderCollectionView();
     toast('Carta excluída e coleção renumerada.', 'success');

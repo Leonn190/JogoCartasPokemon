@@ -174,7 +174,6 @@ export interface WorkspaceState {
   schemaVersion: 1;
   revision: number;
   updatedAt: string;
-  publishedFingerprint?: string;
   collections: CardCollection[];
 }
 

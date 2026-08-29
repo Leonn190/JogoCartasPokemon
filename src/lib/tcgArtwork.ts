@@ -1,7 +1,6 @@
 const TCGDEX_API = 'https://api.tcgdex.net/v2/en';
 const POKEMON_TCG_API = 'https://api.pokemontcg.io/v2';
-const CACHE_PREFIX = 'card-forge:tcg-art:v2:';
-const CACHE_TTL = 1000 * 60 * 60 * 24 * 7;
+const MEMORY_CACHE = new Map<string, unknown>();
 const SEARCH_TIMEOUT_MS = 5500;
 const IMAGE_TIMEOUT_MS = 9000;
 
@@ -70,7 +69,6 @@ export interface TcgArtworkSearchOptions {
   fallbackStage?: string;
 }
 
-interface CacheEnvelope<T> { value: T; savedAt: number }
 interface Rect { x: number; y: number; width: number; height: number }
 interface CropProfile {
   id: string;
@@ -151,26 +149,11 @@ function seriesScore(seriesId: string) {
 }
 
 function cacheRead<T>(key: string): T | null {
-  try {
-    const raw = localStorage.getItem(CACHE_PREFIX + key);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as CacheEnvelope<T>;
-    if (Date.now() - parsed.savedAt > CACHE_TTL) {
-      localStorage.removeItem(CACHE_PREFIX + key);
-      return null;
-    }
-    return parsed.value;
-  } catch {
-    return null;
-  }
+  return MEMORY_CACHE.has(key) ? MEMORY_CACHE.get(key) as T : null;
 }
 
 function cacheWrite<T>(key: string, value: T) {
-  try {
-    localStorage.setItem(CACHE_PREFIX + key, JSON.stringify({ value, savedAt: Date.now() }));
-  } catch {
-    // O cache é só uma otimização. Quota/privacidade nunca deve bloquear o editor.
-  }
+  MEMORY_CACHE.set(key, value);
 }
 
 function isAbortError(error: unknown) {

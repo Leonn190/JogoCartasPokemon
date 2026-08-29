@@ -11,12 +11,12 @@ Editor estático em **Astro + TypeScript** para criação de cartas de um jogo p
 
 ## Recursos principais
 
-- Busca de Pokémon por nome ou número, com autocomplete, debounce e cache local.
+- Busca de Pokémon por nome ou número, com autocomplete, debounce e cache apenas em memória durante a sessão.
 - PokéAPI v2 para Pokémon, espécie, cadeia evolutiva, habilidades e sprites/artwork usados em Ataques.
 - 12 tipos próprios: Fogo, Água, Planta, Elétrico, Gelo, Lutador, Terra, Voador, Psíquico, Sombrio, Metal e Místico.
 - Upload de PNG/JPG/WebP, drag & drop, zoom, posição X/Y e reposicionamento arrastando a arte no preview.
 - Preview reativo sem recarregar a página ao trocar o tipo de carta.
-- Autosave local com migração simples do rascunho Pokémon antigo: dados em `localStorage` e arte em `IndexedDB`.
+- As coleções são carregadas exclusivamente dos JSONs em `public/conteudo`; alterações permanecem apenas na sessão até a exportação dos JSONs.
 - Exportação PNG de apenas o template atualmente selecionado em **1260 × 1760 px**.
 - Layout responsivo e deploy estático via GitHub Pages/GitHub Actions.
 

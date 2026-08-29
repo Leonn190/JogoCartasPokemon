@@ -10,37 +10,16 @@ import { findEvolutionPosition, stageFromDepth } from './evolution';
 import { REGION_BY_GENERATION, sanitizeFlavorText, suggestGameTypes, titleCasePokemon } from './pokemonMapping';
 
 const API = 'https://pokeapi.co/api/v2';
-const CACHE_PREFIX = 'card-forge:pokeapi:v2:';
 const MEMORY = new Map<string, unknown>();
-const TTL = 1000 * 60 * 60 * 24 * 14;
 const TRANSLATION_TIMEOUT_MS = 6500;
-
-interface CacheEnvelope<T> { value: T; savedAt: number }
 
 function readCache<T>(key: string): T | null {
   if (MEMORY.has(key)) return MEMORY.get(key) as T;
-  try {
-    const raw = localStorage.getItem(CACHE_PREFIX + key);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as CacheEnvelope<T>;
-    if (Date.now() - parsed.savedAt > TTL) {
-      localStorage.removeItem(CACHE_PREFIX + key);
-      return null;
-    }
-    MEMORY.set(key, parsed.value);
-    return parsed.value;
-  } catch {
-    return null;
-  }
+  return null;
 }
 
 function writeCache<T>(key: string, value: T) {
   MEMORY.set(key, value);
-  try {
-    localStorage.setItem(CACHE_PREFIX + key, JSON.stringify({ value, savedAt: Date.now() }));
-  } catch {
-    // Cache é uma otimização; falhas de quota/privacidade não quebram o editor.
-  }
 }
 
 async function apiFetch<T>(pathOrUrl: string, signal?: AbortSignal): Promise<T> {

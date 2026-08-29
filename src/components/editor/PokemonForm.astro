@@ -15,7 +15,7 @@ const { card } = Astro.props;
     </div>
     <div class="field">
       <label for="pokemon-form">Forma</label>
-      <select id="pokemon-form" data-field="form">
+      <select id="pokemon-form" data-field="form" data-role="pokemon-subtype-selector">
         {CARD_FORMS.map((form) => <option value={form} selected={form === card.form}>{form}</option>)}
       </select>
     </div>

@@ -68,7 +68,7 @@ const autosaveStatus = q<HTMLElement>('[data-role="autosave-status"]');
 const fileInput = q<HTMLInputElement>('[data-role="artwork-file"]')!;
 const dropzone = q<HTMLElement>('[data-role="dropzone"]')!;
 const dialog = q<HTMLDialogElement>('[data-role="new-card-dialog"]');
-const cardFamilySelector = q<HTMLSelectElement>('[data-role="card-family-selector"]')!;
+const cardFamilySelector = q<HTMLSelectElement>('[data-role="card-family-selector"]');
 const pokemonSubtypeSelector = q<HTMLSelectElement>('[data-role="pokemon-subtype-selector"]')!;
 const trainerSubtypeSelector = q<HTMLSelectElement>('[data-role="trainer-subtype-selector"]')!;
 const attackSubtypeSelector = q<HTMLSelectElement>('[data-role="attack-subtype-selector"]')!;
@@ -141,10 +141,7 @@ function setTypeIcon(root: ParentNode, role: string, relativePath: string) {
 
 function syncTypeSelectorUI() {
   const family = familyForCard();
-  cardFamilySelector.value = family;
-  qa<HTMLElement>('[data-subtype-family]').forEach((node) => {
-    node.hidden = node.dataset.subtypeFamily !== family;
-  });
+  if (cardFamilySelector) cardFamilySelector.value = family;
 
   if (isPokemon(card)) pokemonSubtypeSelector.value = card.form;
   else if (isAttack(card)) attackSubtypeSelector.value = card.attackKind;
@@ -544,7 +541,7 @@ function openStoredCard(cardId: string) {
   applyState(mergeDraft(stored.data));
   pokemonSearchInput.value = stored.data.cardType === 'pokemon' ? stored.data.pokemonName : '';
   attackSearchInput.value = '';
-  cardFamilySelector.disabled = true;
+  if (cardFamilySelector) cardFamilySelector.disabled = true;
   trainerSubtypeSelector.disabled = false;
   syncDerivedCollectionFields();
   setAppView('editor');
@@ -568,7 +565,7 @@ async function createAndOpenCard(type: CardType) {
   reference = { officialStats: null, abilities: [] };
   resetTcgArtworkCandidates();
   applyState(stored.data);
-  cardFamilySelector.disabled = true;
+  if (cardFamilySelector) cardFamilySelector.disabled = true;
   trainerSubtypeSelector.disabled = false;
   syncDerivedCollectionFields();
   setAppView('editor');
@@ -1465,7 +1462,8 @@ async function selectPokemon(identifier: string | number, pokemonNameHint = '') 
   pokemonSearchAbort?.abort();
   pokemonSearchAbort = new AbortController();
   pokemonSearchControl.classList.add('is-loading');
-  getActiveCardNode().classList.add('is-api-loading');
+  const loadingCardNode = getActiveCardNode();
+  loadingCardNode.classList.add('is-api-loading');
   apiStatus.textContent = 'Consultando PokéAPI, espécie e cadeia evolutiva…';
 
   const hintedName = (pokemonNameHint || (typeof identifier === 'string' ? identifier : '')).trim();
@@ -1486,6 +1484,10 @@ async function selectPokemon(identifier: string | number, pokemonNameHint = '') 
     const data = await loadPokemonEditorData(identifier, pokemonSearchAbort.signal);
     if (!isPokemon(card)) return;
     const p = data.pokemon;
+    if (p.inferredForm) {
+      card.form = p.inferredForm;
+      if (!isAdvancedMode()) card.rarity = normalizePokemonRarityForForm(card.rarity, p.inferredForm);
+    }
     naturalStage = p.stage;
     resetTcgArtworkCandidates();
     if (card.artworkSource === 'tcgdex') {
@@ -1503,7 +1505,7 @@ async function selectPokemon(identifier: string | number, pokemonNameHint = '') 
       region: p.region,
       previousEvolution: p.previousEvolution,
       previousEvolutionImage: p.previousEvolutionImage,
-      stage: card.form === 'Normal' ? p.stage : 'FINAL',
+      stage: (p.inferredForm ?? card.form) === 'Normal' ? p.stage : 'FINAL',
       typeCandidates: p.typeCandidates,
       ...data.officialStats,
     });
@@ -1540,7 +1542,8 @@ async function selectPokemon(identifier: string | number, pokemonNameHint = '') 
     toast(message, 'error');
   } finally {
     pokemonSearchControl.classList.remove('is-loading');
-    q<HTMLElement>('[data-card-template="pokemon"]')?.classList.remove('is-api-loading');
+    loadingCardNode.classList.remove('is-api-loading');
+    qa<HTMLElement>('.is-api-loading').forEach((node) => node.classList.remove('is-api-loading'));
   }
 }
 
@@ -1776,7 +1779,7 @@ function bindEvents() {
     input.addEventListener('input', () => updateField(input));
   });
 
-  cardFamilySelector.addEventListener('change', () => {
+  cardFamilySelector?.addEventListener('change', () => {
     const family = cardFamilySelector.value as CardFamily;
     if (family === 'pokemon') switchCardType('pokemon');
     else if (family === 'attack') switchCardType('attack');
@@ -1785,13 +1788,8 @@ function bindEvents() {
   });
 
   trainerSubtypeSelector.addEventListener('change', () => {
-    if (cardFamilySelector.value !== 'trainer') return;
+    if (cardFamilySelector && cardFamilySelector.value !== 'trainer') return;
     switchCardType(trainerSubtypeSelector.value as TrainerCardType);
-  });
-
-  pokemonSubtypeSelector.addEventListener('change', () => {
-    if (!isPokemon(card)) return;
-    applyPokemonForm(pokemonSubtypeSelector.value as PokemonForm);
   });
 
   attackSubtypeSelector.addEventListener('change', () => {

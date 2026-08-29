@@ -1,7 +1,6 @@
 ---
 import type { PokemonCardData } from '../../types/card';
 import { DEFAULT_ATTACK_CARD, DEFAULT_CHAMPION_CARD, DEFAULT_CLIMATE_CARD, createUtilityCard } from '../../data/defaultCard';
-import CardTypeSelector from './CardTypeSelector.astro';
 import PokemonForm from './PokemonForm.astro';
 import EvolutionEditor from './EvolutionEditor.astro';
 import ArtworkControls from './ArtworkControls.astro';
@@ -35,8 +34,6 @@ const { card } = Astro.props;
       <strong>Avançado</strong><small>todos os ajustes</small>
     </button>
   </div>
-
-  <CardTypeSelector cardType={card.cardType} pokemonForm={card.form} attackKind="normal" />
 
   <div class="editor-kind" data-editor-kind="pokemon">
     <PokemonForm card={card} />

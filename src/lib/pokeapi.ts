@@ -13,6 +13,7 @@ const API = 'https://pokeapi.co/api/v2';
 const CACHE_PREFIX = 'card-forge:pokeapi:v2:';
 const MEMORY = new Map<string, unknown>();
 const TTL = 1000 * 60 * 60 * 24 * 14;
+const TRANSLATION_TIMEOUT_MS = 6500;
 
 interface CacheEnvelope<T> { value: T; savedAt: number }
 
@@ -70,10 +71,82 @@ export async function getPokemonIndex(signal?: AbortSignal): Promise<Array<{ nam
 }
 
 function pickLanguage<T extends { language: { name: string } }>(entries: T[]): T | undefined {
-  return entries.find((entry) => entry.language.name === 'pt-BR')
-    ?? entries.find((entry) => entry.language.name === 'pt')
-    ?? entries.find((entry) => entry.language.name === 'en')
+  const language = (entry: T) => entry.language.name.toLowerCase();
+  return entries.find((entry) => language(entry) === 'pt-br')
+    ?? entries.find((entry) => language(entry) === 'pt')
+    ?? entries.find((entry) => language(entry) === 'en')
     ?? entries[0];
+}
+
+function hasPortuguese<T extends { language: { name: string } }>(entry: T | undefined) {
+  const language = entry?.language.name.toLowerCase();
+  return language === 'pt-br' || language === 'pt';
+}
+
+async function translateToPortuguese(pokemonKey: string, field: 'genus' | 'flavorText', source: string, signal?: AbortSignal) {
+  const clean = sanitizeFlavorText(source).replace(/[\u0000-\u001f\u007f]/g, '');
+  if (!clean) return clean;
+  const cacheKey = `translation:${pokemonKey}:${field}:${clean}`;
+  const cached = readCache<string>(cacheKey);
+  if (cached) return cached;
+
+  const controller = new AbortController();
+  const abortFromParent = () => controller.abort();
+  signal?.addEventListener('abort', abortFromParent, { once: true });
+  const timer = window.setTimeout(() => controller.abort(), TRANSLATION_TIMEOUT_MS);
+  try {
+    const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(clean)}&langpair=en|pt-BR`;
+    const response = await fetch(url, { signal: controller.signal, headers: { Accept: 'application/json' } });
+    if (!response.ok) { writeCache(cacheKey, clean); return clean; }
+    const payload = await response.json() as { responseData?: { translatedText?: string } };
+    const translated = sanitizeFlavorText(payload.responseData?.translatedText || '');
+    if (!translated) { writeCache(cacheKey, clean); return clean; }
+    writeCache(cacheKey, translated);
+    return translated;
+  } catch {
+    if (signal?.aborted) throw new DOMException('Operação cancelada.', 'AbortError');
+    writeCache(cacheKey, clean);
+    return clean;
+  } finally {
+    window.clearTimeout(timer);
+    signal?.removeEventListener('abort', abortFromParent);
+  }
+}
+
+async function localizedSpeciesText<T extends { language: { name: string } }>(
+  pokemonKey: string,
+  field: 'genus' | 'flavorText',
+  entries: T[],
+  read: (entry: T) => string,
+  signal?: AbortSignal,
+) {
+  const selected = pickLanguage(entries);
+  const source = sanitizeFlavorText(selected ? read(selected) : '');
+  return hasPortuguese(selected) ? source : translateToPortuguese(pokemonKey, field, source, signal);
+}
+
+function naturalizeGenus(value: string) {
+  const clean = sanitizeFlavorText(value);
+  const withoutPokemon = clean.replace(/\s+Pok[eé]mon$/i, '').replace(/^Pok[eé]mon\s+/i, '').trim();
+  return withoutPokemon ? `Pokémon ${withoutPokemon}` : 'Pokémon';
+}
+
+function regionalFormRegion(name: string) {
+  if (/(?:^|-)alola(?:n)?(?:-|$)/.test(name)) return 'Alola';
+  if (/(?:^|-)galar(?:ian)?(?:-|$)/.test(name)) return 'Galar';
+  if (/(?:^|-)hisui(?:an)?(?:-|$)/.test(name)) return 'Hisui';
+  if (/(?:^|-)paldea(?:n)?(?:-|$)/.test(name)) return 'Paldea';
+  return '';
+}
+
+function pokemonDisplayIdentity(apiName: string) {
+  const parts = apiName.split('-');
+  const megaIndex = parts.indexOf('mega');
+  if (megaIndex >= 0) {
+    const nameParts = parts.filter((_, index) => index !== megaIndex);
+    return { name: titleCasePokemon(nameParts.join('-')), inferredForm: 'Mega' as const };
+  }
+  return { name: titleCasePokemon(apiName), inferredForm: null };
 }
 
 function roundStatToTen(value: number, max = Number.POSITIVE_INFINITY) {
@@ -117,21 +190,25 @@ export async function loadPokemonEditorData(identifier: string | number, signal?
     }
   }
 
-  const genusEntry = pickLanguage(species.genera);
-  const flavorEntry = pickLanguage(species.flavor_text_entries);
+  const [rawGenus, flavorText] = await Promise.all([
+    localizedSpeciesText(species.name, 'genus', species.genera, (entry) => entry.genus, signal),
+    localizedSpeciesText(species.name, 'flavorText', species.flavor_text_entries, (entry) => entry.flavor_text, signal),
+  ]);
+  const identity = pokemonDisplayIdentity(pokemon.name);
   const typeCandidates = suggestGameTypes(pokemon.types.sort((a, b) => a.slot - b.slot).map((entry) => entry.type.name));
   const suggestedType = typeCandidates.length === 1 ? typeCandidates[0]! : null;
 
   return {
     pokemon: {
       pokemonId: pokemon.id,
-      pokemonName: titleCasePokemon(pokemon.name),
-      pokedexNumber: pokemon.id,
+      pokemonName: identity.name,
+      pokedexNumber: species.id,
       height: `${(pokemon.height / 10).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} m`,
       weight: `${(pokemon.weight / 10).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} kg`,
-      genus: genusEntry?.genus || 'Pokémon',
-      flavorText: sanitizeFlavorText(flavorEntry?.flavor_text || ''),
-      region: REGION_BY_GENERATION[species.generation.name] || '',
+      genus: naturalizeGenus(rawGenus),
+      flavorText,
+      region: regionalFormRegion(pokemon.name) || REGION_BY_GENERATION[species.generation.name] || '',
+      inferredForm: identity.inferredForm,
       previousEvolution: previousEvolution ? titleCasePokemon(previousEvolution) : '',
       previousEvolutionImage,
       stage: stageFromDepth(position?.depth ?? 0),

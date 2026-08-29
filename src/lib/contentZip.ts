@@ -1,6 +1,6 @@
 import type { CardData, WorkspaceState } from '../types/card';
 import { createStoreZip, decodeZipText, readZip } from './simpleZip';
-import { COLLECTION_CATEGORY_ORDER } from '../data/gameConfig';
+import { COLLECTION_CATEGORY_ORDER, COLLECTION_PRESETS } from '../data/gameConfig';
 
 const SCHEMA_VERSION = 1;
 
@@ -8,8 +8,8 @@ type Manifest = {
   schemaVersion: 1;
   exportedAt: string;
   revision: number;
-  rules: { categoryOrder: typeof COLLECTION_CATEGORY_ORDER };
-  collections: Array<{ id: string; name: string; code: string; path: string; size?: string }>;
+  rules: { categoryOrder: typeof COLLECTION_CATEGORY_ORDER; presets: typeof COLLECTION_PRESETS };
+  collections: Array<{ id: string; name: string; code: string; size: string; path: string }>;
 };
 
 function dataUrlToBytes(value: string) {
@@ -61,11 +61,12 @@ export function exportWorkspaceZip(workspace: WorkspaceState) {
     schemaVersion: SCHEMA_VERSION,
     exportedAt,
     revision: workspace.revision,
-    rules: { categoryOrder: COLLECTION_CATEGORY_ORDER },
+    rules: { categoryOrder: COLLECTION_CATEGORY_ORDER, presets: COLLECTION_PRESETS },
     collections: workspace.collections.map((collection) => ({
       id: collection.id,
       name: collection.name,
       code: collection.code,
+      size: collection.size,
       path: `collections/${collection.id}/collection.json`,
     })),
   };

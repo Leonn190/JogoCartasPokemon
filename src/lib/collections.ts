@@ -1,6 +1,5 @@
-import { CARD_TYPE_LABELS } from '../types/card';
-import type { CardCollection, CardData, CardType, CollectionSize, StoredCard, WorkspaceState } from '../types/card';
-import { COLLECTION_CATEGORY_ORDER, categoryLimit, categoryStart, collectionTotal } from '../data/gameConfig';
+import type { CardCollection, CardData, CardType, WorkspaceState } from '../types/card';
+import { COLLECTION_CATEGORY_ORDER, collectionBaseTotal } from '../data/gameConfig';
 
 export function stableId(prefix = 'id') {
   if (globalThis.crypto?.randomUUID) return `${prefix}-${globalThis.crypto.randomUUID()}`;
@@ -50,13 +49,12 @@ export function generateCollectionCode(name: string, existingCodes: string[]) {
   throw new Error('Não há mais siglas de três letras disponíveis.');
 }
 
-export function createCollection(name: string, size: CollectionSize, existing: CardCollection[]): CardCollection {
+export function createCollection(name: string, existing: CardCollection[]): CardCollection {
   const now = new Date().toISOString();
   return {
     id: stableId('collection'),
     name: name.trim() || 'Nova Coleção',
     code: generateCollectionCode(name, existing.map((item) => item.code)),
-    size,
     createdAt: now,
     updatedAt: now,
     cards: [],
@@ -77,10 +75,10 @@ export function isFullArtCard(card: CardData) {
   return Boolean(card.expandedArtwork);
 }
 
-export function applyCollectionMetadata(card: CardData, collection: CardCollection, positionInCategory: number) {
+export function applyCollectionMetadata(card: CardData, collection: CardCollection, cardNumber: number, setTotal: number) {
   card.setCode = collection.code;
-  card.setTotal = collectionTotal(collection.size);
-  card.cardNumber = categoryStart(collection.size, card.cardType) + positionInCategory;
+  card.setTotal = setTotal;
+  card.cardNumber = cardNumber;
   return card;
 }
 
@@ -101,20 +99,23 @@ export function renumberCategory(collection: CardCollection, type: CardType) {
   const entries = collection.cards
     .filter((entry) => entry.data.cardType === type && !isFullArtCard(entry.data))
     .sort((a, b) => a.data.cardNumber - b.data.cardNumber || a.createdAt.localeCompare(b.createdAt) || a.id.localeCompare(b.id));
-  entries.forEach((entry, index) => applyCollectionMetadata(entry.data, collection, index));
+  const offset = COLLECTION_CATEGORY_ORDER.slice(0, categoryOrder(type)).reduce((total, category) =>
+    total + collection.cards.filter((entry) => entry.data.cardType === category && !isFullArtCard(entry.data)).length, 0);
+  const baseTotal = collectionBaseTotal(collection);
+  entries.forEach((entry, index) => applyCollectionMetadata(entry.data, collection, offset + index + 1, baseTotal));
   collection.updatedAt = new Date().toISOString();
   return collection;
 }
 
 /**
- * A coleção-base continua terminando em 140/170. Full Arts são cartas extras:
- * 141+, 142+... ou 171+, 172+..., sempre agrupadas pela ordem oficial das
+ * Full Arts são cartas extras, numeradas depois das cartas regulares e
+ * sempre agrupadas pela ordem oficial das
  * categorias (Pokémon → Ataque → Treinadores/Clima/Campeão).
  */
 export function renumberCollection(collection: CardCollection) {
   for (const type of COLLECTION_CATEGORY_ORDER) renumberCategory(collection, type);
 
-  const baseTotal = collectionTotal(collection.size);
+  const baseTotal = collectionBaseTotal(collection);
   const bonusCards = collection.cards
     .filter((entry) => isFullArtCard(entry.data))
     .sort((a, b) =>
@@ -134,23 +135,21 @@ export function renumberCollection(collection: CardCollection) {
 }
 
 export function prepareCardForCollection(card: CardData, collection: CardCollection, currentCardId?: string | null) {
+  const current = currentCardId ? collection.cards.find((entry) => entry.id === currentCardId) : undefined;
+  const currentWasRegular = Boolean(current && !isFullArtCard(current.data));
+  const nextIsRegular = !isFullArtCard(card);
+  const baseTotal = collectionBaseTotal(collection) + (nextIsRegular ? 1 : 0) - (currentWasRegular ? 1 : 0);
   if (isFullArtCard(card)) {
     const bonusSiblings = collection.cards.filter((entry) => entry.id !== currentCardId && isFullArtCard(entry.data));
     card.setCode = collection.code;
-    card.setTotal = collectionTotal(collection.size);
-    card.cardNumber = collectionTotal(collection.size) + bonusSiblings.length + 1;
+    card.setTotal = baseTotal;
+    card.cardNumber = current && isFullArtCard(current.data) ? current.data.cardNumber : baseTotal + bonusSiblings.length + 1;
     return card;
   }
-
-  const siblings = collection.cards.filter((entry) =>
-    entry.id !== currentCardId
-    && entry.data.cardType === card.cardType
-    && !isFullArtCard(entry.data));
-
-  if (siblings.length >= categoryLimit(collection.size, card.cardType)) {
-    throw new Error(`${CARD_TYPE_LABELS[card.cardType]} está no limite da coleção.`);
+  if (current && !isFullArtCard(current.data) && current.data.cardType === card.cardType) {
+    return applyCollectionMetadata(card, collection, current.data.cardNumber, baseTotal);
   }
-  return applyCollectionMetadata(card, collection, siblings.length);
+  return applyCollectionMetadata(card, collection, Number.MAX_SAFE_INTEGER, baseTotal);
 }
 
 export function upsertCard(collection: CardCollection, card: CardData, cardId?: string | null) {

@@ -42,8 +42,8 @@ import '../styles/collections.css';
 
       <main class="hub-view app-view" data-view="hub">
         <section class="hub-hero">
-          <div><span class="eyebrow">COLEÇÕES</span><h1>Seu acervo de Jornada</h1><p>Crie coleções, acompanhe os limites oficiais e abra qualquer carta diretamente no editor.</p></div>
-          <button class="collection-create-card" type="button" data-action="create-collection"><span>＋</span><strong>Criar nova coleção</strong><small>Normal ou Grande, com sigla automática</small></button>
+          <div><span class="eyebrow">COLEÇÕES</span><h1>Seu acervo de Jornada</h1><p>Crie coleções livremente e abra qualquer carta diretamente no editor.</p></div>
+          <button class="collection-create-card" type="button" data-action="create-collection"><span>＋</span><strong>Criar nova coleção</strong><small>Sem limite de cartas, com sigla automática</small></button>
         </section>
         <section class="collections-section">
           <div class="section-title-row"><div><span class="eyebrow">BIBLIOTECA</span><h2>Coleções existentes</h2></div><span class="snapshot-status" data-role="snapshot-status">Carregando conteúdo…</span></div>
@@ -56,10 +56,8 @@ import '../styles/collections.css';
         <section class="collection-hero">
           <button class="back-link" type="button" data-action="go-hub">← Hub de coleções</button>
           <div class="collection-title-row">
-            <div><span class="collection-code" data-role="collection-code">SET</span><h1 data-role="collection-name">Coleção</h1><p><select class="collection-size-select" data-role="collection-size-select" aria-label="Tamanho da coleção"><option value="normal">Normal · 140</option><option value="large">Grande · 170</option></select> · <span data-role="collection-progress">0 / 140 cartas</span></p></div>
-            <div class="collection-progress-ring"><strong data-role="collection-percent">0%</strong><span>concluído</span></div>
+            <div><span class="collection-code" data-role="collection-code">SET</span><h1 data-role="collection-name">Coleção</h1><p><span class="collection-size-pill">Composição livre</span> · <span data-role="collection-progress">0 cartas</span></p></div>
           </div>
-          <div class="progress-track"><i data-role="collection-progress-bar"></i></div>
         </section>
         <section class="category-capacity-panel"><div class="capacity-grid" data-role="capacity-grid"></div></section>
         <section class="collection-cards-section">
@@ -89,15 +87,14 @@ import '../styles/collections.css';
 
     <dialog class="confirm-dialog collection-dialog" data-role="create-collection-dialog">
       <form method="dialog" class="dialog-inner" data-role="create-collection-form">
-        <span class="eyebrow">NOVA COLEÇÃO</span><h3>Criar coleção</h3><p>Escolha somente o nome e o tamanho. A sigla será gerada automaticamente.</p>
+        <span class="eyebrow">NOVA COLEÇÃO</span><h3>Criar coleção</h3><p>Escolha o nome. A coleção não possui limite de cartas e a sigla será gerada automaticamente.</p>
         <label class="dialog-field"><span>Nome da coleção</span><input data-role="new-collection-name" maxlength="48" placeholder="Ex.: Evoluções de Kanto" required /></label>
-        <div class="size-choice"><label><input type="radio" name="collection-size" value="normal" checked /><span><strong>Normal</strong><small>140 cartas</small></span></label><label><input type="radio" name="collection-size" value="large" /><span><strong>Grande</strong><small>170 cartas</small></span></label></div>
         <div class="dialog-actions"><button class="button subtle" value="cancel">Cancelar</button><button class="button primary" value="default" data-action="confirm-create-collection">Criar coleção</button></div>
       </form>
     </dialog>
 
     <dialog class="confirm-dialog collection-dialog" data-role="new-card-dialog">
-      <div class="dialog-inner"><span class="eyebrow">NOVA CARTA</span><h3>Escolha a categoria</h3><p>A numeração será calculada automaticamente na faixa oficial.</p><div class="new-card-category-grid" data-role="new-card-category-grid"></div><div class="dialog-actions"><button class="button subtle" type="button" data-action="cancel-new">Cancelar</button></div></div>
+      <div class="dialog-inner"><span class="eyebrow">NOVA CARTA</span><h3>Escolha a categoria</h3><p>A numeração será calculada automaticamente sem alterar a ordem das cartas já criadas.</p><div class="new-card-category-grid" data-role="new-card-category-grid"></div><div class="dialog-actions"><button class="button subtle" type="button" data-action="cancel-new">Cancelar</button></div></div>
     </dialog>
 
     <dialog class="confirm-dialog" data-role="delete-card-dialog"><div class="dialog-inner"><h3>Excluir esta carta?</h3><p>A coleção será renumerada automaticamente. Full Arts extras também podem mudar de número para manter a ordem oficial.</p><div class="dialog-actions"><button class="button subtle" type="button" data-action="cancel-delete-card">Cancelar</button><button class="button danger" type="button" data-action="confirm-delete-card">Excluir</button></div></div></dialog>

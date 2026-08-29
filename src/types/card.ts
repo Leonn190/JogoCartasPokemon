@@ -151,8 +151,6 @@ export interface ChampionCardData extends BaseCardData {
 
 export type CardData = PokemonCardData | AttackCardData | UtilityCardData | ClimateCardData | ChampionCardData;
 
-export type CollectionSize = 'normal' | 'large';
-
 export interface StoredCard {
   id: string;
   collectionId: string;
@@ -165,7 +163,8 @@ export interface CardCollection {
   id: string;
   name: string;
   code: string;
-  size: CollectionSize;
+  /** Campo legado opcional, lido de conteudo.zip antigos. */
+  size?: 'normal' | 'large';
   createdAt: string;
   updatedAt: string;
   cards: StoredCard[];

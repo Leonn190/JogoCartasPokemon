@@ -100,4 +100,4 @@ O workflow existente em `.github/workflows/deploy.yml` e o cálculo de `site`/`b
 
 ## Observação sobre a coleção
 
-A referência de distribuição de categorias em `src/data/gameConfig.ts` soma 158 apesar do total mecânico informado ser 150. Essa inconsistência foi preservada intencionalmente, sem correção silenciosa. Todas as cartas continuam exibindo numeração `XXX/150`.
+As coleções têm composição livre, sem tamanho máximo e sem limites por categoria. A numeração é recalculada a partir das cartas regulares existentes; Full Arts continuam como extras numerados depois do total regular. Editar uma carta preserva sua posição na coleção.

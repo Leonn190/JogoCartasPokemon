@@ -4,7 +4,7 @@ import { exportCardAsPng } from '../lib/exportCard';
 import { exportWorkspaceZip, importWorkspaceZip } from '../lib/contentZip';
 import { cardDisplayName, createCollection, createEmptyWorkspace, deleteCard, isFullArtCard, prepareCardForCollection, renumberCollection, upsertCard } from '../lib/collections';
 import { loadWorkspaceLocal, saveWorkspaceLocal, touchWorkspace } from '../lib/workspaceStorage';
-import { COLLECTION_CATEGORY_ORDER, categoryCount, categoryFull, categoryLimit, collectionTotal } from '../data/gameConfig';
+import { COLLECTION_CATEGORY_ORDER, categoryCount } from '../data/gameConfig';
 import { getPokemonIndex, loadAbilityDescription, loadPokemonEditorData, loadPokemonSummary } from '../lib/pokeapi';
 import { extractArtworkFromCandidate, findNormalPokemonArtworkCandidates } from '../lib/tcgArtwork';
 import type { TcgArtworkCandidate } from '../lib/tcgArtwork';
@@ -27,7 +27,6 @@ import type {
   TrainerCardType,
   UtilityCardData,
   WorkspaceState,
-  CollectionSize,
 } from '../types/card';
 
 const q = <T extends Element = HTMLElement>(selector: string, root: ParentNode = document) => root.querySelector<T>(selector);
@@ -195,10 +194,9 @@ function setAppView(view: 'hub' | 'collection' | 'editor') {
 }
 
 function collectionProgress(collection: CardCollection) {
-  const total = collectionTotal(collection.size);
   const created = collection.cards.filter((entry) => !isFullArtCard(entry.data)).length;
   const extras = collection.cards.filter((entry) => isFullArtCard(entry.data)).length;
-  return { created, extras, total, percent: Math.min(100, Math.round((created / total) * 100)) };
+  return { created, extras };
 }
 
 
@@ -429,10 +427,9 @@ function renderHub() {
   grid.innerHTML = workspace.collections.map((collection) => {
     const progress = collectionProgress(collection);
     return `<article class="collection-tile" data-open-collection="${escapeHtml(collection.id)}" tabindex="0">
-      <div class="collection-tile-head"><span class="collection-tile-code">${escapeHtml(collection.code)}</span><span class="collection-size-pill">${collection.size === 'large' ? 'Grande' : 'Normal'}</span></div>
+      <div class="collection-tile-head"><span class="collection-tile-code">${escapeHtml(collection.code)}</span><span class="collection-size-pill">Livre</span></div>
       <h3>${escapeHtml(collection.name)}</h3>
-      <div class="collection-tile-progress"><span>${progress.created} / ${progress.total} cartas${progress.extras ? ` · +${progress.extras} Full Art` : ''}</span><strong>${progress.percent}%</strong></div>
-      <div class="mini-progress"><i style="width:${progress.percent}%"></i></div>
+      <div class="collection-tile-progress"><span>${progress.created} cartas${progress.extras ? ` · +${progress.extras} Full Art` : ''}</span></div>
     </article>`;
   }).join('');
 }
@@ -442,8 +439,7 @@ function renderCapacity(collection: CardCollection) {
   if (!grid) return;
   grid.innerHTML = COLLECTION_CATEGORY_ORDER.map((type) => {
     const count = categoryCount(collection, type);
-    const limit = categoryLimit(collection.size, type);
-    return `<div class="capacity-chip${count >= limit ? ' is-full' : ''}"><span>${escapeHtml(CARD_TYPE_LABELS[type])}</span><strong>${count} / ${limit}</strong></div>`;
+    return `<div class="capacity-chip"><span>${escapeHtml(CARD_TYPE_LABELS[type])}</span><strong>${count}</strong></div>`;
   }).join('');
 }
 
@@ -475,16 +471,10 @@ function renderCollectionView() {
   const progress = collectionProgress(collection);
   const name = q<HTMLElement>('[data-role="collection-name"]');
   const code = q<HTMLElement>('[data-role="collection-code"]');
-  const sizeSelect = q<HTMLSelectElement>('[data-role="collection-size-select"]');
   const label = q<HTMLElement>('[data-role="collection-progress"]');
-  const percent = q<HTMLElement>('[data-role="collection-percent"]');
-  const bar = q<HTMLElement>('[data-role="collection-progress-bar"]');
   if (name) name.textContent = collection.name;
   if (code) code.textContent = collection.code;
-  if (sizeSelect) { sizeSelect.value = collection.size; sizeSelect.disabled = collection.cards.length > 0; sizeSelect.title = collection.cards.length ? 'O tamanho fica bloqueado depois que a coleção possui cartas.' : 'Coleções vazias podem trocar de tamanho.'; }
-  if (label) label.textContent = `${progress.created} / ${progress.total} cartas${progress.extras ? ` · +${progress.extras} Full Art` : ''}`;
-  if (percent) percent.textContent = `${progress.percent}%`;
-  if (bar) bar.style.width = `${progress.percent}%`;
+  if (label) label.textContent = `${progress.created} cartas${progress.extras ? ` · +${progress.extras} Full Art` : ''}`;
   renderCapacity(collection);
   renderCollectionCards(collection);
   renderNewCardChoices(collection);
@@ -510,9 +500,7 @@ function renderNewCardChoices(collection: CardCollection) {
   if (!grid) return;
   grid.innerHTML = COLLECTION_CATEGORY_ORDER.map((type) => {
     const count = categoryCount(collection, type);
-    const limit = categoryLimit(collection.size, type);
-    const full = count >= limit;
-    return `<button class="new-card-category" type="button" data-create-card-type="${type}" ${full ? 'disabled' : ''}><strong>${escapeHtml(CARD_TYPE_LABELS[type])}</strong><small>${count} / ${limit}${full ? ' · cheio' : ''}</small></button>`;
+    return `<button class="new-card-category" type="button" data-create-card-type="${type}"><strong>${escapeHtml(CARD_TYPE_LABELS[type])}</strong><small>${count} na coleção</small></button>`;
   }).join('');
 }
 
@@ -551,10 +539,6 @@ function openStoredCard(cardId: string) {
 async function createAndOpenCard(type: CardType) {
   const collection = currentCollection();
   if (!collection) return;
-  if (categoryFull(collection, type)) {
-    toast(`${CARD_TYPE_LABELS[type]} já atingiu o limite desta coleção.`, 'error');
-    return;
-  }
   const next = createEmptyCard(type);
   prepareCardForCollection(next, collection, null);
   const stored = upsertCard(collection, next);
@@ -653,8 +637,7 @@ async function bootstrapWorkspace() {
   if (!workspace.collections.length && !published) {
     const legacy = await loadDraft();
     if (legacy) {
-      const size: CollectionSize = Number(legacy.setTotal) > 140 ? 'large' : 'normal';
-      const recovered = createCollection('Rascunhos locais', size, workspace.collections);
+      const recovered = createCollection('Rascunhos locais', workspace.collections);
       const restored = mergeDraft(legacy);
       upsertCard(recovered, restored);
       workspace.collections.push(recovered);
@@ -1735,12 +1718,6 @@ function fitPreview() {
 
 function switchCardType(nextType: CardType) {
   if (nextType === card.cardType) return;
-  const collection = currentCollection();
-  if (collection && categoryFull(collection, nextType)) {
-    toast(`${CARD_TYPE_LABELS[nextType]} já atingiu o limite desta coleção.`, 'error');
-    syncTypeSelectorUI();
-    return;
-  }
   pokemonSearchAbort?.abort();
   attackPokemonAbort?.abort();
   tcgArtworkSearchAbort?.abort();
@@ -1964,11 +1941,9 @@ function bindEvents() {
   q<HTMLButtonElement>('[data-action="confirm-create-collection"]')?.addEventListener('click', async (event) => {
     event.preventDefault();
     const createDialog = q<HTMLDialogElement>('[data-role="create-collection-dialog"]');
-    const form = q<HTMLFormElement>('[data-role="create-collection-form"]');
     const name = q<HTMLInputElement>('[data-role="new-collection-name"]')?.value.trim() ?? '';
     if (!name) { toast('Digite o nome da coleção.', 'error'); return; }
-    const size = q<HTMLInputElement>('input[name="collection-size"]:checked', form ?? document)?.value === 'large' ? 'large' : 'normal';
-    const collection = createCollection(name, size, workspace.collections);
+    const collection = createCollection(name, workspace.collections);
     workspace.collections.push(collection);
     touchWorkspace(workspace);
     await saveWorkspaceLocal(workspace);
@@ -2004,17 +1979,6 @@ function bindEvents() {
   q<HTMLSelectElement>('[data-role="category-filter"]')?.addEventListener('change', () => {
     const collection = currentCollection();
     if (collection) renderCollectionCards(collection);
-  });
-
-  q<HTMLSelectElement>('[data-role="collection-size-select"]')?.addEventListener('change', async (event) => {
-    const collection = currentCollection();
-    if (!collection || collection.cards.length) { renderCollectionView(); return; }
-    collection.size = (event.currentTarget as HTMLSelectElement).value === 'large' ? 'large' : 'normal';
-    collection.updatedAt = new Date().toISOString();
-    touchWorkspace(workspace);
-    await saveWorkspaceLocal(workspace);
-    renderCollectionView();
-    toast(`Coleção alterada para ${collection.size === 'large' ? 'Grande' : 'Normal'}.`, 'success');
   });
 
   q<HTMLElement>('[data-role="collection-card-grid"]')?.addEventListener('click', (event) => {

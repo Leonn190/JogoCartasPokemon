@@ -656,7 +656,7 @@ async function bootstrapWorkspace() {
   if (!workspace.collections.length && !published) {
     const legacy = await loadDraft();
     if (legacy) {
-      const size: CollectionSize = Number(legacy.setTotal) > 130 ? 'large' : 'normal';
+      const size: CollectionSize = Number(legacy.setTotal) > 140 ? 'large' : 'normal';
       const recovered = createCollection('Rascunhos locais', size, workspace.collections);
       const restored = mergeDraft(legacy);
       upsertCard(recovered, restored);
@@ -1280,7 +1280,7 @@ function mergeDraft(restored: CardData): CardData {
       specialAttack: normalizeStat(restored.specialAttack),
       specialDefense: normalizeStat(restored.specialDefense),
       speed: normalizeStat(restored.speed),
-      setTotal: Number(restored.setTotal) || 160,
+      setTotal: Number(restored.setTotal) || 170,
       artworkSource: restored.artworkSource ?? (restored.artwork ? 'manual' : 'none'),
       artworkTransform: { ...DEFAULT_POKEMON_CARD.artworkTransform, ...restored.artworkTransform },
     };
@@ -1292,7 +1292,7 @@ function mergeDraft(restored: CardData): CardData {
       cardType: 'attack',
       power: Number.isFinite(Number(restored.power)) ? Number(restored.power) : 100,
       type: restored.type || 'Água',
-      setTotal: Number(restored.setTotal) || 160,
+      setTotal: Number(restored.setTotal) || 170,
       compatiblePokemon: Array.isArray(restored.compatiblePokemon) ? restored.compatiblePokemon : [],
       artworkSource: restored.artworkSource ?? (restored.artwork ? 'manual' : 'none'),
       artworkTransform: { ...DEFAULT_ATTACK_CARD.artworkTransform, ...restored.artworkTransform },
@@ -1308,7 +1308,7 @@ function mergeDraft(restored: CardData): CardData {
       ...base,
       ...restored,
       cardType: 'champion',
-      setTotal: Number(restored.setTotal) || 160,
+      setTotal: Number(restored.setTotal) || 170,
       artworkSource: restored.artworkSource ?? (restored.artwork ? 'manual' : 'none'),
       artworkTransform: { ...base.artworkTransform, ...restored.artworkTransform },
     };
@@ -1319,7 +1319,7 @@ function mergeDraft(restored: CardData): CardData {
     ...restored,
     cardType: restored.cardType,
     usageText: base.usageText,
-    setTotal: Number(restored.setTotal) || 160,
+    setTotal: Number(restored.setTotal) || 170,
     artworkSource: restored.artworkSource ?? (restored.artwork ? 'manual' : 'none'),
     artworkTransform: { ...base.artworkTransform, ...restored.artworkTransform },
   };

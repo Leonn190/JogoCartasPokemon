@@ -107,8 +107,8 @@ export function renumberCategory(collection: CardCollection, type: CardType) {
 }
 
 /**
- * A coleção-base continua terminando em 130/160. Full Arts são cartas extras:
- * 131+, 132+... ou 161+, 162+..., sempre agrupadas pela ordem oficial das
+ * A coleção-base continua terminando em 140/170. Full Arts são cartas extras:
+ * 141+, 142+... ou 171+, 172+..., sempre agrupadas pela ordem oficial das
  * categorias (Pokémon → Ataque → Treinadores/Clima/Campeão).
  */
 export function renumberCollection(collection: CardCollection) {

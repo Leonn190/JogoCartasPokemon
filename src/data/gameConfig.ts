@@ -19,10 +19,10 @@ type CollectionPreset = {
 
 export const COLLECTION_PRESETS: Record<CollectionSize, CollectionPreset> = {
   large: {
-    total: 160,
+    total: 170,
     limits: {
-      pokemon: 68,
-      attack: 48,
+      pokemon: 76,
+      attack: 50,
       item: 8,
       supporter: 8,
       stadium: 6,
@@ -33,16 +33,16 @@ export const COLLECTION_PRESETS: Record<CollectionSize, CollectionPreset> = {
     },
   },
   normal: {
-    total: 130,
+    total: 140,
     limits: {
-      pokemon: 64,
-      attack: 36,
-      item: 6,
-      supporter: 6,
-      stadium: 4,
-      tool: 4,
-      rareItem: 3,
-      climate: 3,
+      pokemon: 76,
+      attack: 42,
+      item: 4,
+      supporter: 4,
+      stadium: 3,
+      tool: 3,
+      rareItem: 2,
+      climate: 2,
       champion: 4,
     },
   },

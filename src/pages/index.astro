@@ -56,7 +56,7 @@ import '../styles/collections.css';
         <section class="collection-hero">
           <button class="back-link" type="button" data-action="go-hub">← Hub de coleções</button>
           <div class="collection-title-row">
-            <div><span class="collection-code" data-role="collection-code">SET</span><h1 data-role="collection-name">Coleção</h1><p><select class="collection-size-select" data-role="collection-size-select" aria-label="Tamanho da coleção"><option value="normal">Normal · 130</option><option value="large">Grande · 160</option></select> · <span data-role="collection-progress">0 / 160 cartas</span></p></div>
+            <div><span class="collection-code" data-role="collection-code">SET</span><h1 data-role="collection-name">Coleção</h1><p><select class="collection-size-select" data-role="collection-size-select" aria-label="Tamanho da coleção"><option value="normal">Normal · 140</option><option value="large">Grande · 170</option></select> · <span data-role="collection-progress">0 / 140 cartas</span></p></div>
             <div class="collection-progress-ring"><strong data-role="collection-percent">0%</strong><span>concluído</span></div>
           </div>
           <div class="progress-track"><i data-role="collection-progress-bar"></i></div>
@@ -73,7 +73,7 @@ import '../styles/collections.css';
       </main>
 
       <main class="editor-view app-view" data-view="editor" hidden>
-        <div class="editor-context-bar"><button class="back-link" type="button" data-action="back-to-collection">← Voltar</button><span data-role="editor-collection-context">Coleção</span><strong data-role="editor-card-number">001/160</strong></div>
+        <div class="editor-context-bar"><button class="back-link" type="button" data-action="back-to-collection">← Voltar</button><span data-role="editor-collection-context">Coleção</span><strong data-role="editor-card-number">001/140</strong></div>
         <div class="workspace">
           <EditorPanel card={DEFAULT_POKEMON_CARD} />
           <section class="preview-column" aria-label="Preview da carta">
@@ -91,7 +91,7 @@ import '../styles/collections.css';
       <form method="dialog" class="dialog-inner" data-role="create-collection-form">
         <span class="eyebrow">NOVA COLEÇÃO</span><h3>Criar coleção</h3><p>Escolha somente o nome e o tamanho. A sigla será gerada automaticamente.</p>
         <label class="dialog-field"><span>Nome da coleção</span><input data-role="new-collection-name" maxlength="48" placeholder="Ex.: Evoluções de Kanto" required /></label>
-        <div class="size-choice"><label><input type="radio" name="collection-size" value="normal" checked /><span><strong>Normal</strong><small>130 cartas</small></span></label><label><input type="radio" name="collection-size" value="large" /><span><strong>Grande</strong><small>160 cartas</small></span></label></div>
+        <div class="size-choice"><label><input type="radio" name="collection-size" value="normal" checked /><span><strong>Normal</strong><small>140 cartas</small></span></label><label><input type="radio" name="collection-size" value="large" /><span><strong>Grande</strong><small>170 cartas</small></span></label></div>
         <div class="dialog-actions"><button class="button subtle" value="cancel">Cancelar</button><button class="button primary" value="default" data-action="confirm-create-collection">Criar coleção</button></div>
       </form>
     </dialog>

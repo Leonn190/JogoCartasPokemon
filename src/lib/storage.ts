@@ -59,7 +59,7 @@ function migrateLegacy(value: PokemonCardData): CardData {
     ...value,
     cardType: 'pokemon',
     rarity: value.rarity ?? 'common',
-    setTotal: Number(value.setTotal) || 160,
+    setTotal: Number(value.setTotal) || 170,
     artworkTransform: {
       scale: value.artworkTransform?.scale ?? 1,
       x: value.artworkTransform?.x ?? 0,

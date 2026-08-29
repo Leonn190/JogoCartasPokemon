@@ -38,7 +38,7 @@ export const DEFAULT_POKEMON_CARD: PokemonCardData = {
   abilityDescription: 'Uma vez por Momento, quando este Pokémon usar um ataque de Fogo, ele recebe +10 de poder.',
   flavorText: 'Diz-se que seu fogo queima ainda mais intensamente após grandes batalhas.',
   cardNumber: 1,
-  setTotal: 160,
+  setTotal: 170,
   setCode: 'SET',
 };
 
@@ -71,7 +71,7 @@ export const EMPTY_POKEMON_CARD: PokemonCardData = {
   abilityDescription: 'Escreva aqui o efeito da habilidade deste Pokémon.',
   flavorText: 'Adicione uma breve descrição para o rodapé da carta.',
   cardNumber: 1,
-  setTotal: 160,
+  setTotal: 170,
   setCode: 'SET',
 };
 
@@ -89,8 +89,8 @@ export const DEFAULT_ATTACK_CARD: AttackCardData = {
   artworkSource: 'none',
   artworkTransform: { scale: 1, x: 0, y: 0 },
   expandedArtwork: false,
-  cardNumber: 69,
-  setTotal: 160,
+  cardNumber: 77,
+  setTotal: 170,
   setCode: 'SET',
 };
 
@@ -99,31 +99,31 @@ const UTILITY_COPY: Record<UtilityCardType, { name: string; effect: string; usag
     name: 'Arena Central',
     effect: 'Escreva aqui o efeito que este Estádio produz enquanto estiver em jogo.',
     usage: 'Posicione em uma das quatro áreas entre dois jogadores. Afeta apenas os dois jogadores conectados. Pode ser combinado com 1 Ferramenta na mesma ação, mas nunca com outro Estádio.',
-    number: 133,
+    number: 143,
   },
   supporter: {
     name: 'Parceiro de Jornada',
     effect: 'Escreva aqui o efeito concedido por este Apoiador.',
     usage: 'Use somente na Janela de Apoiadores/Confronto, depois da Revelação e antes da resolução por VEL. Máximo de 1 Apoiador por jogador por Rodada.',
-    number: 125,
+    number: 135,
   },
   item: {
     name: 'Kit de Campo',
     effect: 'Escreva aqui o efeito produzido por este Item.',
     usage: 'Use como uma ação. Uma única ação de Item pode empilhar até 2 Itens normais. Depois do uso, descarte-os salvo efeito em contrário.',
-    number: 117,
+    number: 127,
   },
   rareItem: {
     name: 'Relíquia de Jornada',
     effect: 'Escreva aqui o efeito especial produzido por este Item Raro.',
     usage: 'Ocupa uma ação sozinho. Não pode ser empilhado com outro Item Raro, Item normal, Ferramenta ou Estádio na mesma ação.',
-    number: 145,
+    number: 155,
   },
   tool: {
     name: 'Insígnia de Aço',
     effect: 'Escreva aqui o efeito concedido por esta Ferramenta.',
     usage: 'Equipe em um Pokémon válido. Cada Pokémon pode ter 1 Ferramenta. Uma ação pode conter até 2 Ferramentas ou 1 Ferramenta + 1 Estádio.',
-    number: 139,
+    number: 149,
   },
 };
 
@@ -135,8 +135,8 @@ export const DEFAULT_CLIMATE_CARD: ClimateCardData = {
   artworkSource: 'none',
   artworkTransform: { scale: 1, x: 0, y: 0 },
   expandedArtwork: false,
-  cardNumber: 151,
-  setTotal: 160,
+  cardNumber: 161,
+  setTotal: 170,
   setCode: 'SET',
 };
 
@@ -154,8 +154,8 @@ export const DEFAULT_CHAMPION_CARD: ChampionCardData = {
   artworkSource: 'none',
   artworkTransform: { scale: 1, x: 0, y: 0 },
   expandedArtwork: false,
-  cardNumber: 156,
-  setTotal: 160,
+  cardNumber: 166,
+  setTotal: 170,
   setCode: 'SET',
 };
 
@@ -170,7 +170,7 @@ export function createUtilityCard(cardType: UtilityCardType): UtilityCardData {
     artworkTransform: { scale: 1, x: 0, y: 0 },
     expandedArtwork: false,
     cardNumber: copy.number,
-    setTotal: 160,
+    setTotal: 170,
     setCode: 'SET',
   };
 }

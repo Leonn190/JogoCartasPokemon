@@ -1,52 +1,23 @@
 ---
 import { CARD_FORMS, CARD_TYPE_LABELS, TRAINER_CARD_TYPES } from '../../types/card';
 import type { AttackKind, CardType, PokemonForm, TrainerCardType } from '../../types/card';
-interface Props {
-  cardType: CardType;
-  pokemonForm?: PokemonForm;
-  attackKind?: AttackKind;
-}
+interface Props { cardType: CardType; pokemonForm?: PokemonForm; attackKind?: AttackKind }
 const { cardType, pokemonForm = 'Normal', attackKind = 'normal' } = Astro.props;
-const family = cardType === 'pokemon' ? 'pokemon' : cardType === 'attack' ? 'attack' : 'trainer';
-const trainerSubtype = cardType !== 'pokemon' && cardType !== 'attack' ? cardType as TrainerCardType : 'stadium';
+const family = cardType === 'pokemon' ? 'pokemon' : cardType === 'attack' ? 'attack' : cardType === 'climate' ? 'climate' : 'trainer';
+const trainerSubtype = cardType !== 'pokemon' && cardType !== 'attack' && cardType !== 'climate' ? cardType as TrainerCardType : 'stadium';
 ---
 <div class="card-type-selector">
-  <div class="type-selector-copy">
-    <span class="eyebrow">TIPO DE CARTA</span>
-    <strong>Template e subtipo</strong>
-    <small>Primeiro escolha a família da carta e depois a variação.</small>
-  </div>
-
+  <div class="type-selector-copy"><span class="eyebrow">TIPO DE CARTA</span><strong>Template e subtipo</strong><small>A categoria nasce na coleção; formas e subtipos continuam editáveis.</small></div>
   <div class="type-selector-controls">
-    <label class="compact-select">
-      <span>Tipo</span>
-      <select data-role="card-family-selector" aria-label="Tipo principal da carta">
-        <option value="pokemon" selected={family === 'pokemon'}>Pokémon</option>
-        <option value="trainer" selected={family === 'trainer'}>Treinador</option>
-        <option value="attack" selected={family === 'attack'}>Ataque</option>
-      </select>
-    </label>
-
-    <label class="compact-select" data-subtype-family="pokemon" hidden={family !== 'pokemon'}>
-      <span>Subtipo</span>
-      <select data-role="pokemon-subtype-selector" aria-label="Subtipo de Pokémon">
-        {CARD_FORMS.map((form) => <option value={form} selected={form === pokemonForm}>{form}</option>)}
-      </select>
-    </label>
-
-    <label class="compact-select" data-subtype-family="trainer" hidden={family !== 'trainer'}>
-      <span>Subtipo</span>
-      <select data-role="trainer-subtype-selector" aria-label="Subtipo de Treinador">
-        {TRAINER_CARD_TYPES.map((type) => <option value={type} selected={type === trainerSubtype}>{CARD_TYPE_LABELS[type]}</option>)}
-      </select>
-    </label>
-
-    <label class="compact-select" data-subtype-family="attack" hidden={family !== 'attack'}>
-      <span>Subtipo</span>
-      <select data-role="attack-subtype-selector" aria-label="Subtipo de Ataque">
-        <option value="normal" selected={attackKind === 'normal'}>Ataque Normal</option>
-        <option value="special" selected={attackKind === 'special'}>Ataque Especial</option>
-      </select>
-    </label>
+    <label class="compact-select"><span>Tipo</span><select data-role="card-family-selector" aria-label="Tipo principal da carta">
+      <option value="pokemon" selected={family === 'pokemon'}>Pokémon</option>
+      <option value="trainer" selected={family === 'trainer'}>Treinador</option>
+      <option value="attack" selected={family === 'attack'}>Ataque</option>
+      <option value="climate" selected={family === 'climate'}>Clima</option>
+    </select></label>
+    <label class="compact-select" data-subtype-family="pokemon" hidden={family !== 'pokemon'}><span>Subtipo</span><select data-role="pokemon-subtype-selector">{CARD_FORMS.map((form) => <option value={form} selected={form === pokemonForm}>{form}</option>)}</select></label>
+    <label class="compact-select" data-subtype-family="trainer" hidden={family !== 'trainer'}><span>Subtipo</span><select data-role="trainer-subtype-selector">{TRAINER_CARD_TYPES.map((type) => <option value={type} selected={type === trainerSubtype}>{CARD_TYPE_LABELS[type]}</option>)}</select></label>
+    <label class="compact-select" data-subtype-family="attack" hidden={family !== 'attack'}><span>Subtipo</span><select data-role="attack-subtype-selector"><option value="normal" selected={attackKind === 'normal'}>Ataque Normal</option><option value="special" selected={attackKind === 'special'}>Ataque Especial</option></select></label>
+    <div class="compact-static" data-subtype-family="climate" hidden={family !== 'climate'}><span>Subtipo</span><strong>Clima</strong></div>
   </div>
 </div>

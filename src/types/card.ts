@@ -1,18 +1,19 @@
-export const CARD_TYPES = ['pokemon', 'attack', 'stadium', 'supporter', 'item', 'rareItem', 'tool', 'champion'] as const;
+export const CARD_TYPES = ['pokemon', 'attack', 'item', 'supporter', 'stadium', 'tool', 'rareItem', 'climate', 'champion'] as const;
 export type CardType = (typeof CARD_TYPES)[number];
 
 export const CARD_TYPE_LABELS: Record<CardType, string> = {
   pokemon: 'Pokémon',
   attack: 'Ataque',
-  stadium: 'Estádio',
-  supporter: 'Apoiador',
   item: 'Item',
-  rareItem: 'Item Raro',
+  supporter: 'Apoiador',
+  stadium: 'Estádio',
   tool: 'Ferramenta',
+  rareItem: 'Item Raro',
+  climate: 'Clima',
   champion: 'Campeão',
 };
 
-export const TRAINER_CARD_TYPES = ['stadium', 'supporter', 'item', 'rareItem', 'tool', 'champion'] as const;
+export const TRAINER_CARD_TYPES = ['item', 'supporter', 'stadium', 'tool', 'rareItem', 'champion'] as const;
 export type TrainerCardType = (typeof TRAINER_CARD_TYPES)[number];
 
 export const UTILITY_CARD_TYPES = ['stadium', 'supporter', 'item', 'rareItem', 'tool'] as const;
@@ -85,6 +86,7 @@ export interface PokemonCardData extends BaseCardData, CardStats {
   form: PokemonForm;
   rarity: PokemonRarity;
   type: GameType;
+  typeCandidates?: GameType[];
   stage: PokemonStage;
   previousEvolution: string;
   previousEvolutionImage: string;
@@ -128,6 +130,12 @@ export interface UtilityCardData extends BaseCardData {
   usageText: string;
 }
 
+export interface ClimateCardData extends BaseCardData {
+  cardType: 'climate';
+  name: string;
+  effectText: string;
+}
+
 export interface ChampionCardData extends BaseCardData {
   cardType: 'champion';
   name: string;
@@ -140,7 +148,35 @@ export interface ChampionCardData extends BaseCardData {
   initialTrainerCount: number;
 }
 
-export type CardData = PokemonCardData | AttackCardData | UtilityCardData | ChampionCardData;
+export type CardData = PokemonCardData | AttackCardData | UtilityCardData | ClimateCardData | ChampionCardData;
+
+export type CollectionSize = 'normal' | 'large';
+
+export interface StoredCard {
+  id: string;
+  collectionId: string;
+  createdAt: string;
+  updatedAt: string;
+  data: CardData;
+}
+
+export interface CardCollection {
+  id: string;
+  name: string;
+  code: string;
+  size: CollectionSize;
+  createdAt: string;
+  updatedAt: string;
+  cards: StoredCard[];
+}
+
+export interface WorkspaceState {
+  schemaVersion: 1;
+  revision: number;
+  updatedAt: string;
+  snapshotExportedAt?: string;
+  collections: CardCollection[];
+}
 
 export interface OfficialStats extends CardStats {}
 

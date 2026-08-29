@@ -1,59 +1,61 @@
 import { CARD_TYPE_LABELS } from '../types/card';
-import type { CardData, CardType } from '../types/card';
-import type { CardCollection, CollectionSize, ContentState, StoredCard } from '../types/collection';
-import { COLLECTION_CATEGORY_ORDER, COLLECTION_TOTALS, getCategoryLimit, getCategoryStart } from '../data/gameConfig';
-
-export const CONTENT_SCHEMA_VERSION = 1 as const;
-
-export function createEmptyContentState(): ContentState {
-  return { schemaVersion: CONTENT_SCHEMA_VERSION, generatedAt: new Date(0).toISOString(), collections: [] };
-}
+import type { CardCollection, CardData, CardType, CollectionSize, StoredCard, WorkspaceState } from '../types/card';
+import { categoryLimit, categoryStart, collectionTotal } from '../data/gameConfig';
 
 export function stableId(prefix = 'id') {
-  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) return `${prefix}-${crypto.randomUUID()}`;
+  if (globalThis.crypto?.randomUUID) return `${prefix}-${globalThis.crypto.randomUUID()}`;
   return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
-function normalizeForCode(value: string) {
-  return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Za-z ]+/g, ' ').trim().toUpperCase();
+function normalizeCodeSource(name: string) {
+  return name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().replace(/[^A-Z ]+/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
-export function generateCollectionCode(name: string, existingCodes: string[]): string {
-  const normalized = normalizeForCode(name);
-  const words = normalized.split(/\s+/).filter(Boolean);
-  const candidates: string[] = [];
-
-  if (words.length >= 3) candidates.push((words[0][0] + words[1][0] + words[2][0]).slice(0, 3));
-  if (words.length >= 2) {
-    candidates.push((words[0].slice(0, 2) + words[1][0]).slice(0, 3));
-    candidates.push((words[0][0] + words[1].slice(0, 2)).slice(0, 3));
+function baseCode(name: string) {
+  const clean = normalizeCodeSource(name);
+  const words = clean.split(' ').filter(Boolean);
+  if (!words.length) return 'SET';
+  if (words.length >= 3) return `${words[0]![0] ?? ''}${words[1]![0] ?? ''}${words[2]![0] ?? ''}`.padEnd(3, 'X').slice(0, 3);
+  if (words.length === 2) {
+    const first = words[0]!;
+    const second = words[1]!;
+    return (first.length > 6 ? `${first[0] ?? ''}${second.slice(0, 2)}` : `${first.slice(0, 2)}${second[0] ?? ''}`).padEnd(3, 'X').slice(0, 3);
   }
-  if (words[0]) candidates.push(words[0].slice(0, 3));
-  candidates.push(normalized.replace(/\s+/g, '').slice(0, 3));
+  return words[0]!.slice(0, 3).padEnd(3, 'X');
+}
 
+export function generateCollectionCode(name: string, existingCodes: string[]) {
   const used = new Set(existingCodes.map((code) => code.toUpperCase()));
-  for (const candidate of candidates) {
-    const code = candidate.replace(/[^A-Z]/g, '').padEnd(3, 'X').slice(0, 3);
-    if (!used.has(code)) return code;
-  }
+  const clean = normalizeCodeSource(name).replace(/ /g, '');
+  const primary = baseCode(name);
+  if (!used.has(primary)) return primary;
 
-  const base = (candidates.find(Boolean) || 'SET').replace(/[^A-Z]/g, '').padEnd(3, 'X').slice(0, 3);
-  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  for (let i = 0; i < alphabet.length; i += 1) {
-    for (let j = 0; j < alphabet.length; j += 1) {
-      const code = `${base[0]}${alphabet[i]}${alphabet[j]}`;
-      if (!used.has(code)) return code;
+  const candidates = new Set<string>();
+  for (let i = 0; i < clean.length; i += 1) {
+    for (let j = i + 1; j < clean.length; j += 1) {
+      for (let k = j + 1; k < clean.length; k += 1) candidates.add(`${clean[i]}${clean[j]}${clean[k]}`);
     }
   }
-  throw new Error('Não foi possível gerar uma sigla única para a coleção.');
+  for (const candidate of candidates) if (!used.has(candidate)) return candidate;
+
+  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  for (const letter of alphabet) {
+    const candidate = `${primary.slice(0, 2)}${letter}`;
+    if (!used.has(candidate)) return candidate;
+  }
+  for (const a of alphabet) for (const b of alphabet) for (const c of alphabet) {
+    const candidate = `${a}${b}${c}`;
+    if (!used.has(candidate)) return candidate;
+  }
+  throw new Error('Não há mais siglas de três letras disponíveis.');
 }
 
 export function createCollection(name: string, size: CollectionSize, existing: CardCollection[]): CardCollection {
   const now = new Date().toISOString();
   return {
     id: stableId('collection'),
-    name: name.trim(),
-    code: generateCollectionCode(name, existing.map((collection) => collection.code)),
+    name: name.trim() || 'Nova Coleção',
+    code: generateCollectionCode(name, existing.map((item) => item.code)),
     size,
     createdAt: now,
     updatedAt: now,
@@ -61,95 +63,65 @@ export function createCollection(name: string, size: CollectionSize, existing: C
   };
 }
 
-export function countCardsByType(collection: CardCollection, type: CardType) {
-  return collection.cards.filter((card) => card.data.cardType === type).length;
+export function createEmptyWorkspace(): WorkspaceState {
+  return { schemaVersion: 1, revision: 0, updatedAt: new Date(0).toISOString(), collections: [] };
 }
 
-export function isCategoryFull(collection: CardCollection, type: CardType) {
-  return countCardsByType(collection, type) >= getCategoryLimit(collection.size, type);
+export function cardDisplayName(card: CardData) {
+  if (card.cardType === 'pokemon') return card.pokemonName || 'Novo Pokémon';
+  if (card.cardType === 'attack') return card.attackName || 'Novo Ataque';
+  return card.name || CARD_TYPE_LABELS[card.cardType];
 }
 
-export function getNextCardNumber(collection: CardCollection, type: CardType) {
-  const count = countCardsByType(collection, type);
-  const limit = getCategoryLimit(collection.size, type);
-  if (count >= limit) throw new Error(`${CARD_TYPE_LABELS[type]} está completo nesta coleção.`);
-  return getCategoryStart(collection.size, type) + count;
+export function applyCollectionMetadata(card: CardData, collection: CardCollection, positionInCategory: number) {
+  card.setCode = collection.code;
+  card.setTotal = collectionTotal(collection.size);
+  card.cardNumber = categoryStart(collection.size, card.cardType) + positionInCategory;
+  return card;
 }
 
-export function applyCollectionMetadata<T extends CardData>(collection: CardCollection, data: T, number: number): T {
-  return {
-    ...data,
-    cardNumber: number,
-    setTotal: COLLECTION_TOTALS[collection.size],
-    setCode: collection.code,
-  } as T;
+export function renumberCategory(collection: CardCollection, type: CardType) {
+  const entries = collection.cards
+    .filter((entry) => entry.data.cardType === type)
+    .sort((a, b) => a.data.cardNumber - b.data.cardNumber || a.createdAt.localeCompare(b.createdAt));
+  entries.forEach((entry, index) => applyCollectionMetadata(entry.data, collection, index));
+  collection.cards.sort((a, b) => a.data.cardNumber - b.data.cardNumber || a.createdAt.localeCompare(b.createdAt));
+  collection.updatedAt = new Date().toISOString();
+  return collection;
 }
 
-export function renumberCollection(collection: CardCollection): CardCollection {
-  const cloned: CardCollection = structuredClone(collection);
-  for (const type of COLLECTION_CATEGORY_ORDER) {
-    const items = cloned.cards
-      .filter((card) => card.data.cardType === type)
-      .sort((a, b) => a.order - b.order || a.createdAt.localeCompare(b.createdAt));
-    const start = getCategoryStart(cloned.size, type);
-    items.forEach((item, index) => {
-      item.order = index;
-      item.data = applyCollectionMetadata(cloned, item.data, start + index);
-    });
+export function renumberCollection(collection: CardCollection) {
+  const categories = new Set(collection.cards.map((entry) => entry.data.cardType));
+  for (const type of categories) renumberCategory(collection, type);
+  return collection;
+}
+
+export function prepareCardForCollection(card: CardData, collection: CardCollection, currentCardId?: string | null) {
+  const siblings = collection.cards.filter((entry) => entry.id !== currentCardId && entry.data.cardType === card.cardType);
+  if (siblings.length >= categoryLimit(collection.size, card.cardType)) {
+    throw new Error(`${CARD_TYPE_LABELS[card.cardType]} está no limite da coleção.`);
   }
-  cloned.cards.sort((a, b) => a.data.cardNumber - b.data.cardNumber || a.createdAt.localeCompare(b.createdAt));
-  cloned.updatedAt = new Date().toISOString();
-  return cloned;
+  return applyCollectionMetadata(card, collection, siblings.length);
 }
 
-export function upsertCard(collection: CardCollection, cardId: string | null, data: CardData): { collection: CardCollection; card: StoredCard } {
-  const cloned: CardCollection = structuredClone(collection);
+export function upsertCard(collection: CardCollection, card: CardData, cardId?: string | null) {
   const now = new Date().toISOString();
-  let record = cardId ? cloned.cards.find((item) => item.id === cardId) : undefined;
-  const previousType = record?.data.cardType;
-
-  if (!record) {
-    if (isCategoryFull(cloned, data.cardType)) throw new Error(`${CARD_TYPE_LABELS[data.cardType]} está completo nesta coleção.`);
-    record = {
-      id: stableId('card'),
-      order: countCardsByType(cloned, data.cardType),
-      createdAt: now,
-      updatedAt: now,
-      data,
-    };
-    cloned.cards.push(record);
+  const data = prepareCardForCollection(structuredClone(card), collection, cardId);
+  let stored = cardId ? collection.cards.find((entry) => entry.id === cardId) : undefined;
+  if (stored) {
+    stored.data = data;
+    stored.updatedAt = now;
   } else {
-    if (previousType !== data.cardType && isCategoryFull(cloned, data.cardType)) {
-      throw new Error(`${CARD_TYPE_LABELS[data.cardType]} está completo nesta coleção.`);
-    }
-    record.data = data;
-    record.updatedAt = now;
-    if (previousType !== data.cardType) record.order = countCardsByType(cloned, data.cardType) - (previousType === data.cardType ? 1 : 0);
+    stored = { id: stableId('card'), collectionId: collection.id, createdAt: now, updatedAt: now, data };
+    collection.cards.push(stored);
   }
-
-  const renumbered = renumberCollection(cloned);
-  const saved = renumbered.cards.find((item) => item.id === record!.id)!;
-  return { collection: renumbered, card: saved };
+  renumberCollection(collection);
+  return stored;
 }
 
-export function deleteCard(collection: CardCollection, cardId: string): CardCollection {
-  const cloned: CardCollection = structuredClone(collection);
-  cloned.cards = cloned.cards.filter((card) => card.id !== cardId);
-  return renumberCollection(cloned);
-}
-
-export function validateCollection(collection: CardCollection): string[] {
-  const errors: string[] = [];
-  for (const type of COLLECTION_CATEGORY_ORDER) {
-    const count = countCardsByType(collection, type);
-    const limit = getCategoryLimit(collection.size, type);
-    if (count > limit) errors.push(`${CARD_TYPE_LABELS[type]}: ${count}/${limit}`);
-  }
-  return errors;
-}
-
-export function cardDisplayName(data: CardData) {
-  if (data.cardType === 'pokemon') return data.pokemonName;
-  if (data.cardType === 'attack') return data.attackName;
-  return data.name;
+export function deleteCard(collection: CardCollection, cardId: string) {
+  const removedType = collection.cards.find((entry) => entry.id === cardId)?.data.cardType;
+  collection.cards = collection.cards.filter((entry) => entry.id !== cardId);
+  if (removedType) return renumberCategory(collection, removedType);
+  return collection;
 }

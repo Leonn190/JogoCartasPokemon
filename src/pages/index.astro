@@ -6,6 +6,7 @@ import '../styles/global.css';
 import '../styles/editor.css';
 import '../styles/card.css';
 import '../styles/pokemon-card.css';
+import '../styles/collections.css';
 ---
 <!doctype html>
 <html lang="pt-BR" data-base-url={import.meta.env.BASE_URL}>
@@ -13,52 +14,94 @@ import '../styles/pokemon-card.css';
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#0d0f12" />
-    <meta name="description" content="Editor estático de cartas customizadas, integrado à PokéAPI." />
+    <meta name="description" content="Gerenciador estático de coleções e editor de cartas Pokémon/Jornada." />
     <link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL}favicon.svg`} />
-    <title>Card Forge — Editor de Cartas</title>
+    <title>Card Forge — Coleções</title>
   </head>
   <body>
     <div class="app-shell">
-      <header class="topbar">
-        <div class="brand" aria-label="Card Forge">
+      <header class="topbar app-topbar">
+        <button class="brand brand-button" type="button" data-action="go-hub" aria-label="Ir para coleções">
           <div class="brand-mark" aria-hidden="true">✦</div>
-          <div class="brand-copy">
-            <strong>Card Forge</strong>
-            <span>Custom Card Editor</span>
-          </div>
+          <div class="brand-copy"><strong>Card Forge</strong><span>Collection Studio</span></div>
+        </button>
+        <div class="topbar-actions" data-role="hub-actions">
+          <button class="button primary" type="button" data-action="create-collection"><span class="button-icon">＋</span>Criar coleção</button>
         </div>
-        <div class="topbar-actions">
-          <button class="button subtle" type="button" data-action="new-card"><span class="button-icon" aria-hidden="true">＋</span><span class="button-label optional">Nova carta</span></button>
-          <button class="button subtle" type="button" data-action="save-now"><span class="button-icon" aria-hidden="true">◇</span><span class="button-label optional">Salvar</span></button>
-          <button class="button primary" type="button" data-action="export"><span class="button-icon" aria-hidden="true">⇩</span>Exportar PNG</button>
+        <div class="topbar-actions" data-role="collection-actions" hidden>
+          <button class="button subtle" type="button" data-action="go-hub">← Coleções</button>
+          <button class="button subtle" type="button" data-action="new-collection-card"><span class="button-icon">＋</span>Nova carta</button>
+          <button class="button primary" type="button" data-action="export-content"><span class="button-icon">⇩</span>Salvar conteúdo</button>
+        </div>
+        <div class="topbar-actions" data-role="editor-actions" hidden>
+          <button class="button subtle" type="button" data-action="back-to-collection">← Coleção</button>
+          <button class="button subtle" type="button" data-action="save-card"><span class="button-icon">◇</span>Salvar carta</button>
+          <button class="button primary" type="button" data-action="export"><span class="button-icon">⇩</span>Exportar PNG</button>
         </div>
       </header>
 
-      <main class="workspace">
-        <EditorPanel card={DEFAULT_POKEMON_CARD} />
-        <section class="preview-column" aria-label="Preview da carta">
-          <div class="preview-heading">
-            <div>
-              <span class="eyebrow">PREVIEW EM TEMPO REAL</span>
-              <h2 data-role="preview-title">Carta Pokémon</h2>
-              <p>Composição fixa 63 × 88, escalada apenas para visualização.</p>
-            </div>
-            <div class="preview-tools"><span class="scale-chip" data-role="preview-scale">100%</span><span class="scale-chip">630 × 880 base</span></div>
-          </div>
-          <div class="preview-stage"><div class="card-scale-box"><CardPreview /></div></div>
-          <p class="preview-footnote"><span>↳</span> A exportação captura somente o template selecionado em 1260 × 1760 px. A arte pode ser arrastada diretamente na carta para refinar o enquadramento.</p>
+      <main class="hub-view app-view" data-view="hub">
+        <section class="hub-hero">
+          <div><span class="eyebrow">COLEÇÕES</span><h1>Seu acervo de Jornada</h1><p>Crie coleções, acompanhe os limites oficiais e abra qualquer carta diretamente no editor.</p></div>
+          <button class="collection-create-card" type="button" data-action="create-collection"><span>＋</span><strong>Criar nova coleção</strong><small>Normal ou Grande, com sigla automática</small></button>
         </section>
+        <section class="collections-section">
+          <div class="section-title-row"><div><span class="eyebrow">BIBLIOTECA</span><h2>Coleções existentes</h2></div><span class="snapshot-status" data-role="snapshot-status">Carregando conteúdo…</span></div>
+          <div class="collections-grid" data-role="collections-grid"></div>
+          <div class="empty-hub" data-role="empty-hub" hidden><div class="empty-glyph">✦</div><h3>Nenhuma coleção ainda</h3><p>Crie a primeira coleção para começar. Se não existir <code>public/conteudo.zip</code>, o site continua funcionando normalmente.</p><button class="button primary" type="button" data-action="create-collection">Criar nova coleção</button></div>
+        </section>
+      </main>
+
+      <main class="collection-view app-view" data-view="collection" hidden>
+        <section class="collection-hero">
+          <button class="back-link" type="button" data-action="go-hub">← Hub de coleções</button>
+          <div class="collection-title-row">
+            <div><span class="collection-code" data-role="collection-code">SET</span><h1 data-role="collection-name">Coleção</h1><p><select class="collection-size-select" data-role="collection-size-select" aria-label="Tamanho da coleção"><option value="normal">Normal · 130</option><option value="large">Grande · 160</option></select> · <span data-role="collection-progress">0 / 160 cartas</span></p></div>
+            <div class="collection-progress-ring"><strong data-role="collection-percent">0%</strong><span>concluído</span></div>
+          </div>
+          <div class="progress-track"><i data-role="collection-progress-bar"></i></div>
+        </section>
+        <section class="category-capacity-panel"><div class="capacity-grid" data-role="capacity-grid"></div></section>
+        <section class="collection-cards-section">
+          <div class="section-title-row collection-toolbar">
+            <div><span class="eyebrow">CARTAS</span><h2>Cartas da coleção</h2></div>
+            <div class="toolbar-actions"><select data-role="category-filter"><option value="all">Todas as categorias</option></select><button class="button primary" type="button" data-action="new-collection-card">＋ Nova carta</button></div>
+          </div>
+          <div class="collection-card-grid" data-role="collection-card-grid"></div>
+          <div class="empty-collection" data-role="empty-collection" hidden><p>Esta coleção ainda não tem cartas.</p><button class="button primary" type="button" data-action="new-collection-card">Criar primeira carta</button></div>
+        </section>
+      </main>
+
+      <main class="editor-view app-view" data-view="editor" hidden>
+        <div class="editor-context-bar"><button class="back-link" type="button" data-action="back-to-collection">← Voltar</button><span data-role="editor-collection-context">Coleção</span><strong data-role="editor-card-number">001/160</strong></div>
+        <div class="workspace">
+          <EditorPanel card={DEFAULT_POKEMON_CARD} />
+          <section class="preview-column" aria-label="Preview da carta">
+            <div class="preview-heading"><div><span class="eyebrow">PREVIEW EM TEMPO REAL</span><h2 data-role="preview-title">Carta Pokémon</h2><p>Composição fixa 63 × 88, escalada apenas para visualização.</p></div><div class="preview-tools"><span class="scale-chip" data-role="preview-scale">100%</span><span class="scale-chip">630 × 880 base</span></div></div>
+            <div class="preview-stage"><div class="card-scale-box"><CardPreview /></div></div>
+            <p class="preview-footnote"><span>↳</span> A exportação captura somente o template selecionado em 1260 × 1760 px. A arte pode ser arrastada diretamente na carta para refinar o enquadramento.</p>
+          </section>
+        </div>
       </main>
     </div>
 
     <div class="toast-region" data-role="toast-region" aria-live="polite" aria-atomic="true"></div>
-    <dialog class="confirm-dialog" data-role="new-card-dialog">
-      <div class="dialog-inner">
-        <h3>Começar uma nova carta?</h3>
-        <p>O rascunho local atual será limpo e o tipo selecionado começará com valores padrão.</p>
-        <div class="dialog-actions"><button class="button subtle" type="button" data-action="cancel-new">Cancelar</button><button class="button primary" type="button" data-action="confirm-new">Criar nova carta</button></div>
-      </div>
+
+    <dialog class="confirm-dialog collection-dialog" data-role="create-collection-dialog">
+      <form method="dialog" class="dialog-inner" data-role="create-collection-form">
+        <span class="eyebrow">NOVA COLEÇÃO</span><h3>Criar coleção</h3><p>Escolha somente o nome e o tamanho. A sigla será gerada automaticamente.</p>
+        <label class="dialog-field"><span>Nome da coleção</span><input data-role="new-collection-name" maxlength="48" placeholder="Ex.: Evoluções de Kanto" required /></label>
+        <div class="size-choice"><label><input type="radio" name="collection-size" value="normal" checked /><span><strong>Normal</strong><small>130 cartas</small></span></label><label><input type="radio" name="collection-size" value="large" /><span><strong>Grande</strong><small>160 cartas</small></span></label></div>
+        <div class="dialog-actions"><button class="button subtle" value="cancel">Cancelar</button><button class="button primary" value="default" data-action="confirm-create-collection">Criar coleção</button></div>
+      </form>
     </dialog>
+
+    <dialog class="confirm-dialog collection-dialog" data-role="new-card-dialog">
+      <div class="dialog-inner"><span class="eyebrow">NOVA CARTA</span><h3>Escolha a categoria</h3><p>A numeração será calculada automaticamente na faixa oficial.</p><div class="new-card-category-grid" data-role="new-card-category-grid"></div><div class="dialog-actions"><button class="button subtle" type="button" data-action="cancel-new">Cancelar</button></div></div>
+    </dialog>
+
+    <dialog class="confirm-dialog" data-role="delete-card-dialog"><div class="dialog-inner"><h3>Excluir esta carta?</h3><p>As cartas restantes desta categoria serão renumeradas. As outras faixas não mudam.</p><div class="dialog-actions"><button class="button subtle" type="button" data-action="cancel-delete-card">Cancelar</button><button class="button danger" type="button" data-action="confirm-delete-card">Excluir</button></div></div></dialog>
+
     <script src="../scripts/editor.ts"></script>
   </body>
 </html>

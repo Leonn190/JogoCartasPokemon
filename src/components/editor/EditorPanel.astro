@@ -1,6 +1,6 @@
 ---
 import type { PokemonCardData } from '../../types/card';
-import { DEFAULT_ATTACK_CARD, DEFAULT_CHAMPION_CARD, createUtilityCard } from '../../data/defaultCard';
+import { DEFAULT_ATTACK_CARD, DEFAULT_CHAMPION_CARD, DEFAULT_CLIMATE_CARD, createUtilityCard } from '../../data/defaultCard';
 import CardTypeSelector from './CardTypeSelector.astro';
 import PokemonForm from './PokemonForm.astro';
 import EvolutionEditor from './EvolutionEditor.astro';
@@ -8,10 +8,12 @@ import ArtworkControls from './ArtworkControls.astro';
 import PokedexEditor from './PokedexEditor.astro';
 import StatsEditor from './StatsEditor.astro';
 import AbilityEditor from './AbilityEditor.astro';
+import AbilityDescriptionEditor from './AbilityDescriptionEditor.astro';
 import CardMetadataEditor from './CardMetadataEditor.astro';
 import AttackEditor from './AttackEditor.astro';
 import UtilityEditor from './UtilityEditor.astro';
 import ChampionEditor from './ChampionEditor.astro';
+import ClimateEditor from './ClimateEditor.astro';
 interface Props { card: PokemonCardData }
 const { card } = Astro.props;
 ---
@@ -29,15 +31,18 @@ const { card } = Astro.props;
 
   <div class="editor-kind" data-editor-kind="pokemon">
     <PokemonForm card={card} />
-    <EvolutionEditor card={card} />
-    <PokedexEditor card={card} />
     <StatsEditor card={card} />
     <AbilityEditor card={card} />
+    <div class="editor-mode-label advanced-label"><span>AVANÇADO</span><small>Dados preenchidos automaticamente e ajustes ocasionais</small></div>
+    <EvolutionEditor card={card} />
+    <PokedexEditor card={card} />
+    <AbilityDescriptionEditor card={card} />
     <CardMetadataEditor card={card} />
   </div>
 
   <AttackEditor card={DEFAULT_ATTACK_CARD} />
   <UtilityEditor card={createUtilityCard('stadium')} />
+  <ClimateEditor card={DEFAULT_CLIMATE_CARD} />
   <ChampionEditor card={DEFAULT_CHAMPION_CARD} />
   <ArtworkControls card={card} />
 </aside>

@@ -1,18 +1,24 @@
 import { ATTACK_KIND_META, CARD_CATEGORY_META } from '../data/cardCategories';
-import { DEFAULT_ATTACK_CARD, DEFAULT_POKEMON_CARD, EMPTY_POKEMON_CARD, createChampionCard, createEmptyCard, createUtilityCard } from '../data/defaultCard';
+import { DEFAULT_ATTACK_CARD, DEFAULT_POKEMON_CARD, createChampionCard, createClimateCard, createEmptyCard, createUtilityCard } from '../data/defaultCard';
 import { exportCardAsPng } from '../lib/exportCard';
+import { exportWorkspaceZip, importWorkspaceZip } from '../lib/contentZip';
+import { cardDisplayName, createCollection, createEmptyWorkspace, deleteCard, prepareCardForCollection, renumberCollection, upsertCard } from '../lib/collections';
+import { loadWorkspaceLocal, saveWorkspaceLocal, touchWorkspace } from '../lib/workspaceStorage';
+import { COLLECTION_CATEGORY_ORDER, categoryCount, categoryFull, categoryLimit, collectionTotal } from '../data/gameConfig';
 import { getPokemonIndex, loadAbilityDescription, loadPokemonEditorData, loadPokemonSummary } from '../lib/pokeapi';
 import { extractArtworkFromCandidate, findNormalPokemonArtworkCandidates } from '../lib/tcgArtwork';
 import type { TcgArtworkCandidate } from '../lib/tcgArtwork';
 import { TYPE_META, titleCasePokemon } from '../lib/pokemonMapping';
-import { clearDraft, loadDraft, saveDraft } from '../lib/storage';
-import { CARD_FORMS, CARD_TYPE_LABELS, POKEMON_RARITY_LABELS } from '../types/card';
+import { clearDraft, loadDraft } from '../lib/storage';
+import { CARD_FORMS, CARD_TYPE_LABELS, GAME_TYPES, POKEMON_RARITY_LABELS } from '../types/card';
 import type {
   AttackCardData,
   AttackKind,
   CardData,
   CardType,
   ChampionCardData,
+  ClimateCardData,
+  CardCollection,
   EditorReferenceData,
   GameType,
   PokemonCardData,
@@ -20,6 +26,8 @@ import type {
   PokemonRarity,
   TrainerCardType,
   UtilityCardData,
+  WorkspaceState,
+  CollectionSize,
 } from '../types/card';
 
 const q = <T extends Element = HTMLElement>(selector: string, root: ParentNode = document) => root.querySelector<T>(selector);
@@ -48,6 +56,10 @@ let attackSearchTimer = 0;
 let pokemonSuggestionCursor = -1;
 let attackSuggestionCursor = -1;
 let dirty = false;
+let workspace: WorkspaceState = createEmptyWorkspace();
+let activeCollectionId: string | null = null;
+let activeCardId: string | null = null;
+let pendingDeleteCardId: string | null = null;
 
 const scaleBox = q<HTMLElement>('.card-scale-box')!;
 const previewStage = q<HTMLElement>('.preview-stage')!;
@@ -79,20 +91,23 @@ const tcgArtworkRefreshButton = q<HTMLButtonElement>('[data-action="refresh-tcg-
 function isPokemon(value: CardData = card): value is PokemonCardData { return value.cardType === 'pokemon'; }
 function isAttack(value: CardData = card): value is AttackCardData { return value.cardType === 'attack'; }
 function isChampion(value: CardData = card): value is ChampionCardData { return value.cardType === 'champion'; }
-function isUtility(value: CardData = card): value is UtilityCardData { return !isPokemon(value) && !isAttack(value) && !isChampion(value); }
+function isClimate(value: CardData = card): value is ClimateCardData { return value.cardType === 'climate'; }
+function isUtility(value: CardData = card): value is UtilityCardData { return !isPokemon(value) && !isAttack(value) && !isClimate(value) && !isChampion(value); }
 
 function slotForCard(value: CardData = card) {
   if (value.cardType === 'pokemon') return 'pokemon';
   if (value.cardType === 'attack') return 'attack';
+  if (value.cardType === 'climate') return 'climate';
   if (value.cardType === 'champion') return 'champion';
   return 'utility';
 }
 
-type CardFamily = 'pokemon' | 'trainer' | 'attack';
+type CardFamily = 'pokemon' | 'trainer' | 'attack' | 'climate';
 
 function familyForCard(value: CardData = card): CardFamily {
   if (value.cardType === 'pokemon') return 'pokemon';
   if (value.cardType === 'attack') return 'attack';
+  if (value.cardType === 'climate') return 'climate';
   return 'trainer';
 }
 
@@ -159,6 +174,276 @@ function toast(message: string, kind: 'success' | 'error' | 'neutral' = 'neutral
   window.setTimeout(() => item.remove(), 3300);
 }
 
+function currentCollection(): CardCollection | null {
+  return activeCollectionId ? workspace.collections.find((item) => item.id === activeCollectionId) ?? null : null;
+}
+
+function setAppView(view: 'hub' | 'collection' | 'editor') {
+  qa<HTMLElement>('[data-view]').forEach((node) => { node.hidden = node.dataset.view !== view; });
+  const groups = ['hub', 'collection', 'editor'] as const;
+  groups.forEach((group) => {
+    const node = q<HTMLElement>(`[data-role="${group}-actions"]`);
+    if (node) node.hidden = group !== view;
+  });
+  if (view === 'editor') requestAnimationFrame(fitPreview);
+}
+
+function collectionProgress(collection: CardCollection) {
+  const total = collectionTotal(collection.size);
+  return { created: collection.cards.length, total, percent: Math.min(100, Math.round((collection.cards.length / total) * 100)) };
+}
+
+function renderHub() {
+  const grid = q<HTMLElement>('[data-role="collections-grid"]');
+  const empty = q<HTMLElement>('[data-role="empty-hub"]');
+  if (!grid || !empty) return;
+  empty.hidden = workspace.collections.length > 0;
+  grid.hidden = workspace.collections.length === 0;
+  grid.innerHTML = workspace.collections.map((collection) => {
+    const progress = collectionProgress(collection);
+    return `<article class="collection-tile" data-open-collection="${escapeHtml(collection.id)}" tabindex="0">
+      <div class="collection-tile-head"><span class="collection-tile-code">${escapeHtml(collection.code)}</span><span class="collection-size-pill">${collection.size === 'large' ? 'Grande' : 'Normal'}</span></div>
+      <h3>${escapeHtml(collection.name)}</h3>
+      <div class="collection-tile-progress"><span>${progress.created} / ${progress.total} cartas</span><strong>${progress.percent}%</strong></div>
+      <div class="mini-progress"><i style="width:${progress.percent}%"></i></div>
+    </article>`;
+  }).join('');
+}
+
+function renderCapacity(collection: CardCollection) {
+  const grid = q<HTMLElement>('[data-role="capacity-grid"]');
+  if (!grid) return;
+  grid.innerHTML = COLLECTION_CATEGORY_ORDER.map((type) => {
+    const count = categoryCount(collection, type);
+    const limit = categoryLimit(collection.size, type);
+    return `<div class="capacity-chip${count >= limit ? ' is-full' : ''}"><span>${escapeHtml(CARD_TYPE_LABELS[type])}</span><strong>${count} / ${limit}</strong></div>`;
+  }).join('');
+}
+
+function ensureFilterOptions() {
+  const filter = q<HTMLSelectElement>('[data-role="category-filter"]');
+  if (!filter || filter.options.length > 1) return;
+  COLLECTION_CATEGORY_ORDER.forEach((type) => filter.add(new Option(CARD_TYPE_LABELS[type], type)));
+}
+
+function renderCollectionCards(collection: CardCollection) {
+  ensureFilterOptions();
+  const grid = q<HTMLElement>('[data-role="collection-card-grid"]');
+  const empty = q<HTMLElement>('[data-role="empty-collection"]');
+  const filter = q<HTMLSelectElement>('[data-role="category-filter"]')?.value ?? 'all';
+  if (!grid || !empty) return;
+  const cards = collection.cards.filter((entry) => filter === 'all' || entry.data.cardType === filter);
+  empty.hidden = cards.length > 0;
+  grid.hidden = cards.length === 0;
+  grid.innerHTML = cards.map((entry) => {
+    const artwork = entry.data.artwork;
+    const thumb = artwork ? `<img src="${escapeHtml(artwork)}" alt="" />` : '<span class="card-library-placeholder">✦</span>';
+    return `<article class="card-library-item">
+      <button class="card-delete" type="button" data-delete-card="${escapeHtml(entry.id)}" title="Excluir carta">×</button>
+      <div class="card-library-thumb" data-open-card="${escapeHtml(entry.id)}">${thumb}</div>
+      <div class="card-library-copy" data-open-card="${escapeHtml(entry.id)}"><small>${escapeHtml(CARD_TYPE_LABELS[entry.data.cardType])}</small><strong>${escapeHtml(cardDisplayName(entry.data))}</strong><div class="card-library-number"><span>${String(entry.data.cardNumber).padStart(3, '0')}/${entry.data.setTotal}</span><span>${escapeHtml(entry.data.setCode)}</span></div></div>
+    </article>`;
+  }).join('');
+}
+
+function renderCollectionView() {
+  const collection = currentCollection();
+  if (!collection) return showHub();
+  renumberCollection(collection);
+  const progress = collectionProgress(collection);
+  const name = q<HTMLElement>('[data-role="collection-name"]');
+  const code = q<HTMLElement>('[data-role="collection-code"]');
+  const sizeSelect = q<HTMLSelectElement>('[data-role="collection-size-select"]');
+  const label = q<HTMLElement>('[data-role="collection-progress"]');
+  const percent = q<HTMLElement>('[data-role="collection-percent"]');
+  const bar = q<HTMLElement>('[data-role="collection-progress-bar"]');
+  if (name) name.textContent = collection.name;
+  if (code) code.textContent = collection.code;
+  if (sizeSelect) { sizeSelect.value = collection.size; sizeSelect.disabled = collection.cards.length > 0; sizeSelect.title = collection.cards.length ? 'O tamanho fica bloqueado depois que a coleção possui cartas.' : 'Coleções vazias podem trocar de tamanho.'; }
+  if (label) label.textContent = `${progress.created} / ${progress.total} cartas`;
+  if (percent) percent.textContent = `${progress.percent}%`;
+  if (bar) bar.style.width = `${progress.percent}%`;
+  renderCapacity(collection);
+  renderCollectionCards(collection);
+  renderNewCardChoices(collection);
+}
+
+function showHub() {
+  activeCollectionId = null;
+  activeCardId = null;
+  renderHub();
+  setAppView('hub');
+}
+
+function openCollection(collectionId: string) {
+  if (!workspace.collections.some((item) => item.id === collectionId)) return;
+  activeCollectionId = collectionId;
+  activeCardId = null;
+  renderCollectionView();
+  setAppView('collection');
+}
+
+function renderNewCardChoices(collection: CardCollection) {
+  const grid = q<HTMLElement>('[data-role="new-card-category-grid"]');
+  if (!grid) return;
+  grid.innerHTML = COLLECTION_CATEGORY_ORDER.map((type) => {
+    const count = categoryCount(collection, type);
+    const limit = categoryLimit(collection.size, type);
+    const full = count >= limit;
+    return `<button class="new-card-category" type="button" data-create-card-type="${type}" ${full ? 'disabled' : ''}><strong>${escapeHtml(CARD_TYPE_LABELS[type])}</strong><small>${count} / ${limit}${full ? ' · cheio' : ''}</small></button>`;
+  }).join('');
+}
+
+function syncDerivedCollectionFields() {
+  const collection = currentCollection();
+  if (!collection) return;
+  setInputValue('cardNumber', card.cardNumber);
+  setInputValue('setCode', card.setCode);
+  qa<HTMLInputElement>('[data-role="derived-set-total"]').forEach((input) => { input.value = String(card.setTotal); });
+  const context = q<HTMLElement>('[data-role="editor-collection-context"]');
+  const number = q<HTMLElement>('[data-role="editor-card-number"]');
+  if (context) context.textContent = `${collection.name} · ${collection.code}`;
+  if (number) number.textContent = `${String(card.cardNumber).padStart(3, '0')}/${card.setTotal}`;
+}
+
+function openStoredCard(cardId: string) {
+  const collection = currentCollection();
+  const stored = collection?.cards.find((entry) => entry.id === cardId);
+  if (!collection || !stored) return;
+  activeCardId = stored.id;
+  cardCache = {};
+  resetTcgArtworkCandidates();
+  reference = { officialStats: null, abilities: [] };
+  setReferenceStats();
+  setAbilitySuggestions();
+  applyState(mergeDraft(stored.data));
+  pokemonSearchInput.value = stored.data.cardType === 'pokemon' ? stored.data.pokemonName : '';
+  attackSearchInput.value = '';
+  cardFamilySelector.disabled = true;
+  trainerSubtypeSelector.disabled = true;
+  syncDerivedCollectionFields();
+  setAppView('editor');
+  if (card.cardType === 'pokemon' && card.form === 'Normal' && card.pokemonName && card.pokemonName !== 'Novo Pokémon') void preloadTcgArtworkSuggestions(card.pokemonName);
+}
+
+async function createAndOpenCard(type: CardType) {
+  const collection = currentCollection();
+  if (!collection) return;
+  if (categoryFull(collection, type)) {
+    toast(`${CARD_TYPE_LABELS[type]} já atingiu o limite desta coleção.`, 'error');
+    return;
+  }
+  const next = createEmptyCard(type);
+  prepareCardForCollection(next, collection, null);
+  const stored = upsertCard(collection, next);
+  activeCardId = stored.id;
+  touchWorkspace(workspace);
+  await saveWorkspaceLocal(workspace);
+  cardCache = {};
+  reference = { officialStats: null, abilities: [] };
+  resetTcgArtworkCandidates();
+  applyState(stored.data);
+  cardFamilySelector.disabled = true;
+  trainerSubtypeSelector.disabled = true;
+  syncDerivedCollectionFields();
+  setAppView('editor');
+  dialog?.close();
+}
+
+async function persistActiveCard(showFeedback = false) {
+  const collection = currentCollection();
+  if (!collection || !activeCardId) return;
+  try {
+    const stored = upsertCard(collection, card, activeCardId);
+    card = cloneCard(stored.data);
+    touchWorkspace(workspace);
+    await saveWorkspaceLocal(workspace);
+    dirty = false;
+    syncDerivedCollectionFields();
+    if (showFeedback) toast('Carta salva na coleção.', 'success');
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Não foi possível salvar a carta.';
+    toast(message, 'error');
+    throw error;
+  }
+}
+
+async function exportContentZip() {
+  try {
+    const { bytes, exportedAt } = exportWorkspaceZip(workspace);
+    const blob = new Blob([bytes], { type: 'application/zip' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = 'conteudo.zip';
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1500);
+    workspace.snapshotExportedAt = exportedAt;
+    await saveWorkspaceLocal(workspace);
+    toast('Conteúdo exportado. Substitua public/conteudo.zip por este arquivo e publique o projeto para atualizar a versão online.', 'success');
+  } catch (error) {
+    console.error(error);
+    toast('Não foi possível gerar conteudo.zip.', 'error');
+  }
+}
+
+async function loadPublishedWorkspace() {
+  const status = q<HTMLElement>('[data-role="snapshot-status"]');
+  const path = `${baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`}conteudo.zip`;
+  try {
+    const response = await fetch(path, { cache: 'no-store' });
+    if (response.status === 404) {
+      if (status) status.textContent = 'Sem conteudo.zip publicado · usando área de trabalho local';
+      return null;
+    }
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const imported = await importWorkspaceZip(new Uint8Array(await response.arrayBuffer()));
+    if (status) status.textContent = `conteudo.zip carregado · ${imported.workspace.collections.length} coleção(ões)`;
+    return imported;
+  } catch (error) {
+    console.warn('Falha ao carregar conteudo.zip', error);
+    if (status) status.textContent = 'conteudo.zip inválido ou indisponível · área local preservada';
+    return null;
+  }
+}
+
+async function bootstrapWorkspace() {
+  const [local, published] = await Promise.all([loadWorkspaceLocal(), loadPublishedWorkspace()]);
+  const publishedTime = published ? Date.parse(published.exportedAt) || 0 : 0;
+  const localSnapshotTime = local?.snapshotExportedAt ? Date.parse(local.snapshotExportedAt) || 0 : 0;
+  const publishedIsNew = Boolean(published && (!local || publishedTime > localSnapshotTime + 1000));
+  if (published && publishedIsNew) {
+    workspace = published.workspace;
+    await saveWorkspaceLocal(workspace);
+  } else if (local) {
+    workspace = local;
+    const status = q<HTMLElement>('[data-role="snapshot-status"]');
+    if (published && status) status.textContent = 'Área de trabalho local ativa · snapshot publicado já sincronizado';
+  } else if (published) {
+    workspace = published.workspace;
+  } else {
+    workspace = createEmptyWorkspace();
+  }
+
+  if (!workspace.collections.length && !published) {
+    const legacy = await loadDraft();
+    if (legacy) {
+      const size: CollectionSize = Number(legacy.setTotal) > 130 ? 'large' : 'normal';
+      const recovered = createCollection('Rascunhos locais', size, workspace.collections);
+      const restored = mergeDraft(legacy);
+      upsertCard(recovered, restored);
+      workspace.collections.push(recovered);
+      touchWorkspace(workspace);
+      await saveWorkspaceLocal(workspace);
+      await clearDraft();
+      toast('Rascunho antigo recuperado em “Rascunhos locais”.', 'success');
+    }
+  }
+  renderHub();
+}
+
 function setTextIn(root: ParentNode, role: string, value: string | number) {
   qa<HTMLElement>(`[data-role="${role}"]`, root).forEach((node) => { node.textContent = String(value); });
 }
@@ -184,6 +469,7 @@ function updateEditorVisibility() {
   if (previewTitle) {
     if (isPokemon(card)) previewTitle.textContent = `Carta Pokémon — ${card.form}`;
     else if (isAttack(card)) previewTitle.textContent = `Carta Ataque — ${card.attackKind === 'special' ? 'Especial' : 'Normal'}`;
+    else if (isClimate(card)) previewTitle.textContent = 'Carta Clima';
     else previewTitle.textContent = `Carta Treinador — ${CARD_TYPE_LABELS[card.cardType]}`;
   }
 }
@@ -205,6 +491,7 @@ function syncFormFromState() {
       'specialAttack', 'specialDefense', 'speed', 'abilityName', 'abilityDescription', 'flavorText', 'expandedArtwork',
     ];
     fields.forEach((field) => setInputValue(String(field), card[field]));
+    updatePokemonTypeChoices(card.typeCandidates ?? []);
   } else if (isAttack(card)) {
     setInputValue('attackName', card.attackName);
     setInputValue('attackDescription', card.attackDescription);
@@ -213,13 +500,16 @@ function syncFormFromState() {
     setInputValue('compatibleType', card.compatibleType);
     const compatibilityMode = card.compatibilityMode;
     qa<HTMLInputElement>('[data-compat-mode]').forEach((input) => { input.checked = input.value === compatibilityMode; });
+  } else if (isClimate(card)) {
+    setInputValue('name', card.name);
+    setInputValue('effectText', card.effectText);
   } else if (isChampion(card)) {
     const fields: Array<keyof ChampionCardData> = [
       'name', 'victoryCondition', 'defeatCondition', 'passiveName', 'passiveDescription',
       'initialPokemonCount', 'initialAttackCount', 'initialTrainerCount',
     ];
     fields.forEach((field) => setInputValue(String(field), card[field]));
-  } else {
+  } else if (isUtility(card)) {
     setInputValue('name', card.name);
     setInputValue('effectText', card.effectText);
     setInputValue('usageText', card.usageText);
@@ -229,6 +519,23 @@ function syncFormFromState() {
   updateAttackCompatibilityEditor();
   updateAttackDescriptionCount();
   updateTcgArtworkUI();
+}
+
+function updatePokemonTypeChoices(candidates: GameType[]) {
+  const select = q<HTMLSelectElement>('#pokemon-type');
+  const row = q<HTMLElement>('[data-role="type-candidates"]');
+  if (!select || !row || !isPokemon(card)) return;
+  const pokemon = card;
+  const distinct = candidates.filter((value, index, list) => list.indexOf(value) === index);
+  const choices = distinct.length ? distinct : [...GAME_TYPES];
+  select.innerHTML = choices.map((type) => `<option value="${escapeHtml(type)}"${type === pokemon.type ? ' selected' : ''}>${escapeHtml(type)}</option>`).join('');
+  if (!choices.includes(pokemon.type)) {
+    pokemon.type = choices[0] ?? 'Fogo';
+    select.value = pokemon.type;
+  }
+  select.disabled = distinct.length === 1;
+  row.hidden = distinct.length < 2;
+  row.innerHTML = distinct.length >= 2 ? distinct.map((type) => `<button type="button" class="type-candidate-button${pokemon.type === type ? ' is-active' : ''}" data-type-candidate="${escapeHtml(type)}">${escapeHtml(type)}</button>`).join('') : '';
 }
 
 function applyArtworkToNode(node: HTMLElement) {
@@ -352,6 +659,20 @@ function renderUtility(node: HTMLElement, value: UtilityCardData) {
   setTextIn(node, 'set-code', (value.setCode || 'SET').toUpperCase());
 }
 
+function renderClimate(node: HTMLElement, value: ClimateCardData) {
+  const meta = CARD_CATEGORY_META.climate;
+  node.style.setProperty('--accent', meta.accent);
+  node.style.setProperty('--accent-deep', meta.deep);
+  node.style.setProperty('--utility-surface', meta.surface);
+  node.style.setProperty('--ribbon-start', meta.ribbonStart);
+  node.style.setProperty('--ribbon-end', meta.ribbonEnd);
+  setTextIn(node, 'climate-name', value.name || 'Clima');
+  setTextIn(node, 'climate-effect', value.effectText || 'Descreva aqui o efeito deste Clima.');
+  setTextIn(node, 'card-number', String(value.cardNumber || 0).padStart(3, '0'));
+  setTextIn(node, 'set-total', value.setTotal);
+  setTextIn(node, 'set-code', (value.setCode || 'SET').toUpperCase());
+}
+
 function renderChampion(node: HTMLElement, value: ChampionCardData) {
   const meta = CARD_CATEGORY_META.champion;
   node.style.setProperty('--accent', meta.accent);
@@ -437,8 +758,9 @@ function renderCard() {
   applyArtworkToNode(node);
   if (isPokemon(card)) renderPokemon(node, card);
   else if (isAttack(card)) renderAttack(node, card);
+  else if (isClimate(card)) renderClimate(node, card);
   else if (isChampion(card)) renderChampion(node, card);
-  else renderUtility(node, card);
+  else if (isUtility(card)) renderUtility(node, card);
   updateAttackCompatibilityEditor();
   updateAttackDescriptionCount();
 }
@@ -665,7 +987,7 @@ function markChanged() {
   window.clearTimeout(saveTimer);
   saveTimer = window.setTimeout(async () => {
     try {
-      await saveDraft(card);
+      await persistActiveCard(false);
       dirty = false;
       autosaveStatus?.classList.remove('is-saving');
       if (autosaveStatus) autosaveStatus.innerHTML = '<i></i> Salvo localmente';
@@ -708,7 +1030,7 @@ function mergeDraft(restored: CardData): CardData {
       specialAttack: normalizeStat(restored.specialAttack),
       specialDefense: normalizeStat(restored.specialDefense),
       speed: normalizeStat(restored.speed),
-      setTotal: Number(restored.setTotal) || 150,
+      setTotal: Number(restored.setTotal) || 160,
       artworkSource: restored.artworkSource ?? (restored.artwork ? 'manual' : 'none'),
       artworkTransform: { ...DEFAULT_POKEMON_CARD.artworkTransform, ...restored.artworkTransform },
     };
@@ -720,11 +1042,15 @@ function mergeDraft(restored: CardData): CardData {
       cardType: 'attack',
       power: [0, 50, 100, 150, 200].includes(Number(restored.power)) ? restored.power : 100,
       type: restored.type || 'Água',
-      setTotal: Number(restored.setTotal) || 150,
+      setTotal: Number(restored.setTotal) || 160,
       compatiblePokemon: Array.isArray(restored.compatiblePokemon) ? restored.compatiblePokemon.slice(0, 10) : [],
       artworkSource: restored.artworkSource ?? (restored.artwork ? 'manual' : 'none'),
       artworkTransform: { ...DEFAULT_ATTACK_CARD.artworkTransform, ...restored.artworkTransform },
     };
+  }
+  if (restored.cardType === 'climate') {
+    const base = createClimateCard();
+    return { ...base, ...restored, cardType: 'climate', artworkSource: restored.artworkSource ?? (restored.artwork ? 'manual' : 'none'), artworkTransform: { ...base.artworkTransform, ...restored.artworkTransform } };
   }
   if (restored.cardType === 'champion') {
     const base = createChampionCard();
@@ -732,7 +1058,7 @@ function mergeDraft(restored: CardData): CardData {
       ...base,
       ...restored,
       cardType: 'champion',
-      setTotal: Number(restored.setTotal) || 150,
+      setTotal: Number(restored.setTotal) || 160,
       artworkSource: restored.artworkSource ?? (restored.artwork ? 'manual' : 'none'),
       artworkTransform: { ...base.artworkTransform, ...restored.artworkTransform },
     };
@@ -743,7 +1069,7 @@ function mergeDraft(restored: CardData): CardData {
     ...restored,
     cardType: restored.cardType,
     usageText: base.usageText,
-    setTotal: Number(restored.setTotal) || 150,
+    setTotal: Number(restored.setTotal) || 160,
     artworkSource: restored.artworkSource ?? (restored.artwork ? 'manual' : 'none'),
     artworkTransform: { ...base.artworkTransform, ...restored.artworkTransform },
   };
@@ -754,18 +1080,6 @@ function applyState(next: CardData, syncForm = true) {
   if (isPokemon(card)) naturalStage = card.form === 'Normal' ? card.stage : naturalStage;
   if (syncForm) syncFormFromState();
   renderCard();
-}
-
-async function restoreDraft() {
-  const restored = await loadDraft();
-  if (!restored) return;
-  const merged = mergeDraft(restored);
-  cardCache[merged.cardType] = cloneCard(merged);
-  applyState(merged);
-  if (merged.cardType === 'pokemon' && merged.form === 'Normal' && merged.pokemonName && merged.pokemonName !== 'Novo Pokémon') {
-    void preloadTcgArtworkSuggestions(merged.pokemonName);
-  }
-  toast('Último rascunho restaurado.', 'success');
 }
 
 function applyPokemonForm(form: PokemonForm) {
@@ -786,6 +1100,7 @@ function applyPokemonForm(form: PokemonForm) {
 function updateField(input: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement) {
   const field = input.dataset.field;
   if (!field) return;
+  if (input.hasAttribute('data-derived') || field === 'cardNumber' || field === 'setCode') return;
   if (!(field in card)) return;
 
   if (field === 'form' && isPokemon(card)) {
@@ -797,11 +1112,6 @@ function updateField(input: HTMLInputElement | HTMLSelectElement | HTMLTextAreaE
   if (input instanceof HTMLInputElement && input.type === 'checkbox') value = input.checked;
   else if (input instanceof HTMLInputElement && input.type === 'number') value = input.value === '' ? 0 : Number(input.value);
 
-  if (field === 'setCode') {
-    value = String(value).toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 8);
-    input.value = String(value);
-  }
-  if (field === 'cardNumber') value = clamp(Number(value) || 1, 1, 150);
   if (field === 'pokedexNumber') value = Number(value) || null;
   if (['hp', 'attack', 'defense', 'specialAttack', 'specialDefense', 'speed'].includes(field)) {
     value = normalizeStat(Number(value), field === 'hp' ? 300 : Number.POSITIVE_INFINITY);
@@ -933,21 +1243,29 @@ async function selectPokemon(identifier: string | number, pokemonNameHint = '') 
       previousEvolution: p.previousEvolution,
       previousEvolutionImage: p.previousEvolutionImage,
       stage: card.form === 'Normal' ? p.stage : 'FINAL',
+      typeCandidates: p.typeCandidates,
+      ...data.officialStats,
     });
-    if (p.suggestedType) card.type = p.suggestedType;
+    if (p.typeCandidates.length === 1) card.type = p.typeCandidates[0]!;
+    else if (p.typeCandidates.length > 1 && !p.typeCandidates.includes(card.type)) card.type = p.typeCandidates[0]!;
 
     reference.officialStats = data.officialStats;
     reference.abilities = data.abilities;
+    if (data.abilities.length && (!card.abilityName || card.abilityName === 'Nome da habilidade')) card.abilityName = data.abilities[0]!.name;
     setReferenceStats();
     setAbilitySuggestions();
     syncFormFromState();
     renderCard();
     pokemonSearchInput.value = p.pokemonName;
-    apiStatus.textContent = p.suggestedType
-      ? `Dados carregados. Tipo ${p.suggestedType} sugerido a partir da PokéAPI.`
-      : 'Dados carregados. O tipo ficou para você escolher por ser um caso ambíguo.';
+    apiStatus.textContent = p.typeCandidates.length === 1
+      ? `Dados carregados. Tipo ${p.typeCandidates[0]} definido automaticamente.`
+      : p.typeCandidates.length > 1
+        ? `Dados carregados. Escolha entre ${p.typeCandidates.join(' ou ')}.`
+        : 'Dados carregados. Nenhum mapeamento direto: escolha o tipo manualmente.';
     const typeSuggestion = q<HTMLElement>('[data-role="type-suggestion"]');
-    if (typeSuggestion) typeSuggestion.textContent = p.suggestedType ? `Sugestão da API: ${p.suggestedType}` : 'Tipo oficial ambíguo: escolha manualmente.';
+    if (typeSuggestion) typeSuggestion.textContent = p.typeCandidates.length === 1
+      ? `Tipo definido automaticamente: ${p.typeCandidates[0]}.`
+      : p.typeCandidates.length > 1 ? 'Somente os tipos compatíveis aparecem acima.' : 'Fallback: todos os tipos do jogo estão disponíveis.';
     markChanged();
     toast(`${p.pokemonName} carregado pela PokéAPI.`, 'success');
     const canReusePrefetch = artworkPrefetch && normalizePokemonNameForArtwork(hintedName) === normalizePokemonNameForArtwork(p.pokemonName);
@@ -1170,6 +1488,7 @@ function bindEvents() {
     const family = cardFamilySelector.value as CardFamily;
     if (family === 'pokemon') switchCardType('pokemon');
     else if (family === 'attack') switchCardType('attack');
+    else if (family === 'climate') switchCardType('climate');
     else switchCardType(trainerSubtypeSelector.value as TrainerCardType);
   });
 
@@ -1334,18 +1653,114 @@ function bindEvents() {
     }
   });
 
-  q<HTMLButtonElement>('[data-action="save-now"]')?.addEventListener('click', async () => {
-    await saveDraft(card);
-    dirty = false;
-    toast('Rascunho salvo localmente.', 'success');
+  q<HTMLElement>('[data-role="type-candidates"]')?.addEventListener('click', (event) => {
+    const button = (event.target as Element).closest<HTMLButtonElement>('[data-type-candidate]');
+    if (!button || !isPokemon(card)) return;
+    card.type = button.dataset.typeCandidate as GameType;
+    setInputValue('type', card.type);
+    updatePokemonTypeChoices(card.typeCandidates ?? []);
+    renderCard();
+    markChanged();
   });
 
-  q<HTMLButtonElement>('[data-action="new-card"]')?.addEventListener('click', () => {
-    if (dirty && dialog?.showModal) dialog.showModal();
-    else resetToNewCard();
+  qa<HTMLButtonElement>('[data-action="create-collection"]').forEach((button) => button.addEventListener('click', () => {
+    const createDialog = q<HTMLDialogElement>('[data-role="create-collection-dialog"]');
+    const name = q<HTMLInputElement>('[data-role="new-collection-name"]');
+    if (name) name.value = '';
+    createDialog?.showModal();
+    setTimeout(() => name?.focus(), 0);
+  }));
+
+  q<HTMLButtonElement>('[data-action="confirm-create-collection"]')?.addEventListener('click', async (event) => {
+    event.preventDefault();
+    const createDialog = q<HTMLDialogElement>('[data-role="create-collection-dialog"]');
+    const form = q<HTMLFormElement>('[data-role="create-collection-form"]');
+    const name = q<HTMLInputElement>('[data-role="new-collection-name"]')?.value.trim() ?? '';
+    if (!name) { toast('Digite o nome da coleção.', 'error'); return; }
+    const size = q<HTMLInputElement>('input[name="collection-size"]:checked', form ?? document)?.value === 'large' ? 'large' : 'normal';
+    const collection = createCollection(name, size, workspace.collections);
+    workspace.collections.push(collection);
+    touchWorkspace(workspace);
+    await saveWorkspaceLocal(workspace);
+    createDialog?.close();
+    renderHub();
+    openCollection(collection.id);
+    toast(`Coleção ${collection.code} criada.`, 'success');
   });
+
+  q<HTMLElement>('[data-role="collections-grid"]')?.addEventListener('click', (event) => {
+    const tile = (event.target as Element).closest<HTMLElement>('[data-open-collection]');
+    if (tile?.dataset.openCollection) openCollection(tile.dataset.openCollection);
+  });
+
+  qa<HTMLButtonElement>('[data-action="go-hub"]').forEach((button) => button.addEventListener('click', async () => {
+    if (activeCardId && dirty) await persistActiveCard(false).catch(() => undefined);
+    showHub();
+  }));
+
+  qa<HTMLButtonElement>('[data-action="new-collection-card"]').forEach((button) => button.addEventListener('click', () => {
+    const collection = currentCollection();
+    if (!collection) return;
+    renderNewCardChoices(collection);
+    dialog?.showModal();
+  }));
   q<HTMLButtonElement>('[data-action="cancel-new"]')?.addEventListener('click', () => dialog?.close());
-  q<HTMLButtonElement>('[data-action="confirm-new"]')?.addEventListener('click', async () => { dialog?.close(); await resetToNewCard(); });
+  q<HTMLElement>('[data-role="new-card-category-grid"]')?.addEventListener('click', (event) => {
+    const button = (event.target as Element).closest<HTMLButtonElement>('[data-create-card-type]');
+    if (!button || button.disabled) return;
+    void createAndOpenCard(button.dataset.createCardType as CardType);
+  });
+
+  q<HTMLSelectElement>('[data-role="category-filter"]')?.addEventListener('change', () => {
+    const collection = currentCollection();
+    if (collection) renderCollectionCards(collection);
+  });
+
+  q<HTMLSelectElement>('[data-role="collection-size-select"]')?.addEventListener('change', async (event) => {
+    const collection = currentCollection();
+    if (!collection || collection.cards.length) { renderCollectionView(); return; }
+    collection.size = (event.currentTarget as HTMLSelectElement).value === 'large' ? 'large' : 'normal';
+    collection.updatedAt = new Date().toISOString();
+    touchWorkspace(workspace);
+    await saveWorkspaceLocal(workspace);
+    renderCollectionView();
+    toast(`Coleção alterada para ${collection.size === 'large' ? 'Grande' : 'Normal'}.`, 'success');
+  });
+
+  q<HTMLElement>('[data-role="collection-card-grid"]')?.addEventListener('click', (event) => {
+    const deleteButton = (event.target as Element).closest<HTMLButtonElement>('[data-delete-card]');
+    if (deleteButton?.dataset.deleteCard) {
+      pendingDeleteCardId = deleteButton.dataset.deleteCard;
+      q<HTMLDialogElement>('[data-role="delete-card-dialog"]')?.showModal();
+      return;
+    }
+    const open = (event.target as Element).closest<HTMLElement>('[data-open-card]');
+    if (open?.dataset.openCard) openStoredCard(open.dataset.openCard);
+  });
+
+  q<HTMLButtonElement>('[data-action="cancel-delete-card"]')?.addEventListener('click', () => {
+    pendingDeleteCardId = null;
+    q<HTMLDialogElement>('[data-role="delete-card-dialog"]')?.close();
+  });
+  q<HTMLButtonElement>('[data-action="confirm-delete-card"]')?.addEventListener('click', async () => {
+    const collection = currentCollection();
+    if (!collection || !pendingDeleteCardId) return;
+    deleteCard(collection, pendingDeleteCardId);
+    pendingDeleteCardId = null;
+    touchWorkspace(workspace);
+    await saveWorkspaceLocal(workspace);
+    q<HTMLDialogElement>('[data-role="delete-card-dialog"]')?.close();
+    renderCollectionView();
+    toast('Carta excluída e categoria renumerada.', 'success');
+  });
+
+  qa<HTMLButtonElement>('[data-action="back-to-collection"]').forEach((button) => button.addEventListener('click', async () => {
+    if (activeCardId) await persistActiveCard(false).catch(() => undefined);
+    renderCollectionView();
+    setAppView('collection');
+  }));
+  q<HTMLButtonElement>('[data-action="save-card"]')?.addEventListener('click', async () => { await persistActiveCard(true).catch(() => undefined); });
+  q<HTMLButtonElement>('[data-action="export-content"]')?.addEventListener('click', exportContentZip);
 
   bindArtworkDragging();
   const resizeObserver = new ResizeObserver(fitPreview);
@@ -1358,34 +1773,14 @@ function bindEvents() {
   });
 }
 
-async function resetToNewCard() {
-  const type = card.cardType;
-  await clearDraft();
-  cardCache = {};
-  reference = { officialStats: null, abilities: [] };
-  tcgArtworkSearchAbort?.abort();
-  tcgArtworkCropAbort?.abort();
-  resetTcgArtworkCandidates();
-  naturalStage = 'BÁSICO';
-  pokemonSearchInput.value = '';
-  attackSearchInput.value = '';
-  apiStatus.textContent = 'Pesquise um Pokémon ou preencha tudo manualmente.';
-  attackApiStatus.textContent = 'Máximo de 10 Pokémon. Duplicatas são ignoradas.';
-  setReferenceStats();
-  setAbilitySuggestions();
-  applyState(type === 'pokemon' ? cloneCard(EMPTY_POKEMON_CARD) : createEmptyCard(type));
-  dirty = false;
-  toast('Nova carta iniciada.');
-}
-
 async function init() {
   bindEvents();
   setReferenceStats();
   setAbilitySuggestions();
-  await restoreDraft();
+  await bootstrapWorkspace();
   syncFormFromState();
   renderCard();
-  fitPreview();
+  setAppView('hub');
 }
 
 init();

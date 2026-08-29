@@ -7,7 +7,7 @@ import type {
 } from '../types/pokeapi';
 import type { OfficialStats } from '../types/card';
 import { findEvolutionPosition, stageFromDepth } from './evolution';
-import { REGION_BY_GENERATION, sanitizeFlavorText, suggestGameType, titleCasePokemon } from './pokemonMapping';
+import { REGION_BY_GENERATION, sanitizeFlavorText, suggestGameTypes, titleCasePokemon } from './pokemonMapping';
 
 const API = 'https://pokeapi.co/api/v2';
 const CACHE_PREFIX = 'card-forge:pokeapi:v2:';
@@ -119,7 +119,8 @@ export async function loadPokemonEditorData(identifier: string | number, signal?
 
   const genusEntry = pickLanguage(species.genera);
   const flavorEntry = pickLanguage(species.flavor_text_entries);
-  const suggestedType = suggestGameType(pokemon.types.sort((a, b) => a.slot - b.slot).map((entry) => entry.type.name));
+  const typeCandidates = suggestGameTypes(pokemon.types.sort((a, b) => a.slot - b.slot).map((entry) => entry.type.name));
+  const suggestedType = typeCandidates.length === 1 ? typeCandidates[0]! : null;
 
   return {
     pokemon: {
@@ -135,6 +136,7 @@ export async function loadPokemonEditorData(identifier: string | number, signal?
       previousEvolutionImage,
       stage: stageFromDepth(position?.depth ?? 0),
       suggestedType,
+      typeCandidates,
     },
     officialStats: statsFromPokemon(pokemon),
     abilities: pokemon.abilities.map(({ ability }) => ({ name: titleCasePokemon(ability.name), url: ability.url })),

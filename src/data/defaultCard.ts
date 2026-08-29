@@ -3,6 +3,7 @@ import type {
   CardData,
   CardType,
   ChampionCardData,
+  ClimateCardData,
   PokemonCardData,
   UtilityCardData,
   UtilityCardType,
@@ -36,9 +37,9 @@ export const DEFAULT_POKEMON_CARD: PokemonCardData = {
   abilityName: 'Chamas Imperiais',
   abilityDescription: 'Uma vez por Momento, quando este Pokémon usar um ataque de Fogo, ele recebe +10 de poder.',
   flavorText: 'Diz-se que seu fogo queima ainda mais intensamente após grandes batalhas.',
-  cardNumber: 6,
-  setTotal: 150,
-  setCode: 'CKT',
+  cardNumber: 1,
+  setTotal: 160,
+  setCode: 'SET',
 };
 
 export const EMPTY_POKEMON_CARD: PokemonCardData = {
@@ -70,7 +71,8 @@ export const EMPTY_POKEMON_CARD: PokemonCardData = {
   abilityDescription: 'Escreva aqui o efeito da habilidade deste Pokémon.',
   flavorText: 'Adicione uma breve descrição para o rodapé da carta.',
   cardNumber: 1,
-  setCode: 'CKT',
+  setTotal: 160,
+  setCode: 'SET',
 };
 
 export const DEFAULT_ATTACK_CARD: AttackCardData = {
@@ -86,9 +88,9 @@ export const DEFAULT_ATTACK_CARD: AttackCardData = {
   artwork: '',
   artworkSource: 'none',
   artworkTransform: { scale: 1, x: 0, y: 0 },
-  cardNumber: 66,
-  setTotal: 150,
-  setCode: 'CKT',
+  cardNumber: 69,
+  setTotal: 160,
+  setCode: 'SET',
 };
 
 const UTILITY_COPY: Record<UtilityCardType, { name: string; effect: string; usage: string; number: number }> = {
@@ -96,32 +98,44 @@ const UTILITY_COPY: Record<UtilityCardType, { name: string; effect: string; usag
     name: 'Arena Central',
     effect: 'Escreva aqui o efeito que este Estádio produz enquanto estiver em jogo.',
     usage: 'Posicione em uma das quatro áreas entre dois jogadores. Afeta apenas os dois jogadores conectados. Pode ser combinado com 1 Ferramenta na mesma ação, mas nunca com outro Estádio.',
-    number: 114,
+    number: 133,
   },
   supporter: {
     name: 'Parceiro de Jornada',
     effect: 'Escreva aqui o efeito concedido por este Apoiador.',
     usage: 'Use somente na Janela de Apoiadores/Confronto, depois da Revelação e antes da resolução por VEL. Máximo de 1 Apoiador por jogador por Rodada.',
-    number: 122,
+    number: 125,
   },
   item: {
     name: 'Kit de Campo',
     effect: 'Escreva aqui o efeito produzido por este Item.',
     usage: 'Use como uma ação. Uma única ação de Item pode empilhar até 2 Itens normais. Depois do uso, descarte-os salvo efeito em contrário.',
-    number: 132,
+    number: 117,
   },
   rareItem: {
     name: 'Relíquia de Jornada',
     effect: 'Escreva aqui o efeito especial produzido por este Item Raro.',
     usage: 'Ocupa uma ação sozinho. Não pode ser empilhado com outro Item Raro, Item normal, Ferramenta ou Estádio na mesma ação.',
-    number: 140,
+    number: 145,
   },
   tool: {
     name: 'Insígnia de Aço',
     effect: 'Escreva aqui o efeito concedido por esta Ferramenta.',
     usage: 'Equipe em um Pokémon válido. Cada Pokémon pode ter 1 Ferramenta. Uma ação pode conter até 2 Ferramentas ou 1 Ferramenta + 1 Estádio.',
-    number: 148,
+    number: 139,
   },
+};
+
+export const DEFAULT_CLIMATE_CARD: ClimateCardData = {
+  cardType: 'climate',
+  name: 'Céu de Tempestade',
+  effectText: 'Descreva aqui o efeito global produzido por este Clima enquanto ele estiver ativo.',
+  artwork: '',
+  artworkSource: 'none',
+  artworkTransform: { scale: 1, x: 0, y: 0 },
+  cardNumber: 151,
+  setTotal: 160,
+  setCode: 'SET',
 };
 
 export const DEFAULT_CHAMPION_CARD: ChampionCardData = {
@@ -137,9 +151,9 @@ export const DEFAULT_CHAMPION_CARD: ChampionCardData = {
   artwork: '',
   artworkSource: 'none',
   artworkTransform: { scale: 1, x: 0, y: 0 },
-  cardNumber: 150,
-  setTotal: 150,
-  setCode: 'CKT',
+  cardNumber: 156,
+  setTotal: 160,
+  setCode: 'SET',
 };
 
 export function createUtilityCard(cardType: UtilityCardType): UtilityCardData {
@@ -152,9 +166,13 @@ export function createUtilityCard(cardType: UtilityCardType): UtilityCardData {
     artwork: '',
     artworkTransform: { scale: 1, x: 0, y: 0 },
     cardNumber: copy.number,
-    setTotal: 150,
-    setCode: 'CKT',
+    setTotal: 160,
+    setCode: 'SET',
   };
+}
+
+export function createClimateCard(): ClimateCardData {
+  return structuredClone(DEFAULT_CLIMATE_CARD);
 }
 
 export function createChampionCard(): ChampionCardData {
@@ -164,6 +182,7 @@ export function createChampionCard(): ChampionCardData {
 export function createEmptyCard(cardType: CardType): CardData {
   if (cardType === 'pokemon') return structuredClone(EMPTY_POKEMON_CARD);
   if (cardType === 'attack') return structuredClone(DEFAULT_ATTACK_CARD);
+  if (cardType === 'climate') return createClimateCard();
   if (cardType === 'champion') return createChampionCard();
   return createUtilityCard(cardType);
 }

@@ -15,9 +15,9 @@ const { card } = Astro.props;
   <details class="editor-section">
     <summary><span class="section-index">02</span><span><strong>Carta</strong><small>Numeração e coleção</small></span><i aria-hidden="true">⌄</i></summary>
     <div class="section-body grid-2">
-      <div class="field"><label for="utility-card-number">Número da carta</label><input id="utility-card-number" data-field="cardNumber" type="number" min="1" max="150" value={card.cardNumber} /></div>
-      <div class="field"><label>Total da coleção</label><input value={card.setTotal} readonly /></div>
-      <div class="field span-2"><label for="utility-set-code">Sigla da coleção</label><input id="utility-set-code" data-field="setCode" value={card.setCode} maxlength="8" spellcheck="false" /></div>
+      <div class="field"><label for="utility-card-number">Número da carta</label><input id="utility-card-number" data-field="cardNumber" data-derived readonly value={card.cardNumber} /></div>
+      <div class="field"><label>Total da coleção</label><input data-role="derived-set-total" value={card.setTotal} readonly /></div>
+      <div class="field span-2"><label for="utility-set-code">Sigla da coleção</label><input id="utility-set-code" data-field="setCode" data-derived readonly value={card.setCode} /></div>
     </div>
   </details>
 </div>

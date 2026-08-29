@@ -26,12 +26,18 @@ const POKE_TYPE_TO_GAME: Record<string, GameType | null> = {
   bug: null, poison: null, normal: null,
 };
 
-export function suggestGameType(pokeTypes: string[]): GameType | null {
+export function suggestGameTypes(pokeTypes: string[]): GameType[] {
+  const candidates: GameType[] = [];
   for (const type of pokeTypes) {
     const mapped = POKE_TYPE_TO_GAME[type];
-    if (mapped) return mapped;
+    if (mapped && !candidates.includes(mapped)) candidates.push(mapped);
   }
-  return null;
+  return candidates;
+}
+
+export function suggestGameType(pokeTypes: string[]): GameType | null {
+  const candidates = suggestGameTypes(pokeTypes);
+  return candidates.length === 1 ? candidates[0]! : null;
 }
 
 export const REGION_BY_GENERATION: Record<string, string> = {

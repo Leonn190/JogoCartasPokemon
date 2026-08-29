@@ -35,6 +35,10 @@ export const CARD_CATEGORY_META: Record<Exclude<CardType, 'pokemon'>, CategoryMe
     label: 'Ferramenta', symbol: '⬡', accent: '#8a61b6', deep: '#51356f', surface: '#ddd9e1',
     ribbonStart: '#a985d0', ribbonEnd: '#70489b',
   },
+  climate: {
+    label: 'CLIMA', symbol: '☁', accent: '#4f7895', deep: '#20394b', surface: '#d6dde2',
+    ribbonStart: '#7ba4bd', ribbonEnd: '#345b73',
+  },
   champion: {
     label: 'Campeão', symbol: '♛', accent: '#d6ac2e', deep: '#73590c', surface: '#e2dfd2',
     ribbonStart: '#f0ca4c', ribbonEnd: '#b88a16',

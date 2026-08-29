@@ -62,6 +62,21 @@ let activeCardId: string | null = null;
 let pendingDeleteCardId: string | null = null;
 let activeZoomCardId: string | null = null;
 
+// ============================================================
+// TEMPORÁRIO: comparador visual de designs.
+// Remover depois que um design de cada família for escolhido.
+// A seleção vive somente na sessão do editor e não entra no schema.
+// ============================================================
+type ExperimentalDesignKey = 'EX' | 'Mega' | 'Radiante' | 'Gigantamax' | 'attack';
+type ExperimentalDesignVariant = 1 | 2 | 3 | 4;
+const experimentalDesignVariants: Record<ExperimentalDesignKey, ExperimentalDesignVariant> = {
+  EX: 1,
+  Mega: 1,
+  Radiante: 1,
+  Gigantamax: 1,
+  attack: 1,
+};
+
 const scaleBox = q<HTMLElement>('.card-scale-box')!;
 const previewStage = q<HTMLElement>('.preview-stage')!;
 const autosaveStatus = q<HTMLElement>('[data-role="autosave-status"]');
@@ -72,6 +87,8 @@ const cardFamilySelector = q<HTMLSelectElement>('[data-role="card-family-selecto
 const pokemonSubtypeSelector = q<HTMLSelectElement>('[data-role="pokemon-subtype-selector"]')!;
 const trainerSubtypeSelector = q<HTMLSelectElement>('[data-role="trainer-subtype-selector"]')!;
 const attackSubtypeSelector = q<HTMLSelectElement>('[data-role="attack-subtype-selector"]')!;
+const experimentalDesignWrap = q<HTMLElement>('[data-role="experimental-design-wrap"]')!;
+const experimentalDesignSelector = q<HTMLSelectElement>('[data-role="experimental-design-selector"]')!;
 const baseUrl = document.documentElement.dataset.baseUrl || '/';
 
 const pokemonSearchInput = q<HTMLInputElement>('[data-role="pokemon-search"]')!;
@@ -139,6 +156,33 @@ function setTypeIcon(root: ParentNode, role: string, relativePath: string) {
   loadNext();
 }
 
+function getExperimentalDesignKey(value: CardData = card): ExperimentalDesignKey | null {
+  if (value.cardType === 'attack') return 'attack';
+  if (value.cardType === 'pokemon' && value.form !== 'Normal') return value.form;
+  return null;
+}
+
+function currentExperimentalVariant(value: CardData = card): ExperimentalDesignVariant | null {
+  const key = getExperimentalDesignKey(value);
+  return key ? experimentalDesignVariants[key] : null;
+}
+
+function syncExperimentalDesignUI() {
+  const key = getExperimentalDesignKey();
+  experimentalDesignWrap.hidden = !key;
+  if (!key) return;
+  experimentalDesignSelector.value = String(experimentalDesignVariants[key]);
+}
+
+function applyExperimentalVariant(node: HTMLElement, value: CardData = card) {
+  const variant = currentExperimentalVariant(value);
+  if (variant === null) {
+    delete node.dataset.designVariant;
+    return;
+  }
+  node.dataset.designVariant = String(variant);
+}
+
 function syncTypeSelectorUI() {
   const family = familyForCard();
   cardFamilySelector.value = family;
@@ -149,6 +193,7 @@ function syncTypeSelectorUI() {
   if (isPokemon(card)) pokemonSubtypeSelector.value = card.form;
   else if (isAttack(card)) attackSubtypeSelector.value = card.attackKind;
   else trainerSubtypeSelector.value = card.cardType;
+  syncExperimentalDesignUI();
 }
 
 function getActiveCardNode(): HTMLElement {
@@ -821,6 +866,7 @@ function renderPokemonHeaderName(node: HTMLElement, value: PokemonCardData) {
 
 function renderPokemon(node: HTMLElement, value: PokemonCardData) {
   const meta = TYPE_META[value.type];
+  applyExperimentalVariant(node, value);
   node.style.setProperty('--type', meta.color);
   node.style.setProperty('--type-deep', meta.deep);
   node.style.setProperty('--type-light', meta.light);
@@ -978,6 +1024,7 @@ function renderCompatiblePokemon(node: HTMLElement, value: AttackCardData) {
 
 function renderAttack(node: HTMLElement, value: AttackCardData) {
   const meta = ATTACK_KIND_META[value.attackKind];
+  applyExperimentalVariant(node, value);
   node.dataset.expanded = String(Boolean(value.expandedArtwork));
   node.classList.toggle('is-expanded', Boolean(value.expandedArtwork));
   const attackTypeMeta = TYPE_META[value.type];
@@ -1799,6 +1846,16 @@ function bindEvents() {
     card.attackKind = attackSubtypeSelector.value as AttackKind;
     renderCard();
     markChanged();
+  });
+
+  experimentalDesignSelector.addEventListener('change', () => {
+    const key = getExperimentalDesignKey();
+    if (!key) return;
+    const parsed = Number(experimentalDesignSelector.value);
+    const variant: ExperimentalDesignVariant = parsed === 2 || parsed === 3 || parsed === 4 ? parsed : 1;
+    experimentalDesignVariants[key] = variant;
+    // Somente apresentação: não chama markChanged() e não altera autosave/conteúdo.
+    renderCard();
   });
 
   qa<HTMLInputElement>('[data-transform]').forEach((input) => {

@@ -1106,3 +1106,244 @@
   background: rgba(236,238,237,.70);
   backdrop-filter: blur(2px);
 }
+
+/* ============================================================
+   TEMPORÁRIO: comparador visual de designs — ATAQUES.
+   Remover depois que um dos quatro layouts for escolhido.
+   Treinadores não são alterados por estes seletores.
+   ============================================================ */
+.attack-card[data-design-variant] {
+  --attack-cut: color-mix(in srgb,var(--accent) 74%,#202428);
+}
+.attack-card[data-design-variant] .attack-design-decoration {
+  position:absolute;
+  inset:13px;
+  z-index:5;
+  overflow:hidden;
+  border-radius:17px;
+  pointer-events:none;
+}
+.attack-design-decoration { display:none; }
+.attack-card[data-design-variant] .attack-design-decoration { display:block; }
+.attack-design-decoration > i { position:absolute; display:block; pointer-events:none; }
+
+/* Ataque / Design 1 — Battle Frame: evolução conservadora, mais angular. */
+.attack-card[data-design-variant="1"]::after {
+  inset:112px 7px 70px;
+  background:
+    linear-gradient(180deg,var(--accent),transparent 18%) left top / 4px 100% no-repeat,
+    linear-gradient(0deg,var(--accent),transparent 18%) right bottom / 4px 100% no-repeat;
+  opacity:.88;
+}
+.attack-card[data-design-variant="1"] .attack-shell {
+  background:
+    linear-gradient(104deg,color-mix(in srgb,var(--accent) 11%,transparent),transparent 18% 81%,color-mix(in srgb,var(--accent) 12%,transparent)),
+    repeating-linear-gradient(180deg,rgba(63,68,71,.04) 0 1px,transparent 1px 5px),
+    linear-gradient(90deg,#c8ccce,#f3f4f2 11%,#d9dcdb 48%,#f5f5f2 87%,#bec4c6);
+}
+.attack-card[data-design-variant="1"] .attack-title-rail {
+  clip-path:polygon(0 0,100% 0,100% 100%,24px 100%,0 calc(100% - 18px));
+  border-radius:9px 9px 2px 2px;
+}
+.attack-card[data-design-variant="1"] .attack-name-row {
+  margin-left:8px;
+  border-left:4px solid var(--accent-deep);
+  clip-path:polygon(0 0,100% 0,calc(100% - 13px) 100%,0 100%);
+}
+.attack-card[data-design-variant="1"] .shared-artwork {
+  margin-inline:3px;
+  border-color:color-mix(in srgb,var(--accent-deep) 32%,#8e989d);
+}
+.attack-card[data-design-variant="1"] .attack-decoration-a {
+  left:8px; top:98px; width:126px; height:3px;
+  transform:skewX(-32deg);
+  background:linear-gradient(90deg,var(--accent),rgba(255,255,255,.72),transparent);
+}
+.attack-card[data-design-variant="1"] .attack-decoration-b {
+  right:9px; bottom:54px; width:160px; height:3px;
+  transform:skewX(-32deg);
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.68),var(--accent));
+}
+.attack-card[data-design-variant="1"] .attack-decoration-c { display:none; }
+.attack-card[data-design-variant="1"] .attack-power-badge { font-size:20px; color:var(--accent-deep); }
+
+/* Ataque / Design 2 — Energy Flow: subtipo domina; tipo do golpe vira energia. */
+.attack-card[data-design-variant="2"]::after {
+  inset:108px 6px 72px;
+  background:linear-gradient(180deg,var(--accent),transparent 38%,var(--attack-type),transparent 78%) left top / 4px 100% no-repeat;
+  opacity:.92;
+}
+.attack-card[data-design-variant="2"] .attack-shell {
+  background:
+    radial-gradient(ellipse at 92% 36%,color-mix(in srgb,var(--attack-type) 16%,transparent),transparent 34%),
+    linear-gradient(105deg,color-mix(in srgb,var(--accent) 11%,transparent),transparent 22% 78%,color-mix(in srgb,var(--attack-type) 8%,transparent)),
+    linear-gradient(90deg,#cbd0d2,#f4f5f3 12%,#dcdfde 50%,#f5f5f2 87%,#c3c9cb);
+}
+.attack-card[data-design-variant="2"] .attack-title-rail {
+  border-bottom:2px solid color-mix(in srgb,var(--attack-type) 64%,var(--accent));
+}
+.attack-card[data-design-variant="2"] .attack-name-row::after {
+  content:"";
+  position:absolute;
+  left:18px; right:18px; bottom:0; height:2px;
+  background:linear-gradient(90deg,var(--accent),transparent 58%,var(--attack-type));
+}
+.attack-card[data-design-variant="2"] .shared-artwork {
+  margin-inline:5px;
+  border-color:color-mix(in srgb,var(--attack-type) 46%,#9ca5aa);
+}
+.attack-card[data-design-variant="2"] .attack-decoration-a {
+  left:14px; top:117px; width:4px; height:280px;
+  background:linear-gradient(var(--accent),var(--attack-type),transparent);
+  box-shadow:0 0 7px color-mix(in srgb,var(--attack-type) 28%,transparent);
+}
+.attack-card[data-design-variant="2"] .attack-decoration-b {
+  left:15px; right:56px; top:396px; height:3px;
+  transform:skewX(-24deg);
+  background:linear-gradient(90deg,var(--attack-type),color-mix(in srgb,var(--attack-type) 30%,transparent) 66%,transparent);
+}
+.attack-card[data-design-variant="2"] .attack-decoration-c {
+  right:14px; top:385px; width:46px; height:46px;
+  border:1px solid color-mix(in srgb,var(--attack-type-deep) 55%,#60686c);
+  border-radius:50%;
+  box-shadow:0 0 0 4px color-mix(in srgb,var(--attack-type) 8%,transparent);
+}
+.attack-card[data-design-variant="2"] .attack-bottom-meta {
+  border-top-color:color-mix(in srgb,var(--attack-type) 42%,#70777b);
+  background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 15%,#dce0e1),#eef0ef 55%,color-mix(in srgb,var(--attack-type) 15%,#dce0e1));
+}
+.attack-card[data-design-variant="2"] .attack-type-badge { box-shadow:0 0 0 2px color-mix(in srgb,var(--attack-type) 34%,transparent),0 1px 2px rgba(0,0,0,.18); }
+
+/* Ataque / Design 3 — Impact Card: ação, impacto e potência em primeiro plano. */
+.attack-card[data-design-variant="3"]::before {
+  inset:9px;
+  border-radius:20px;
+  border:1px solid rgba(38,42,45,.58);
+  box-shadow:inset 0 0 0 2px rgba(255,255,255,.28);
+  clip-path:polygon(0 0,100% 0,100% 76%,97% 79%,100% 82%,100% 100%,0 100%,0 25%,3% 22%,0 19%);
+}
+.attack-card[data-design-variant="3"]::after {
+  inset:92px 2px 65px;
+  background:none;
+  border-left:7px solid var(--accent);
+  border-right:2px solid color-mix(in srgb,var(--accent-deep) 72%,#2c3033);
+  transform:skewY(-1deg);
+  opacity:.92;
+}
+.attack-card[data-design-variant="3"] .attack-shell {
+  background:
+    linear-gradient(164deg,transparent 0 51%,color-mix(in srgb,var(--accent) 10%,transparent) 51.2% 53%,transparent 53.2%),
+    linear-gradient(90deg,#c6cbcd,#f3f3f0 12%,#d8dbda 50%,#f3f4f1 87%,#bec4c6);
+}
+.attack-card[data-design-variant="3"] .attack-title-rail {
+  border-radius:3px;
+  clip-path:polygon(0 0,100% 0,calc(100% - 28px) 100%,0 100%);
+}
+.attack-card[data-design-variant="3"] .attack-title-rail .tcg-major-label { font-size:32px; color:var(--accent-deep); }
+.attack-card[data-design-variant="3"] .attack-name-row {
+  padding-left:26px;
+  clip-path:polygon(10px 0,100% 0,calc(100% - 18px) 100%,0 100%);
+  background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 20%,#e2e3e1),#ebedeb 47%,#d8dad9);
+}
+.attack-card[data-design-variant="3"] .attack-name-row h2 { font-size:31px; }
+.attack-card[data-design-variant="3"] .shared-artwork { margin-inline:0; border-left:0; border-right:0; border-radius:0; }
+.attack-card[data-design-variant="3"] .attack-decoration-a {
+  left:-52px; top:162px; width:730px; height:5px;
+  transform:rotate(-10deg);
+  background:linear-gradient(90deg,transparent,var(--accent) 22%,rgba(255,255,255,.74) 62%,transparent);
+}
+.attack-card[data-design-variant="3"] .attack-decoration-b {
+  left:-36px; top:238px; width:640px; height:2px;
+  transform:rotate(-10deg);
+  background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--accent-deep) 70%,#23282b),transparent);
+}
+.attack-card[data-design-variant="3"] .attack-decoration-c {
+  right:10px; bottom:47px; width:92px; height:57px;
+  clip-path:polygon(18% 0,100% 0,82% 100%,0 100%);
+  border:1px solid color-mix(in srgb,var(--accent-deep) 66%,#565d61);
+  background:color-mix(in srgb,var(--accent) 12%,rgba(255,255,255,.32));
+}
+.attack-card[data-design-variant="3"] .attack-bottom-meta { padding-right:24px; }
+.attack-card[data-design-variant="3"] .attack-power-badge { font-size:23px; color:var(--accent-deep); }
+
+/* Ataque / Design 4 — Combat HUD: técnica física, módulos e cantos chanfrados. */
+.attack-card[data-design-variant="4"]::after {
+  inset:103px 7px 71px;
+  background:
+    repeating-linear-gradient(180deg,var(--accent) 0 10px,transparent 10px 19px) left top / 3px 100% no-repeat,
+    repeating-linear-gradient(180deg,color-mix(in srgb,var(--accent-deep) 68%,#596166) 0 5px,transparent 5px 15px) right top / 3px 100% no-repeat;
+  opacity:.75;
+}
+.attack-card[data-design-variant="4"] .attack-shell {
+  background:
+    repeating-linear-gradient(90deg,rgba(64,70,74,.04) 0 1px,transparent 1px 31px),
+    repeating-linear-gradient(0deg,rgba(64,70,74,.035) 0 1px,transparent 1px 23px),
+    linear-gradient(90deg,#c5cacc,#f1f3f1 11%,#d6dad9 49%,#f1f3f0 87%,#bbc1c4);
+}
+.attack-card[data-design-variant="4"] .attack-title-rail,
+.attack-card[data-design-variant="4"] .attack-name-row,
+.attack-card[data-design-variant="4"] .attack-module,
+.attack-card[data-design-variant="4"] .attack-module-footer {
+  border-radius:2px;
+}
+.attack-card[data-design-variant="4"] .attack-title-rail {
+  clip-path:polygon(10px 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%,0 10px);
+  background:linear-gradient(90deg,#aeb5b8,#f4f5f3 22%,#c1c6c8 50%,#f0f1ef 82%,#aab1b4);
+}
+.attack-card[data-design-variant="4"] .tcg-subtype-ribbon { border-radius:2px; clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%); }
+.attack-card[data-design-variant="4"] .attack-name-row { border-inline:1px solid rgba(67,74,78,.3); }
+.attack-card[data-design-variant="4"] .shared-artwork {
+  margin-inline:7px;
+  border-radius:1px;
+  border-color:#858f94;
+}
+.attack-card[data-design-variant="4"] .compatibility-zone {
+  margin:7px 8px 5px;
+  border:1px solid rgba(70,77,81,.28);
+  border-radius:3px;
+  background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 9%,#e0e4e4),#eef0ef,color-mix(in srgb,var(--accent) 8%,#dde1e1));
+}
+.attack-card[data-design-variant="4"] .attack-rule-heading {
+  margin-inline:8px;
+  border:1px solid rgba(70,77,81,.25);
+  border-radius:2px 2px 0 0;
+  background:rgba(255,255,255,.28);
+}
+.attack-card[data-design-variant="4"] .attack-rule-copy { margin-inline:8px; border-inline:1px solid rgba(70,77,81,.18); }
+.attack-card[data-design-variant="4"] .attack-bottom-meta {
+  margin:0 8px 7px;
+  border:1px solid rgba(62,70,74,.34);
+  border-radius:2px;
+  background:linear-gradient(180deg,#eef0ef,color-mix(in srgb,var(--accent) 12%,#ced4d5));
+}
+.attack-card[data-design-variant="4"] .attack-bottom-power,
+.attack-card[data-design-variant="4"] .attack-bottom-type {
+  min-height:34px;
+  padding:0 10px;
+  border:1px solid rgba(64,71,75,.24);
+  background:rgba(255,255,255,.26);
+  clip-path:polygon(7px 0,100% 0,100% calc(100% - 7px),calc(100% - 7px) 100%,0 100%,0 7px);
+}
+.attack-card[data-design-variant="4"] .attack-power-badge { min-width:58px; font-size:21px; color:var(--accent-deep); }
+.attack-card[data-design-variant="4"] .attack-decoration-a {
+  left:12px; top:111px; width:75px; height:2px;
+  background:var(--accent-deep);
+}
+.attack-card[data-design-variant="4"] .attack-decoration-b {
+  right:12px; top:111px; width:32px; height:2px;
+  background:var(--accent);
+}
+.attack-card[data-design-variant="4"] .attack-decoration-c {
+  right:12px; bottom:54px; width:72px; height:2px;
+  background:linear-gradient(90deg,transparent,var(--attack-type));
+}
+
+/* Normal e Especial preservam suas cores-base em todas as quatro variantes. */
+.attack-card[data-attack-kind="normal"][data-design-variant] { --accent:#cc484b; --accent-deep:#752429; --ribbon-start:#e86364; --ribbon-end:#a93239; }
+.attack-card[data-attack-kind="special"][data-design-variant] { --accent:#8658b3; --accent-deep:#4c306d; --ribbon-start:#a87ad0; --ribbon-end:#6b4397; }
+
+/* Full Art continua capturando o mesmo DOM do preview. Decorações não recebem
+   eventos e os módulos mecânicos continuam legíveis sobre a arte. */
+.attack-card.is-expanded[data-design-variant] .attack-design-decoration { opacity:.88; }
+.attack-card.is-expanded[data-design-variant="3"] .shared-artwork,
+.attack-card.is-expanded[data-design-variant="4"] .shared-artwork { margin:0; }

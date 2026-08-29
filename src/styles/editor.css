@@ -481,3 +481,42 @@
     grid-template-columns: repeat(3,minmax(0,1fr));
   }
 }
+
+/* ============================================================
+   TEMPORÁRIO: comparador visual de designs.
+   Remover depois que um design de cada família for escolhido.
+   ============================================================ */
+.type-selector-controls:has(.experimental-design-select:not([hidden])) {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.experimental-design-select {
+  position: relative;
+}
+.experimental-design-select::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -3px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.16), transparent);
+  pointer-events: none;
+}
+.experimental-design-select > span::after {
+  content: " • temporário";
+  color: #59616a;
+  font-size: 7px;
+  font-weight: 650;
+  letter-spacing: .02em;
+  text-transform: none;
+}
+@media (max-width: 720px) {
+  .type-selector-controls:has(.experimental-design-select:not([hidden])) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .experimental-design-select { grid-column: 1 / -1; }
+}
+@media (max-width: 520px) {
+  .type-selector-controls:has(.experimental-design-select:not([hidden])) { grid-template-columns: 1fr; }
+  .experimental-design-select { grid-column: auto; }
+}

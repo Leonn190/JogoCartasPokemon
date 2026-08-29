@@ -19,5 +19,14 @@ const trainerSubtype = cardType !== 'pokemon' && cardType !== 'attack' && cardTy
     <label class="compact-select" data-subtype-family="trainer" hidden={family !== 'trainer'}><span>Subtipo</span><select data-role="trainer-subtype-selector">{TRAINER_CARD_TYPES.map((type) => <option value={type} selected={type === trainerSubtype}>{CARD_TYPE_LABELS[type]}</option>)}</select></label>
     <label class="compact-select" data-subtype-family="attack" hidden={family !== 'attack'}><span>Subtipo</span><select data-role="attack-subtype-selector"><option value="normal" selected={attackKind === 'normal'}>Ataque Normal</option><option value="special" selected={attackKind === 'special'}>Ataque Especial</option></select></label>
     <div class="compact-static" data-subtype-family="climate" hidden={family !== 'climate'}><span>Subtipo</span><strong>Clima</strong></div>
+    <label class="compact-select experimental-design-select" data-role="experimental-design-wrap" hidden={family !== 'attack' && !(family === 'pokemon' && pokemonForm !== 'Normal')}>
+      <span>Design teste</span>
+      <select data-role="experimental-design-selector" aria-label="Design experimental da carta">
+        <option value="1">Design 1</option>
+        <option value="2">Design 2</option>
+        <option value="3">Design 3</option>
+        <option value="4">Design 4</option>
+      </select>
+    </label>
   </div>
 </div>

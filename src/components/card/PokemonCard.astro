@@ -16,6 +16,7 @@ const meta = TYPE_META[card.type];
   data-role="card-template"
   data-card-template="pokemon"
   data-form={card.form}
+  data-design-variant={card.form === 'Normal' ? undefined : '1'}
   data-pokemon-type={card.type}
   data-rarity={card.rarity}
   data-expanded={String(card.expandedArtwork)}
@@ -23,6 +24,11 @@ const meta = TYPE_META[card.type];
 >
   <div class="card-full-art" data-role="artwork-drag-surface" aria-hidden="true">
     <img data-role="expanded-image" src={card.artwork} alt="" draggable="false" />
+  </div>
+  <div class="pokemon-form-decoration" aria-hidden="true">
+    <i class="form-decoration-a"></i>
+    <i class="form-decoration-b"></i>
+    <i class="form-decoration-c"></i>
   </div>
   <div class="card-shell">
     <CardHeader card={card} />

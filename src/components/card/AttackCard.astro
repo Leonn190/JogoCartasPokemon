@@ -17,16 +17,10 @@ const attackTypeIcon = `${import.meta.env.BASE_URL}${attackTypeMeta.icon}`;
   class="game-card attack-card trainer-card"
   data-role="card-template"
   data-card-template="attack"
-  data-design-variant="1"
   data-attack-kind={card.attackKind}
   data-attack-type={card.type}
   style={`--accent:${meta.accent};--accent-deep:${meta.deep};--attack-surface:${meta.surface};--ribbon-start:${meta.ribbonStart};--ribbon-end:${meta.ribbonEnd};--compat:${typeMeta.color};--compat-deep:${typeMeta.deep};--attack-type:${attackTypeMeta.color};--attack-type-deep:${attackTypeMeta.deep};`}
 >
-  <div class="attack-design-decoration" aria-hidden="true">
-    <i class="attack-decoration-a"></i>
-    <i class="attack-decoration-b"></i>
-    <i class="attack-decoration-c"></i>
-  </div>
   <div class="attack-shell card-shell">
     <header class="tcg-title-rail attack-title-rail">
       <div class="tcg-subtype-ribbon">

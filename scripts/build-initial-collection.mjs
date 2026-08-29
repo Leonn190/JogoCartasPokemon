@@ -1,4 +1,4 @@
-import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 const collectionId = 'collection-primeira-jornada';
@@ -7,7 +7,7 @@ const collectionCode = 'PCO';
 const generatedAt = '2026-08-29T18:00:00.000Z';
 
 const lines = [
-  [['Froakie', 656, 'Água'], ['Frogadier', 657, 'Água'], ['Greninja', 658, 'Água'], ['Greninja', 658, 'Água', 'EX']],
+  [['Froakie', 656, 'Água'], ['Frogadier', 657, 'Água'], ['Greninja', 658, 'Sombrio'], ['Greninja', 658, 'Água', 'EX']],
   [['Swinub', 220, 'Gelo'], ['Piloswine', 221, 'Gelo'], ['Mamoswine', 473, 'Gelo'], ['Mamoswine', 473, 'Gelo', 'EX']],
   [['Rowlet', 722, 'Planta'], ['Dartrix', 723, 'Voador'], ['Decidueye', 724, 'Planta'], ['Decidueye', 724, 'Planta', 'EX']],
   [['Phantump', 708, 'Sombrio'], ['Trevenant', 709, 'Sombrio'], ['Trevenant', 709, 'Sombrio', 'EX']],
@@ -16,17 +16,17 @@ const lines = [
   [['Spearow', 21, 'Voador'], ['Fearow', 22, 'Voador'], ['Fearow', 22, 'Voador', 'EX']],
   [['Riolu', 447, 'Lutador'], ['Lucario', 448, 'Metal'], ['Lucario', 448, 'Lutador', 'Mega'], ['Lucario Z', 448, 'Lutador', 'Mega']],
   [['Ralts', 280, 'Místico'], ['Kirlia', 281, 'Místico'], ['Gardevoir', 282, 'Psíquico'], ['Gallade', 475, 'Lutador'], ['Gardevoir', 282, 'Místico', 'Mega'], ['Gallade', 475, 'Lutador', 'Mega']],
-  [['Scyther', 123, 'Metal'], ['Scizor', 212, 'Metal'], ['Scizor', 212, 'Metal', 'Mega']],
+  [['Scyther', 123, 'Planta'], ['Scizor', 212, 'Metal'], ['Kleavor', 900, 'Terra'], ['Scizor', 212, 'Metal', 'Mega']],
   [['Torchic', 255, 'Fogo'], ['Combusken', 256, 'Lutador'], ['Blaziken', 257, 'Fogo'], ['Blaziken', 257, 'Fogo', 'Mega']],
   [['Raikou', 243, 'Elétrico'], ['Raikou', 243, 'Elétrico', 'Radiante']],
   [['Entei', 244, 'Fogo'], ['Entei', 244, 'Fogo', 'Radiante']],
   [['Suicune', 245, 'Gelo'], ['Suicune', 245, 'Gelo', 'Radiante']],
-  [['Impidimp', 859, 'Sombrio'], ['Morgrem', 860, 'Sombrio'], ['Grimmsnarl', 861, 'Sombrio'], ['Grimmsnarl', 861, 'Sombrio', 'Gigantamax']],
+  [['Impidimp', 859, 'Místico'], ['Morgrem', 860, 'Sombrio'], ['Grimmsnarl', 861, 'Sombrio'], ['Grimmsnarl', 861, 'Sombrio', 'Gigantamax']],
   [['Hatenna', 856, 'Psíquico'], ['Hattrem', 857, 'Psíquico'], ['Hatterene', 858, 'Místico'], ['Hatterene', 858, 'Psíquico', 'Gigantamax']],
   [['Milcery', 868, 'Místico'], ['Alcremie', 869, 'Místico'], ['Alcremie', 869, 'Místico', 'Gigantamax']],
   [['Toedscool', 948, 'Terra'], ['Toedscruel', 949, 'Terra']],
   [['Chatot', 441, 'Voador']],
-  [['Nosepass', 299, 'Metal'], ['Probopass', 476, 'Metal']],
+  [['Nosepass', 299, 'Terra'], ['Probopass', 476, 'Metal']],
   [['Spheal', 363, 'Água'], ['Sealeo', 364, 'Gelo'], ['Walrein', 365, 'Gelo'], ['Walrein', 365, 'Água', 'EX']],
   [['Solrock', 338, 'Psíquico']],
   [['Lunatone', 337, 'Psíquico']],
@@ -69,32 +69,20 @@ const cards = lines.flatMap((line, lineIndex) => line.map((entry, entryIndex) =>
       pokedexNumber: pokemonId, genus: 'Pokémon', height: '—', weight: '—', region: '—',
       hp: 0, attack: 0, defense: 0, specialAttack: 0, specialDefense: 0, speed: 0,
       abilityName: '', abilityDescription: '', flavorText: '',
-      cardNumber: number, setTotal: 170, setCode: collectionCode,
+      cardNumber: number, setTotal: 0, setCode: collectionCode,
     },
     _line: lineIndex + 1,
   };
 }));
 
-if (cards.length !== 75) throw new Error(`Esperadas 75 cartas, recebidas ${cards.length}.`);
-
-const output = join(process.cwd(), '.generated-content');
-rmSync(output, { recursive: true, force: true });
-mkdirSync(join(output, 'collections', collectionId), { recursive: true });
+if (cards.length !== 76) throw new Error(`Esperadas 76 cartas, recebidas ${cards.length}.`);
+cards.forEach((card) => { card.data.setTotal = cards.length; });
 
 const cleanCards = cards.map(({ _line, ...card }) => card);
-const collection = { id: collectionId, name: collectionName, code: collectionCode, size: 'large', createdAt: generatedAt, updatedAt: generatedAt };
-const manifest = {
-  schemaVersion: 1, exportedAt: generatedAt, revision: 1,
-  rules: {
-    categoryOrder: ['pokemon', 'attack', 'item', 'supporter', 'stadium', 'tool', 'rareItem', 'climate', 'champion'],
-    presets: {},
-  },
-  collections: [{ id: collectionId, name: collectionName, code: collectionCode, size: 'large', path: `collections/${collectionId}/collection.json` }],
-};
-
-writeFileSync(join(output, 'manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`);
-writeFileSync(join(output, 'collections', collectionId, 'collection.json'), `${JSON.stringify(collection, null, 2)}\n`);
-writeFileSync(join(output, 'collections', collectionId, 'cards.json'), `${JSON.stringify(cleanCards, null, 2)}\n`);
+const collection = { id: collectionId, name: collectionName, code: collectionCode, createdAt: generatedAt, updatedAt: generatedAt, cards: cleanCards };
+const output = join(process.cwd(), 'public', 'conteudo');
+mkdirSync(output, { recursive: true });
+writeFileSync(join(output, 'primeira-colecao.json'), `${JSON.stringify(collection, null, 2)}\n`);
 
 const counts = cleanCards.reduce((result, card) => {
   result[card.data.type] = (result[card.data.type] ?? 0) + 1;

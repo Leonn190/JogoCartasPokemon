@@ -1,0 +1,34 @@
+---
+import type { ClimateCardData } from '../../types/card';
+import { CARD_CATEGORY_META } from '../../data/cardCategories';
+import SharedArtwork from './SharedArtwork.astro';
+interface Props { card: ClimateCardData }
+const { card } = Astro.props;
+const meta = CARD_CATEGORY_META.climate;
+const number = String(card.cardNumber).padStart(3, '0');
+---
+<article
+  class="game-card utility-card climate-card"
+  data-role="card-template"
+  data-card-template="climate"
+  style={`--accent:${meta.accent};--accent-deep:${meta.deep};--utility-surface:${meta.surface};--ribbon-start:${meta.ribbonStart};--ribbon-end:${meta.ribbonEnd};`}
+>
+  <div class="utility-shell card-shell climate-shell">
+    <div class="climate-atmosphere" aria-hidden="true"><span></span><span></span><span></span></div>
+    <header class="tcg-title-rail climate-title-rail">
+      <div class="tcg-subtype-ribbon"><strong>ATMOSFERA</strong></div>
+      <div class="tcg-major-label">CLIMA</div>
+    </header>
+    <div class="tcg-name-row climate-name-row"><h2 data-role="climate-name">{card.name}</h2><span class="tcg-name-glint" aria-hidden="true"></span></div>
+    <SharedArtwork artwork={card.artwork} name={card.name} />
+    <section class="tcg-rules-panel climate-effect-panel">
+      <div class="climate-effect-icon" aria-hidden="true">☁</div>
+      <div class="tcg-rule-copy"><p data-role="climate-effect">{card.effectText}</p></div>
+    </section>
+    <footer class="simple-footer tcg-footer">
+      <span class="set-stamp" data-role="set-code">{card.setCode}</span>
+      <span class="collector-number"><strong data-role="card-number">{number}</strong><em>/</em><span data-role="set-total">{card.setTotal}</span></span>
+      <span class="edition-mark">CF • CL</span>
+    </footer>
+  </div>
+</article>

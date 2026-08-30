@@ -1,0 +1,42 @@
+{
+  "id": "card-pjo-039",
+  "collectionId": "collection-primeira-jornada",
+  "createdAt": "2026-08-29T18:00:39.000Z",
+  "updatedAt": "2026-08-29T18:00:00.000Z",
+  "data": {
+    "cardType": "pokemon",
+    "pokemonId": 212,
+    "pokemonName": "Scizor",
+    "form": "Mega",
+    "rarity": "ultraRare",
+    "type": "Metal",
+    "stage": "FINAL",
+    "previousEvolution": "Kleavor",
+    "previousEvolutionImage": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/900.png",
+    "artwork": "",
+    "artworkSource": "none",
+    "artworkTransform": {
+      "scale": 1,
+      "x": 0,
+      "y": 0
+    },
+    "expandedArtwork": false,
+    "pokedexNumber": 212,
+    "genus": "Pokémon",
+    "height": "—",
+    "weight": "—",
+    "region": "—",
+    "hp": 0,
+    "attack": 0,
+    "defense": 0,
+    "specialAttack": 0,
+    "specialDefense": 0,
+    "speed": 0,
+    "abilityName": "",
+    "abilityDescription": "",
+    "flavorText": "",
+    "cardNumber": 39,
+    "setTotal": 76,
+    "setCode": "PCO"
+  }
+}

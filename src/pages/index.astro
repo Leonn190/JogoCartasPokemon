@@ -7,16 +7,11 @@ import '../styles/editor.css';
 import '../styles/card.css';
 import '../styles/pokemon-card.css';
 import '../styles/collections.css';
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { loadPublishedCollections } from '../lib/publishedContent';
 
 const contentDirectory = join(process.cwd(), 'public', 'conteudo');
-const publishedCollections = existsSync(contentDirectory)
-  ? readdirSync(contentDirectory)
-      .filter((name) => name.endsWith('.json'))
-      .sort()
-      .map((name) => JSON.parse(readFileSync(join(contentDirectory, name), 'utf8')))
-  : [];
+const publishedCollections = loadPublishedCollections(contentDirectory, import.meta.env.BASE_URL);
 const publishedCollectionsJson = JSON.stringify(publishedCollections).replace(/</g, '\\u003c');
 ---
 <!doctype html>
@@ -59,7 +54,7 @@ const publishedCollectionsJson = JSON.stringify(publishedCollections).replace(/<
         <section class="collections-section">
           <div class="section-title-row"><div><span class="eyebrow">BIBLIOTECA</span><h2>Coleções existentes</h2></div><span class="snapshot-status" data-role="snapshot-status">Carregando conteúdo…</span></div>
           <div class="collections-grid" data-role="collections-grid"></div>
-          <div class="empty-hub" data-role="empty-hub" hidden><div class="empty-glyph">✦</div><h3>Nenhuma coleção ainda</h3><p>Crie a primeira coleção para começar. As coleções publicadas ficam como arquivos JSON em <code>public/conteudo</code>.</p><button class="button primary" type="button" data-action="create-collection">Criar nova coleção</button></div>
+          <div class="empty-hub" data-role="empty-hub" hidden><div class="empty-glyph">✦</div><h3>Nenhuma coleção ainda</h3><p>Crie a primeira coleção para começar. Cada coleção publicada é uma pasta dentro de <code>public/conteudo</code>.</p><button class="button primary" type="button" data-action="create-collection">Criar nova coleção</button></div>
         </section>
       </main>
 
@@ -121,7 +116,7 @@ const publishedCollectionsJson = JSON.stringify(publishedCollections).replace(/<
       </div>
     </dialog>
 
-    <script id="published-collections" type="application/json" set:html={publishedCollectionsJson}></script>
+    <script is:inline id="published-collections" type="application/json" set:html={publishedCollectionsJson}></script>
     <script src="../scripts/editor.ts"></script>
   </body>
 </html>

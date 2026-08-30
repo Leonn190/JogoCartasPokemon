@@ -16,7 +16,7 @@ Editor estático em **Astro + TypeScript** para criação de cartas de um jogo p
 - 12 tipos próprios: Fogo, Água, Planta, Elétrico, Gelo, Lutador, Terra, Voador, Psíquico, Sombrio, Metal e Místico.
 - Upload de PNG/JPG/WebP, drag & drop, zoom, posição X/Y e reposicionamento arrastando a arte no preview.
 - Preview reativo sem recarregar a página ao trocar o tipo de carta.
-- As coleções são carregadas exclusivamente dos JSONs em `public/conteudo`; alterações permanecem apenas na sessão até a exportação dos JSONs.
+- As coleções são carregadas exclusivamente das pastas em `public/conteudo`; alterações permanecem na sessão até a exportação de `conteudo.zip`.
 - Exportação PNG de apenas o template atualmente selecionado em **1260 × 1760 px**.
 - Layout responsivo e deploy estático via GitHub Pages/GitHub Actions.
 
@@ -82,6 +82,24 @@ src/
 │  └─ pokeapi.ts
 └─ pages/index.astro
 ```
+
+## Formato de conteúdo
+
+Cada coleção é uma pasta. Dentro dela, `colecao.json` guarda os metadados e cada carta possui sua própria pasta com o JSON e a imagem usada no template:
+
+```text
+public/conteudo/
+└─ primeira-colecao/
+   ├─ colecao.json
+   ├─ 001-froakie-normal/
+   │  ├─ carta.json
+   │  └─ imagem.webp
+   └─ 002-frogadier-normal/
+      ├─ carta.json
+      └─ imagem.png
+```
+
+Se a carta ainda não tiver arte, sua pasta contém somente `carta.json` até que uma imagem seja definida. O botão **Salvar conteúdo** baixa um único ZIP com a pasta `conteudo` pronta para ser extraída dentro de `public`.
 
 ## Rodar localmente
 

@@ -34,7 +34,7 @@ const lines = [
   [['Petilil', 548, 'Planta'], ['Lilligant', 549, 'Planta'], ['Lilligant de Hisui', 549, 'Lutador']],
 ];
 
-const stageFor = (index, length, form) => {
+const stageFor = (index, form) => {
   if (form !== 'Normal') return 'FINAL';
   if (index === 0) return 'BÁSICO';
   if (index === 1) return 'ESTÁGIO 1';
@@ -63,7 +63,7 @@ const cards = lines.flatMap((line, lineIndex) => line.map((entry, entryIndex) =>
     data: {
       cardType: 'pokemon', pokemonId, pokemonName, form,
       rarity: form === 'Normal' ? 'common' : 'ultraRare', type,
-      stage: stageFor(entryIndex, line.length, form), previousEvolution,
+      stage: stageFor(entryIndex, form), previousEvolution,
       previousEvolutionImage: previousEvolution ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${line[Math.max(0, entryIndex - 1)][1]}.png` : '',
       artwork: '', artworkSource: 'none', artworkTransform: { scale: 1, x: 0, y: 0 }, expandedArtwork: false,
       pokedexNumber: pokemonId, genus: 'Pokémon', height: '—', weight: '—', region: '—',
@@ -79,10 +79,28 @@ if (cards.length !== 76) throw new Error(`Esperadas 76 cartas, recebidas ${cards
 cards.forEach((card) => { card.data.setTotal = cards.length; });
 
 const cleanCards = cards.map(({ _line, ...card }) => card);
-const collection = { id: collectionId, name: collectionName, code: collectionCode, createdAt: generatedAt, updatedAt: generatedAt, cards: cleanCards };
-const output = join(process.cwd(), 'public', 'conteudo');
+const slugify = (value) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+  .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+const output = join(process.cwd(), 'public', 'conteudo', 'primeira-colecao');
 mkdirSync(output, { recursive: true });
-writeFileSync(join(output, 'primeira-colecao.json'), `${JSON.stringify(collection, null, 2)}\n`);
+const collection = {
+  formatVersion: 2,
+  id: collectionId,
+  name: collectionName,
+  code: collectionCode,
+  createdAt: generatedAt,
+  updatedAt: generatedAt,
+  exportedAt: generatedAt,
+};
+writeFileSync(join(output, 'colecao.json'), `${JSON.stringify(collection, null, 2)}\n`);
+
+for (const card of cleanCards) {
+  const numberLabel = String(card.data.cardNumber).padStart(3, '0');
+  const cardDirectory = join(output, `${numberLabel}-${slugify(card.data.pokemonName)}-${slugify(card.data.form)}`);
+  mkdirSync(cardDirectory, { recursive: true });
+  writeFileSync(join(cardDirectory, 'carta.json'), `${JSON.stringify(card, null, 2)}\n`);
+}
 
 const counts = cleanCards.reduce((result, card) => {
   result[card.data.type] = (result[card.data.type] ?? 0) + 1;

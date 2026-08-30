@@ -1,21 +1,27 @@
-import type { CardData, WorkspaceState } from '../types/card';
-import { createStoreZip, decodeZipText, readZip } from './simpleZip';
-import { COLLECTION_CATEGORY_ORDER, COLLECTION_PRESETS } from '../data/gameConfig';
+import type { CardCollection, StoredCard, WorkspaceState } from '../types/card';
+import { cardDisplayName } from './collections';
+import { createStoreZip } from './simpleZip';
 
-const SCHEMA_VERSION = 1;
+type ZipEntry = { name: string; data: string | Uint8Array };
 
-type Manifest = {
-  schemaVersion: 1;
-  exportedAt: string;
-  revision: number;
-  rules: { categoryOrder: typeof COLLECTION_CATEGORY_ORDER; presets: typeof COLLECTION_PRESETS };
-  collections: Array<{ id: string; name: string; code: string; size: string; path: string }>;
-};
+function slugify(value: string) {
+  return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
+
+function uniqueDirectoryName(preferred: string, fallback: string, used: Set<string>) {
+  const base = slugify(preferred) || slugify(fallback) || 'item';
+  let result = base;
+  let suffix = 2;
+  while (used.has(result)) result = `${base}-${suffix++}`;
+  used.add(result);
+  return result;
+}
 
 function dataUrlToBytes(value: string) {
   const match = value.match(/^data:([^;,]+)?(;base64)?,(.*)$/s);
   if (!match) return null;
-  const mime = match[1] || 'application/octet-stream';
+  const mime = (match[1] || 'application/octet-stream').toLowerCase();
   const raw = match[3] || '';
   if (match[2]) {
     const binary = atob(raw);
@@ -26,102 +32,92 @@ function dataUrlToBytes(value: string) {
   return { mime, bytes: new TextEncoder().encode(decodeURIComponent(raw)) };
 }
 
-function bytesToDataUrl(bytes: Uint8Array, mime: string) {
-  let binary = '';
-  const chunk = 0x8000;
-  for (let i = 0; i < bytes.length; i += chunk) binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
-  return `data:${mime};base64,${btoa(binary)}`;
-}
-
 function extensionForMime(mime: string) {
-  if (mime === 'image/png') return 'png';
-  if (mime === 'image/jpeg') return 'jpg';
-  if (mime === 'image/webp') return 'webp';
-  if (mime === 'image/gif') return 'gif';
-  return 'bin';
+  const normalized = mime.split(';')[0]!.trim().toLowerCase();
+  if (normalized === 'image/png') return 'png';
+  if (normalized === 'image/jpeg') return 'jpg';
+  if (normalized === 'image/webp') return 'webp';
+  if (normalized === 'image/gif') return 'gif';
+  if (normalized === 'image/avif') return 'avif';
+  if (normalized === 'image/svg+xml') return 'svg';
+  throw new Error(`Formato de imagem não suportado no conteúdo: ${normalized || 'desconhecido'}.`);
 }
 
-function cloneCardForZip(card: CardData, collectionId: string, cardId: string, entries: Array<{ name: string; data: string | Uint8Array }>) {
-  const copy = structuredClone(card);
-  if (copy.artwork) {
-    const decoded = dataUrlToBytes(copy.artwork);
-    if (decoded) {
-      const path = `collections/${collectionId}/artworks/${cardId}.${extensionForMime(decoded.mime)}`;
-      entries.push({ name: path, data: decoded.bytes });
-      copy.artwork = `zip://${path}|${decoded.mime}`;
-    }
+async function readArtwork(artwork: string, label: string) {
+  const embedded = dataUrlToBytes(artwork);
+  if (embedded) return embedded;
+  try {
+    const response = await fetch(artwork);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const mime = response.headers.get('content-type') || '';
+    const bytes = new Uint8Array(await response.arrayBuffer());
+    return { mime, bytes };
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : 'falha desconhecida';
+    throw new Error(`Não foi possível incorporar a imagem de ${label} (${reason}).`);
   }
-  return copy;
 }
 
-export function exportWorkspaceZip(workspace: WorkspaceState) {
-  const entries: Array<{ name: string; data: string | Uint8Array }> = [];
-  const exportedAt = new Date().toISOString();
-  const manifest: Manifest = {
-    schemaVersion: SCHEMA_VERSION,
+function cardDirectoryLabel(stored: StoredCard) {
+  const number = String(stored.data.cardNumber || 0).padStart(3, '0');
+  const name = cardDisplayName(stored.data);
+  const variant = stored.data.cardType === 'pokemon' ? stored.data.form : stored.data.cardType;
+  return `${number}-${name}-${variant}`;
+}
+
+async function addCard(entries: ZipEntry[], collectionPath: string, stored: StoredCard, directory: string) {
+  const copy = structuredClone(stored);
+  const artwork = copy.data.artwork?.trim() || '';
+  if (artwork) {
+    const image = await readArtwork(artwork, cardDisplayName(copy.data));
+    const imageName = `imagem.${extensionForMime(image.mime)}`;
+    entries.push({ name: `${collectionPath}/${directory}/${imageName}`, data: image.bytes });
+    copy.data.artwork = imageName;
+  } else {
+    copy.data.artwork = '';
+  }
+  entries.push({ name: `${collectionPath}/${directory}/carta.json`, data: `${JSON.stringify(copy, null, 2)}\n` });
+}
+
+function collectionMetadata(collection: CardCollection, exportedAt: string) {
+  return {
+    formatVersion: 2,
+    id: collection.id,
+    name: collection.name,
+    code: collection.code,
+    ...(collection.size ? { size: collection.size } : {}),
+    createdAt: collection.createdAt,
+    updatedAt: collection.updatedAt,
     exportedAt,
-    revision: workspace.revision,
-    rules: { categoryOrder: COLLECTION_CATEGORY_ORDER, presets: COLLECTION_PRESETS },
-    collections: workspace.collections.map((collection) => ({
-      id: collection.id,
-      name: collection.name,
-      code: collection.code,
-      size: collection.size,
-      path: `collections/${collection.id}/collection.json`,
-    })),
   };
-  entries.push({ name: 'manifest.json', data: JSON.stringify(manifest, null, 2) });
+}
+
+/**
+ * Gera um ZIP cuja raiz é `conteudo/`. Cada coleção é uma pasta e cada
+ * carta é outra pasta contendo `carta.json` e, quando definida, `imagem.ext`.
+ */
+export async function exportContentZip(workspace: WorkspaceState) {
+  const entries: ZipEntry[] = [];
+  const exportedAt = new Date().toISOString();
+  const usedCollections = new Set<string>();
 
   for (const collection of workspace.collections) {
-    const collectionMeta = { ...collection, cards: undefined };
-    entries.push({ name: `collections/${collection.id}/collection.json`, data: JSON.stringify(collectionMeta, null, 2) });
-    const cards = collection.cards.map((stored) => ({
-      ...stored,
-      data: cloneCardForZip(stored.data, collection.id, stored.id, entries),
-    }));
-    entries.push({ name: `collections/${collection.id}/cards.json`, data: JSON.stringify(cards, null, 2) });
-  }
+    const collectionDirectory = uniqueDirectoryName(collection.name, collection.code, usedCollections);
+    const collectionPath = `conteudo/${collectionDirectory}`;
+    entries.push({
+      name: `${collectionPath}/colecao.json`,
+      data: `${JSON.stringify(collectionMetadata(collection, exportedAt), null, 2)}\n`,
+    });
 
-  return { bytes: createStoreZip(entries), exportedAt };
-}
-
-function parseJson<T>(files: Map<string, Uint8Array>, path: string): T {
-  const bytes = files.get(path);
-  if (!bytes) throw new Error(`Arquivo ausente no conteúdo: ${path}`);
-  return JSON.parse(decodeZipText(bytes)) as T;
-}
-
-export async function importWorkspaceZip(bytes: Uint8Array): Promise<{ workspace: WorkspaceState; exportedAt: string }> {
-  const files = await readZip(bytes);
-  const manifest = parseJson<Manifest>(files, 'manifest.json');
-  if (manifest.schemaVersion !== SCHEMA_VERSION) throw new Error(`Schema de conteúdo incompatível: ${manifest.schemaVersion}.`);
-  const collections = [] as WorkspaceState['collections'];
-
-  for (const entry of manifest.collections) {
-    const collection = parseJson<any>(files, entry.path);
-    const cards = parseJson<any[]>(files, `collections/${entry.id}/cards.json`);
-    for (const stored of cards) {
-      const artwork = stored?.data?.artwork;
-      if (typeof artwork === 'string' && artwork.startsWith('zip://')) {
-        const payload = artwork.slice(6);
-        const separator = payload.lastIndexOf('|');
-        const path = separator >= 0 ? payload.slice(0, separator) : payload;
-        const mime = separator >= 0 ? payload.slice(separator + 1) : 'application/octet-stream';
-        const image = files.get(path);
-        stored.data.artwork = image ? bytesToDataUrl(image, mime) : '';
-      }
+    const usedCards = new Set<string>();
+    for (const stored of collection.cards) {
+      const cardDirectory = uniqueDirectoryName(cardDirectoryLabel(stored), stored.id, usedCards);
+      await addCard(entries, collectionPath, stored, cardDirectory);
     }
-    collections.push({ ...collection, cards });
   }
 
-  return {
-    workspace: {
-      schemaVersion: 1,
-      revision: Number(manifest.revision) || 0,
-      updatedAt: manifest.exportedAt,
-      snapshotExportedAt: manifest.exportedAt,
-      collections,
-    },
-    exportedAt: manifest.exportedAt,
-  };
+  return { bytes: createStoreZip(entries), exportedAt, fileName: 'conteudo.zip' };
 }
+
+// Nome antigo mantido para integrações locais que já importavam a função.
+export const exportWorkspaceZip = exportContentZip;

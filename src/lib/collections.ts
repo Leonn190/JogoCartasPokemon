@@ -1,3 +1,4 @@
+import { CARD_TYPE_LABELS } from '../types/card';
 import type { CardCollection, CardData, CardType, WorkspaceState } from '../types/card';
 import { COLLECTION_CATEGORY_ORDER, collectionBaseTotal } from '../data/gameConfig';
 

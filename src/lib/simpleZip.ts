@@ -106,7 +106,7 @@ function findEocd(bytes: Uint8Array) {
 
 async function inflateRaw(bytes: Uint8Array) {
   if (!('DecompressionStream' in globalThis)) throw new Error('ZIP comprimido não é suportado neste navegador.');
-  const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+  const stream = new Blob([new Uint8Array(bytes).buffer]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
   return new Uint8Array(await new Response(stream).arrayBuffer());
 }
 

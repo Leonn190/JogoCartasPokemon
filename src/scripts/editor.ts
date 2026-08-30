@@ -1,6 +1,7 @@
 import { ATTACK_KIND_META, CARD_CATEGORY_META } from '../data/cardCategories';
 import { DEFAULT_ATTACK_CARD, DEFAULT_POKEMON_CARD, createChampionCard, createClimateCard, createEmptyCard, createUtilityCard } from '../data/defaultCard';
 import { exportCardAsPng } from '../lib/exportCard';
+import { exportContentZip } from '../lib/contentZip';
 import { cardDisplayName, createCollection, createEmptyWorkspace, deleteCard, isFullArtCard, prepareCardForCollection, renumberCollection, upsertCard } from '../lib/collections';
 import { COLLECTION_CATEGORY_ORDER, categoryCount } from '../data/gameConfig';
 import { getPokemonIndex, loadAbilityDescription, loadPokemonEditorData, loadPokemonSummary } from '../lib/pokeapi';
@@ -575,29 +576,22 @@ async function persistActiveCard(showFeedback = false) {
   }
 }
 
-function collectionFileName(collection: CardCollection) {
-  const slug = collection.name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-  return `${slug || collection.code.toLowerCase()}.json`;
-}
-
 async function exportCollectionFiles() {
   try {
-    for (const collection of workspace.collections) {
-      const blob = new Blob([JSON.stringify(collection, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const anchor = document.createElement('a');
-      anchor.href = url;
-      anchor.download = collectionFileName(collection);
-      document.body.appendChild(anchor);
-      anchor.click();
-      anchor.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 1500);
-    }
-    toast('Coleções exportadas em JSON. Coloque os arquivos em public/conteudo e publique o projeto.', 'success');
+    const { bytes, fileName } = await exportContentZip(workspace);
+    const blob = new Blob([bytes], { type: 'application/zip' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = fileName;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1500);
+    toast('conteudo.zip baixado. Extraia a pasta conteudo dentro de public.', 'success');
   } catch (error) {
     console.error(error);
-    toast('Não foi possível exportar as coleções.', 'error');
+    toast(error instanceof Error ? error.message : 'Não foi possível exportar o conteúdo.', 'error');
   }
 }
 
@@ -607,11 +601,11 @@ function loadPublishedWorkspace() {
     const node = q<HTMLScriptElement>('#published-collections');
     const collections = JSON.parse(node?.textContent || '[]') as CardCollection[];
     if (!Array.isArray(collections) || !collections.length) {
-      if (status) status.textContent = 'Nenhuma coleção encontrada em public/conteudo';
+      if (status) status.textContent = 'Nenhuma pasta de coleção encontrada em public/conteudo';
       return null;
     }
     if (!collections.every((collection) => collection && Array.isArray(collection.cards))) throw new Error('Coleção JSON inválida.');
-    if (status) status.textContent = `${collections.length} coleção(ões) carregada(s) de public/conteudo`;
+    if (status) status.textContent = `${collections.length} coleção(ões) carregada(s) das pastas em public/conteudo`;
     return {
       workspace: {
         schemaVersion: 1 as const,
@@ -622,7 +616,7 @@ function loadPublishedWorkspace() {
     };
   } catch (error) {
     console.warn('Falha ao carregar coleções publicadas', error);
-    if (status) status.textContent = 'JSON publicado inválido';
+    if (status) status.textContent = 'Estrutura publicada inválida';
     return null;
   }
 }
@@ -682,13 +676,14 @@ function syncFormFromState() {
   });
 
   if (isPokemon(card)) {
+    const pokemon = card;
     const fields: Array<keyof PokemonCardData> = [
       'pokemonName', 'form', 'rarity', 'type', 'stage', 'previousEvolution', 'previousEvolutionImage',
       'pokedexNumber', 'genus', 'height', 'weight', 'region', 'hp', 'attack', 'defense',
       'specialAttack', 'specialDefense', 'speed', 'abilityName', 'abilityDescription', 'flavorText', 'expandedArtwork',
     ];
-    fields.forEach((field) => setInputValue(String(field), card[field]));
-    updatePokemonTypeChoices(card.typeCandidates ?? []);
+    fields.forEach((field) => setInputValue(String(field), pokemon[field]));
+    updatePokemonTypeChoices(pokemon.typeCandidates ?? []);
   } else if (isAttack(card)) {
     setInputValue('attackName', card.attackName);
     setInputValue('attackDescription', card.attackDescription);
@@ -701,11 +696,12 @@ function syncFormFromState() {
     setInputValue('name', card.name);
     setInputValue('effectText', card.effectText);
   } else if (isChampion(card)) {
+    const champion = card;
     const fields: Array<keyof ChampionCardData> = [
       'name', 'victoryCondition', 'defeatCondition', 'passiveName', 'passiveDescription',
       'initialPokemonCount', 'initialAttackCount', 'initialTrainerCount',
     ];
-    fields.forEach((field) => setInputValue(String(field), card[field]));
+    fields.forEach((field) => setInputValue(String(field), champion[field]));
   } else if (isUtility(card)) {
     setInputValue('name', card.name);
     setInputValue('effectText', card.effectText);
@@ -1500,7 +1496,7 @@ async function selectPokemon(identifier: string | number, pokemonNameHint = '') 
     markChanged();
     toast(`${p.pokemonName} carregado pela PokéAPI.`, 'success');
     const canReusePrefetch = artworkPrefetch && normalizePokemonNameForArtwork(hintedName) === normalizePokemonNameForArtwork(p.pokemonName);
-    void preloadTcgArtworkSuggestions(p.pokemonName, false, canReusePrefetch ? artworkPrefetch : undefined);
+    void preloadTcgArtworkSuggestions(p.pokemonName, false, canReusePrefetch && artworkPrefetch ? artworkPrefetch : undefined);
   } catch (error) {
     if (error instanceof DOMException && error.name === 'AbortError') return;
     const message = error instanceof Error ? error.message : 'Falha ao consultar a PokéAPI.';

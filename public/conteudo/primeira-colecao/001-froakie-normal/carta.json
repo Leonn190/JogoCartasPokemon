@@ -2,7 +2,7 @@
   "id": "card-pjo-001",
   "collectionId": "collection-primeira-jornada",
   "createdAt": "2026-08-29T18:00:01.000Z",
-  "updatedAt": "2026-08-30T04:21:51.595Z",
+  "updatedAt": "2026-08-30T05:40:11.105Z",
   "data": {
     "cardType": "pokemon",
     "pokemonId": 656,
@@ -14,11 +14,11 @@
     "previousEvolution": "",
     "previousEvolutionImage": "",
     "artwork": "imagem.webp",
-    "artworkSource": "tcgdex",
+    "artworkSource": "manual",
     "artworkTransform": {
       "scale": 1.12,
       "x": 0,
-      "y": 0.2538071065989844
+      "y": 0
     },
     "expandedArtwork": false,
     "pokedexNumber": 656,
@@ -28,12 +28,12 @@
     "region": "Kalos",
     "hp": 50,
     "attack": 60,
-    "defense": 40,
+    "defense": 50,
     "specialAttack": 70,
     "specialDefense": 50,
     "speed": 80,
     "abilityName": "Esquiva",
-    "abilityDescription": "Na primeira vez em que este Pokémon for atacado na partida, jogue um dado. Se o resultado for 6, ele não sofrerá dano desse ataque.",
+    "abilityDescription": "Na primeira vez em que este Pokémon for atacado na rodada, jogue um dado. Se o resultado for 6, ele não sofrerá dano desse ataque.",
     "flavorText": "Secreta bolhas flexíveis do peito e das costas. As bolhas reduzem o dano que, de outra forma, sofreria quando atacadas.",
     "cardNumber": 1,
     "setTotal": 76,
@@ -41,7 +41,7 @@
     "typeCandidates": [
       "Água"
     ],
-    "artworkSourceCardId": "sm6-22",
-    "artworkSourceLabel": "Forbidden Light #22"
+    "artworkSourceCardId": "",
+    "artworkSourceLabel": ""
   }
 }

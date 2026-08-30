@@ -24,7 +24,7 @@
 .pokemon-card[data-form="EX"] { --form-accent: #dbe2e5; }
 .pokemon-card[data-form="Mega"] { --form-accent: #252a2e; }
 .pokemon-card[data-form="Radiante"] { --form-accent: #c99a2c; }
-.pokemon-card[data-form="Gigantamax"] { --form-accent: #bf3b42; }
+.pokemon-card[data-form="Gmax"] { --form-accent: #bf3b42; }
 
 .pokemon-card .card-shell {
   inset: 13px;
@@ -223,7 +223,7 @@
   letter-spacing: -.035em;
 }
 
-.pokemon-card[data-form="Gigantamax"] .pokemon-form-suffix {
+.pokemon-card[data-form="Gmax"] .pokemon-form-suffix {
   background: linear-gradient(90deg, #64219c 0%, #a326aa 25%, #d52b65 48%, #e1473f 67%, #ee8a2d 84%, #e4c64d 100%);
   -webkit-background-clip: text;
   background-clip: text;
@@ -380,15 +380,14 @@
 
 .artwork-frame.has-artwork .artwork-placeholder { display: none; }
 
-/* EX, Mega, Radiante e Gigantamax usam sangria horizontal: a região da
-   imagem atravessa a moldura interna e termina exatamente na borda da carta. */
+/* EX, Mega, Radiante e Gmax usam imagem mais larga, limitada pela borda prata. */
 .pokemon-card:not([data-form="Normal"]) .card-shell {
-  overflow: visible;
+  overflow: hidden;
 }
 
 .pokemon-card:not([data-form="Normal"]) .artwork-frame {
-  width: calc(100% + 46px);
-  margin-inline: -23px;
+  width: calc(100% + 20px);
+  margin-inline: -10px;
   border-left: 0;
   border-right: 0;
   border-radius: 0;

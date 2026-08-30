@@ -14,7 +14,7 @@ const raritySymbols = { common: '●', uncommon: '▲', rare: '◆', ultraRare: 
         {POKEMON_RARITIES.map((rarity) => <option value={rarity} selected={rarity === card.rarity}>{raritySymbols[rarity]} {POKEMON_RARITY_LABELS[rarity]}</option>)}
       </select>
     </div>
-    <div class="field span-2 advanced-only"><label for="flavor-text">Descrição do Pokémon</label><textarea id="flavor-text" data-field="flavorText" rows="4" maxlength="260">{card.flavorText}</textarea></div>
+    <div class="field span-2 advanced-only"><label for="flavor-text">Descrição do Pokémon</label><textarea id="flavor-text" data-field="flavorText" rows="4" maxlength="520">{card.flavorText}</textarea></div>
     <div class="field advanced-only"><label>Número da carta</label><input data-field="cardNumber" data-derived readonly value={card.cardNumber} /></div>
     <div class="field advanced-only"><label>Total da coleção</label><input data-role="derived-set-total" readonly value={card.setTotal} /></div>
     <div class="field span-2 advanced-only"><label>Sigla da coleção</label><input data-field="setCode" data-derived readonly value={card.setCode} /></div>

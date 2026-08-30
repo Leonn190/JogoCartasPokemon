@@ -133,14 +133,14 @@ function roundStatToTen(value: number, max = Number.POSITIVE_INFINITY) {
   return Math.min(max, rounded);
 }
 
-function scaleOfficialStat(value: number, max = Number.POSITIVE_INFINITY) {
-  return roundStatToTen((value || 0) * 1.1, max);
+function scaleOfficialStat(value: number, multiplier = 1.15, max = Number.POSITIVE_INFINITY) {
+  return roundStatToTen((value || 0) * multiplier, max);
 }
 
 function statsFromPokemon(pokemon: PokemonResponse): OfficialStats {
   const byName = Object.fromEntries(pokemon.stats.map((item) => [item.stat.name, item.base_stat]));
   return {
-    hp: scaleOfficialStat(byName.hp ?? 0, 300),
+    hp: scaleOfficialStat(byName.hp ?? 0, 1.2, 300),
     attack: scaleOfficialStat(byName.attack ?? 0),
     defense: scaleOfficialStat(byName.defense ?? 0),
     specialAttack: scaleOfficialStat(byName['special-attack'] ?? 0),

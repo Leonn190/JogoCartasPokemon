@@ -2,7 +2,7 @@
   "id": "card-pjo-002",
   "collectionId": "collection-primeira-jornada",
   "createdAt": "2026-08-29T18:00:02.000Z",
-  "updatedAt": "2026-08-29T18:00:00.000Z",
+  "updatedAt": "2026-08-30T04:27:49.084Z",
   "data": {
     "cardType": "pokemon",
     "pokemonId": 657,
@@ -13,30 +13,35 @@
     "stage": "ESTÁGIO 1",
     "previousEvolution": "Froakie",
     "previousEvolutionImage": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/656.png",
-    "artwork": "",
-    "artworkSource": "none",
+    "artwork": "imagem.webp",
+    "artworkSource": "manual",
     "artworkTransform": {
-      "scale": 1,
-      "x": 0,
-      "y": 0
+      "scale": 1.12,
+      "x": -5.551115123125783e-17,
+      "y": -1.0152284263959395
     },
     "expandedArtwork": false,
     "pokedexNumber": 657,
-    "genus": "Pokémon",
-    "height": "—",
-    "weight": "—",
-    "region": "—",
-    "hp": 0,
-    "attack": 0,
-    "defense": 0,
-    "specialAttack": 0,
-    "specialDefense": 0,
-    "speed": 0,
-    "abilityName": "",
-    "abilityDescription": "",
-    "flavorText": "",
+    "genus": "Pokémon Sapo Bolha",
+    "height": "0,6 m",
+    "weight": "10,9 kg",
+    "region": "Kalos",
+    "hp": 70,
+    "attack": 70,
+    "defense": 60,
+    "specialAttack": 90,
+    "specialDefense": 60,
+    "speed": 110,
+    "abilityName": "Saltador",
+    "abilityDescription": "Na primeira vez em que este Pokémon for atacado na partida, jogue um dado. Se o resultado for 5 ou 6, ele não sofrerá dano desse ataque.",
+    "flavorText": "Ele pode jogar pedras cobertas de bolhas com controle preciso, atingindo latas vazias a até trinta metros de distância.",
     "cardNumber": 2,
     "setTotal": 76,
-    "setCode": "PCO"
+    "setCode": "PCO",
+    "typeCandidates": [
+      "Água"
+    ],
+    "artworkSourceCardId": "",
+    "artworkSourceLabel": ""
   }
 }

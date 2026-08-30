@@ -2,7 +2,7 @@
   "id": "card-pjo-001",
   "collectionId": "collection-primeira-jornada",
   "createdAt": "2026-08-29T18:00:01.000Z",
-  "updatedAt": "2026-08-29T18:00:00.000Z",
+  "updatedAt": "2026-08-30T04:21:51.595Z",
   "data": {
     "cardType": "pokemon",
     "pokemonId": 656,
@@ -13,30 +13,35 @@
     "stage": "BÁSICO",
     "previousEvolution": "",
     "previousEvolutionImage": "",
-    "artwork": "",
-    "artworkSource": "none",
+    "artwork": "imagem.webp",
+    "artworkSource": "tcgdex",
     "artworkTransform": {
-      "scale": 1,
+      "scale": 1.12,
       "x": 0,
-      "y": 0
+      "y": 0.2538071065989844
     },
     "expandedArtwork": false,
     "pokedexNumber": 656,
-    "genus": "Pokémon",
-    "height": "—",
-    "weight": "—",
-    "region": "—",
-    "hp": 0,
-    "attack": 0,
-    "defense": 0,
-    "specialAttack": 0,
-    "specialDefense": 0,
-    "speed": 0,
-    "abilityName": "",
-    "abilityDescription": "",
-    "flavorText": "",
+    "genus": "Pokémon Sapo Bolha",
+    "height": "0,3 m",
+    "weight": "7 kg",
+    "region": "Kalos",
+    "hp": 50,
+    "attack": 60,
+    "defense": 40,
+    "specialAttack": 70,
+    "specialDefense": 50,
+    "speed": 80,
+    "abilityName": "Esquiva",
+    "abilityDescription": "Na primeira vez em que este Pokémon for atacado na partida, jogue um dado. Se o resultado for 6, ele não sofrerá dano desse ataque.",
+    "flavorText": "Secreta bolhas flexíveis do peito e das costas. As bolhas reduzem o dano que, de outra forma, sofreria quando atacadas.",
     "cardNumber": 1,
     "setTotal": 76,
-    "setCode": "PCO"
+    "setCode": "PCO",
+    "typeCandidates": [
+      "Água"
+    ],
+    "artworkSourceCardId": "sm6-22",
+    "artworkSourceLabel": "Forbidden Light #22"
   }
 }

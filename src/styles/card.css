@@ -883,7 +883,7 @@
   - EX: prata metálica.
   - Mega: preto metálico.
   - Radiante: dourado metálico.
-  - Gigantamax: vermelho metálico.
+  - Gmax: vermelho metálico.
 
   O corpo da carta segue a linguagem dos templates padrão enviados:
   pigmento vivo + manchas/nuvens sutis, sem véu bege e sem cromado no fundo.
@@ -916,10 +916,10 @@
 /* Radiante: dourado metálico. */
 
 
-/* Gigantamax: vermelho metálico. */
+/* Gmax: vermelho metálico. */
 
 
-/* Um único layout para EX, Mega, Radiante e Gigantamax. */
+/* Um único layout para EX, Mega, Radiante e Gmax. */
 
 
 /* Mesmos detalhes de moldura, mudando só o material/cor pela forma. */

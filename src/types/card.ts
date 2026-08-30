@@ -19,7 +19,7 @@ export type TrainerCardType = (typeof TRAINER_CARD_TYPES)[number];
 export const UTILITY_CARD_TYPES = ['stadium', 'supporter', 'item', 'rareItem', 'tool'] as const;
 export type UtilityCardType = (typeof UTILITY_CARD_TYPES)[number];
 
-export const CARD_FORMS = ['Normal', 'EX', 'Mega', 'Radiante', 'Gigantamax'] as const;
+export const CARD_FORMS = ['Normal', 'EX', 'Mega', 'Radiante', 'Gmax'] as const;
 export type PokemonForm = (typeof CARD_FORMS)[number];
 
 export const CARD_STAGES = ['BÁSICO', 'ESTÁGIO 1', 'ESTÁGIO 2', 'FINAL'] as const;

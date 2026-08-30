@@ -1086,7 +1086,7 @@ function updateTcgArtworkUI() {
 
   if (!isPokemon(card)) return;
   if (card.form !== 'Normal') {
-    if (tcgArtworkStatus) tcgArtworkStatus.textContent = 'Sugestões de cartas desativadas para EX, Mega, Radiante e Gigantamax.';
+    if (tcgArtworkStatus) tcgArtworkStatus.textContent = 'Sugestões de cartas desativadas para EX, Mega, Radiante e Gmax.';
     return;
   }
   if (tcgArtworkStatusOverride) {

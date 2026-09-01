@@ -36,7 +36,7 @@
     "abilityDescription": "Na primeira vez que esse pokemon for atacado, jogue um dado se cair 5 ou 6 roube uma carta aleatória do oponente cujo o pokemon te atacou (A carta pode ser uma das cartas coringas, você deve pegar uma aleatoriamente sem seu oponente te mostrar)",
     "flavorText": "Esses Pokémon são criados quando os espíritos possuem tocos de árvores podres. Preferem viver em florestas abandonadas.",
     "cardNumber": 13,
-    "setTotal": 76,
+    "setTotal": 79,
     "setCode": "PCO",
     "typeCandidates": [
       "Sombrio",

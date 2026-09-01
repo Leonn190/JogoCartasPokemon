@@ -36,7 +36,7 @@
     "abilityDescription": "Na primeira vez em que este Pokémon for atacado na rodada, jogue um dado. Se o resultado for 6, ele não sofrerá dano desse ataque.",
     "flavorText": "Secreta bolhas flexíveis do peito e das costas. As bolhas reduzem o dano que, de outra forma, sofreria quando atacadas.",
     "cardNumber": 1,
-    "setTotal": 76,
+    "setTotal": 79,
     "setCode": "PCO",
     "typeCandidates": [
       "Água"

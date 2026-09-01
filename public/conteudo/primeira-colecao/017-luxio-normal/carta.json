@@ -36,7 +36,7 @@
     "abilityDescription": "Esse pokemon é imune a qualquer situação que cause 20 ou menos de dano nele, se o resultado final de um dano for de apenas 20 ou menos de dano, esse pokemon não perderá vida",
     "flavorText": "Suas garras soltam eletricidade com amperagem suficiente para causar desmaios. Eles vivem em pequenos grupos.",
     "cardNumber": 17,
-    "setTotal": 76,
+    "setTotal": 79,
     "setCode": "PCO",
     "typeCandidates": [
       "Elétrico"

@@ -36,7 +36,7 @@
     "abilityDescription": "Na primeira vez em que este Pokémon for atacado na rodada, jogue um dado. Se o resultado for 5 ou 6, ele não sofrerá dano desse ataque.",
     "flavorText": "Ele pode jogar pedras cobertas de bolhas com controle preciso, atingindo latas vazias a até trinta metros de distância.",
     "cardNumber": 2,
-    "setTotal": 76,
+    "setTotal": 79,
     "setCode": "PCO",
     "typeCandidates": [
       "Água"

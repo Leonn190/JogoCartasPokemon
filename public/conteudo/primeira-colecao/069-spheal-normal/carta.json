@@ -1,0 +1,42 @@
+{
+  "id": "card-pjo-066",
+  "collectionId": "collection-primeira-jornada",
+  "createdAt": "2026-08-29T18:01:06.000Z",
+  "updatedAt": "2026-08-29T18:00:00.000Z",
+  "data": {
+    "cardType": "pokemon",
+    "pokemonId": 363,
+    "pokemonName": "Spheal",
+    "form": "Normal",
+    "rarity": "common",
+    "type": "Água",
+    "stage": "BÁSICO",
+    "previousEvolution": "",
+    "previousEvolutionImage": "",
+    "artwork": "",
+    "artworkSource": "none",
+    "artworkTransform": {
+      "scale": 1,
+      "x": 0,
+      "y": 0
+    },
+    "expandedArtwork": false,
+    "pokedexNumber": 363,
+    "genus": "Pokémon",
+    "height": "—",
+    "weight": "—",
+    "region": "—",
+    "hp": 0,
+    "attack": 0,
+    "defense": 0,
+    "specialAttack": 0,
+    "specialDefense": 0,
+    "speed": 0,
+    "abilityName": "",
+    "abilityDescription": "",
+    "flavorText": "",
+    "cardNumber": 69,
+    "setTotal": 79,
+    "setCode": "PCO"
+  }
+}

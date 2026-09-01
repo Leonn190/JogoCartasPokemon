@@ -36,7 +36,7 @@
     "abilityDescription": "Toda vez que esse pokemon ataca, ele pode remover um efeito positivo de um dos pokemon do banco do oponente cujo pokemon foi atingido, se fizer isso, o pokemon que tiver o efeito removido recebe 10 de dano verdadeiro",
     "flavorText": "Suas presas impressionantes são feitas de gelo. A população diminuiu quando ficou quente após a era glacial.",
     "cardNumber": 8,
-    "setTotal": 76,
+    "setTotal": 79,
     "setCode": "PCO",
     "typeCandidates": [
       "Gelo",

@@ -32,7 +32,7 @@ const publishedCollectionsJson = JSON.stringify(publishedCollections).replace(/<
           <div class="brand-copy"><strong>Card Forge</strong><span>Jornada Studio</span></div>
         </button>
         <div class="topbar-actions" data-role="hub-actions">
-          <a class="button primary" href="/jogar"><span class="button-icon">▶</span>Jogar Jornada</a>
+          <a class="button primary" href={`${import.meta.env.BASE_URL}jogar/`}><span class="button-icon">▶</span>Jogar Jornada</a>
           <button class="button primary" type="button" data-action="create-collection"><span class="button-icon">＋</span>Criar coleção</button>
         </div>
         <div class="topbar-actions" data-role="collection-actions" hidden>
@@ -51,7 +51,7 @@ const publishedCollectionsJson = JSON.stringify(publishedCollections).replace(/<
         <section class="hub-hero">
           <div><span class="eyebrow">CARD FORGE / JORNADA</span><h1>Jogar e criar no mesmo lugar</h1><p>Entre em uma Jornada local com 4 jogadores ou gerencie as coleções publicadas do projeto.</p></div>
           <div class="hub-primary-actions">
-            <a class="collection-create-card play-card" href="/jogar"><span>▶</span><strong>Jogar Jornada</strong><small>Modo jogue-e-passe com as cartas atuais</small></a>
+            <a class="collection-create-card play-card" href={`${import.meta.env.BASE_URL}jogar/`}><span>▶</span><strong>Jogar Jornada</strong><small>Modo jogue-e-passe com as cartas atuais</small></a>
             <button class="collection-create-card" type="button" data-action="create-collection"><span>＋</span><strong>Gerenciar cartas e coleções</strong><small>Criação protegida pela chave do editor</small></button>
           </div>
         </section>

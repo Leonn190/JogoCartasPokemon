@@ -1,44 +1,1095 @@
 .journey-body {
   min-height: 100vh;
+  color: #f3f3ec;
   background:
-    linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,.02) 1px, transparent 1px),
-    radial-gradient(circle at 18% 8%, rgba(111,141,130,.16), transparent 30rem),
-    radial-gradient(circle at 82% 20%, rgba(152,114,78,.13), transparent 28rem),
-    #101311;
-  background-size: 28px 28px, 28px 28px, auto, auto, auto;
+    radial-gradient(circle at 50% 48%, rgba(225, 202, 145, .12), transparent 22rem),
+    radial-gradient(circle at 12% 14%, rgba(120, 163, 134, .18), transparent 28rem),
+    radial-gradient(circle at 88% 10%, rgba(168, 119, 86, .16), transparent 24rem),
+    linear-gradient(180deg, #142117 0%, #0f1711 35%, #0b100c 100%);
 }
 
 .journey-button,
-.journey-start-card button,
-.journey-action-list button,
-.journey-dev-panel button {
+.journey-mini-action,
+.journey-slot-clear,
+.journey-ready-button,
+.journey-card-hitbox,
+.journey-selection-card,
+.journey-hand-card,
+.journey-inline-card-button,
+.journey-pile-card,
+.journey-slot-surface {
+  font: inherit;
+}
+
+.journey-button,
+.journey-mini-action,
+.journey-slot-clear {
   min-height: 40px;
-  border: 1px solid rgba(255,255,255,.14);
-  border-radius: 8px;
-  background: rgba(255,255,255,.055);
-  color: #f3f5f0;
-  padding: 0 13px;
-  font-weight: 750;
+  border: 1px solid rgba(255, 255, 255, .14);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .06);
+  color: #f4f5ef;
+  padding: 0 14px;
+  font-weight: 800;
   cursor: pointer;
   text-decoration: none;
+  transition: transform .18s ease, border-color .18s ease, background .18s ease;
 }
+
 .journey-button:hover,
-.journey-action-list button:hover,
-.journey-dev-panel button:hover {
-  border-color: rgba(255,255,255,.32);
-  background: rgba(255,255,255,.1);
+.journey-mini-action:hover,
+.journey-slot-clear:hover {
+  border-color: rgba(255, 255, 255, .3);
+  background: rgba(255, 255, 255, .1);
+  transform: translateY(-1px);
 }
-.journey-button.primary {
-  background: #e8ece4;
-  color: #101311;
-  border-color: #fff;
+
+.journey-button.primary,
+.journey-ready-button {
+  background: linear-gradient(180deg, #f8f4d8, #d8ba6e);
+  color: #15140d;
+  border-color: rgba(255, 248, 210, .9);
 }
-.journey-button.danger { color: #ffaaa3; }
-.journey-button.full { width: 100%; margin-top: 12px; }
+
+.journey-button.danger {
+  color: #ffbbb4;
+}
+
+.journey-eyebrow {
+  display: block;
+  color: #d4d5c6;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+
+.journey-shell {
+  min-height: 100vh;
+}
+
+.journey-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 14px clamp(14px, 2.6vw, 30px);
+  border-bottom: 1px solid rgba(255, 255, 255, .08);
+  background: rgba(9, 14, 10, .84);
+  backdrop-filter: blur(16px);
+}
+
+.journey-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #f7f7f0;
+  text-decoration: none;
+}
+
+.journey-brand span {
+  width: 34px;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, .16);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .04);
+}
+
+.journey-top-stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.journey-top-stats span {
+  border: 1px solid rgba(255, 255, 255, .08);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .04);
+  padding: 7px 11px;
+  color: #c8cdbf;
+  font-size: 12px;
+}
+
+.journey-top-stats strong {
+  color: #fff;
+}
+
+.journey-table {
+  width: min(1840px, calc(100% - 28px));
+  margin: 0 auto;
+  padding: 16px 0 24px;
+  display: grid;
+  gap: 14px;
+}
+
+.journey-board {
+  position: relative;
+  min-height: calc(100vh - 112px);
+  display: grid;
+  grid-template-columns: minmax(260px, 300px) minmax(0, 1fr) minmax(260px, 300px);
+  grid-template-rows: minmax(176px, 210px) minmax(0, 1fr) minmax(332px, 390px);
+  grid-template-areas:
+    "top top top"
+    "left center right"
+    "bottom bottom bottom";
+  gap: 14px;
+}
+
+.journey-seat,
+.journey-center,
+.journey-status-panel,
+.journey-drawer,
+.journey-neutral,
+.journey-start-card,
+.journey-overlay-card {
+  border: 1px solid rgba(255, 255, 255, .1);
+  border-radius: 22px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .06), rgba(255, 255, 255, .02)),
+    rgba(9, 14, 10, .68);
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, .32),
+    inset 0 1px rgba(255, 255, 255, .05);
+}
+
+.journey-seat {
+  position: relative;
+  overflow: hidden;
+  padding: 14px;
+}
+
+.journey-seat.is-focused {
+  border-color: rgba(246, 224, 150, .32);
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, .32),
+    0 0 0 1px rgba(246, 224, 150, .12),
+    inset 0 1px rgba(255, 255, 255, .08);
+}
+
+.journey-seat.is-inactive {
+  opacity: .64;
+}
+
+.journey-seat-top { grid-area: top; }
+.journey-seat-left { grid-area: left; }
+.journey-seat-right { grid-area: right; }
+.journey-seat-bottom { grid-area: bottom; }
+
+.journey-player-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.journey-player-header strong {
+  display: block;
+  font-size: 18px;
+}
+
+.journey-player-header span {
+  color: #c1c7bb;
+  font-size: 12px;
+}
+
+.journey-player-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  align-items: center;
+}
+
+.journey-player-meta > span {
+  border: 1px solid rgba(255, 255, 255, .08);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .035);
+  padding: 6px 10px;
+  font-size: 11px;
+  color: #dce0d5;
+}
+
+.journey-hand-backs {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding-left: 30px;
+  font-size: 11px;
+  color: #e2e6dc;
+}
+
+.journey-hand-backs i {
+  position: absolute;
+  left: 0;
+  width: 22px;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, .2);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, .12), transparent 30%),
+    linear-gradient(180deg, #23372a, #152117);
+  box-shadow: inset 0 0 0 1px rgba(255, 230, 180, .12);
+}
+
+.journey-hand-backs i:nth-child(1) { transform: rotate(-10deg) translateX(0); }
+.journey-hand-backs i:nth-child(2) { transform: rotate(-3deg) translateX(6px); }
+.journey-hand-backs i:nth-child(3) { transform: rotate(4deg) translateX(12px); }
+
+.journey-seat-body,
+.journey-local-layout,
+.journey-local-field {
+  display: grid;
+  gap: 12px;
+}
+
+.journey-seat-body {
+  grid-template-columns: minmax(0, 1fr) 132px;
+  grid-template-rows: auto auto;
+  grid-template-areas:
+    "active side"
+    "bench bench";
+}
+
+.journey-seat-active-zone { grid-area: active; }
+.journey-seat-sidecard { grid-area: side; }
+.journey-seat-bench {
+  grid-area: bench;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.journey-local-layout {
+  grid-template-columns: minmax(0, 1fr) 320px;
+  align-items: start;
+}
+
+.journey-local-field {
+  grid-template-columns: minmax(0, 1fr) 250px;
+  align-items: start;
+}
+
+.journey-local-side-column,
+.journey-sidecard-block {
+  display: grid;
+  gap: 10px;
+}
+
+.journey-local-bench {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.journey-sidecard-label,
+.journey-overlay-label,
+.journey-zone-title {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .08);
+  color: #f4f4ec;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.journey-pokemon-stack {
+  display: grid;
+  gap: 8px;
+}
+
+.journey-pokemon-main {
+  position: relative;
+}
+
+.journey-card-badges {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.journey-damage-badge,
+.journey-stat-badge,
+.journey-mini-chip,
+.journey-effect-pill,
+.journey-option-pill,
+.journey-slot-token {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.journey-damage-badge {
+  background: rgba(157, 40, 40, .88);
+  color: #fff4f2;
+}
+
+.journey-damage-badge.is-ko {
+  background: rgba(40, 14, 14, .92);
+}
+
+.journey-stat-badge,
+.journey-mini-chip,
+.journey-slot-token {
+  background: rgba(7, 11, 8, .72);
+  border: 1px solid rgba(255, 255, 255, .12);
+  color: #eef1e9;
+}
+
+.journey-effect-pill {
+  background: rgba(255, 255, 255, .08);
+  border: 1px solid rgba(255, 255, 255, .1);
+  color: #f4f5ed;
+}
+
+.journey-effect-pill.is-positive { background: rgba(69, 130, 92, .26); }
+.journey-effect-pill.is-negative { background: rgba(145, 63, 63, .28); }
+.journey-effect-pill.is-neutral { background: rgba(119, 132, 144, .24); }
+
+.journey-tool-stack,
+.journey-attack-stack {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.journey-attack-card {
+  display: grid;
+  gap: 6px;
+}
+
+.journey-pokemon-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.journey-center {
+  grid-area: center;
+  min-height: 0;
+  padding: 16px;
+  background:
+    radial-gradient(circle at 50% 34%, rgba(235, 211, 155, .08), transparent 22rem),
+    linear-gradient(145deg, rgba(22, 46, 27, .92), rgba(13, 22, 15, .96));
+}
+
+.journey-center-piles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.journey-pile-card {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  text-align: left;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, .12);
+  border-radius: 18px;
+  background: rgba(0, 0, 0, .18);
+  color: #f4f4ed;
+  cursor: pointer;
+}
+
+.journey-pile-stack {
+  position: relative;
+  width: 42px;
+  height: 58px;
+}
+
+.journey-pile-stack i {
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, .22);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, .12), transparent 30%),
+    linear-gradient(180deg, #243b2c, #182419);
+}
+
+.journey-pile-stack i:nth-child(1) { transform: rotate(-8deg) translateY(1px); }
+.journey-pile-stack i:nth-child(2) { transform: rotate(-2deg) translateX(3px); }
+.journey-pile-stack i:nth-child(3) { transform: rotate(4deg) translateX(6px); }
+
+.journey-pile-copy strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.journey-pile-copy span,
+.journey-pile-copy small,
+.journey-discard-zone small,
+.journey-stadium-copy small,
+.journey-zone-header small {
+  color: #cfd5c7;
+  font-size: 11px;
+}
+
+.journey-center-core {
+  display: grid;
+  gap: 14px;
+}
+
+.journey-center-lane {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.journey-climate-zone,
+.journey-discard-zone,
+.journey-zone-zone,
+.journey-stadium-slot {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, .1);
+  border-radius: 20px;
+  background: rgba(0, 0, 0, .16);
+}
+
+.journey-discard-zone {
+  justify-items: start;
+}
+
+.journey-zone-header,
+.journey-stadium-copy {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.journey-zone-cards,
+.journey-card-row,
+.journey-supporter-hand {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.journey-stadium-ring {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.journey-preview-panel,
+.journey-bottom-panel,
+.journey-supporter-slot,
+.journey-ready-panel {
+  border: 1px solid rgba(255, 255, 255, .08);
+  border-radius: 20px;
+  background: rgba(8, 12, 9, .48);
+}
+
+.journey-preview-panel {
+  padding: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.journey-preview-heading strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 15px;
+}
+
+.journey-preview-stage,
+.journey-preview-empty {
+  min-height: 332px;
+  display: grid;
+  place-items: center;
+}
+
+.journey-preview-empty,
+.journey-empty-slot,
+.journey-empty-pokemon,
+.journey-empty-line,
+.journey-card-fallback,
+.journey-slot-placeholder {
+  display: grid;
+  place-items: center;
+  min-height: 110px;
+  border: 1px dashed rgba(255, 255, 255, .14);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, .03);
+  color: #cfd3ca;
+  text-align: center;
+  padding: 12px;
+}
+
+.journey-card-back.small {
+  width: 98px;
+  height: 138px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, .16);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, .14), transparent 26%),
+    linear-gradient(180deg, #23372a, #152117);
+}
+
+.journey-bottom-panel {
+  margin-top: 12px;
+  padding: 14px;
+  display: grid;
+  gap: 12px;
+}
+
+.journey-bottom-panel.is-passive {
+  padding: 18px;
+}
+
+.journey-panel-copy,
+.journey-passive-panel {
+  display: grid;
+  gap: 6px;
+}
+
+.journey-panel-copy h3,
+.journey-passive-panel h3,
+.journey-overlay-card h2,
+.journey-status-panel h3 {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.02;
+}
+
+.journey-panel-copy p,
+.journey-passive-panel p,
+.journey-overlay-card p,
+.journey-status-panel p,
+.journey-ready-panel p,
+.journey-menu p,
+.journey-neutral p {
+  margin: 0;
+  color: #c3cbbd;
+  line-height: 1.55;
+}
+
+.journey-workbench,
+.journey-supporter-layout {
+  display: grid;
+  gap: 12px;
+}
+
+.journey-slot-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 220px;
+  gap: 12px;
+}
+
+.journey-slot {
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, .08);
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 50% 40%, rgba(255, 236, 175, .06), transparent 16rem),
+    rgba(8, 12, 9, .36);
+  transition: border-color .18s ease, transform .18s ease, box-shadow .18s ease;
+}
+
+.journey-slot.is-armed {
+  border-color: rgba(245, 219, 132, .34);
+  box-shadow: 0 0 0 1px rgba(245, 219, 132, .12) inset;
+}
+
+.journey-slot.is-valid-drop {
+  border-color: rgba(111, 197, 140, .52);
+  transform: translateY(-3px);
+}
+
+.journey-slot.is-invalid-drop {
+  border-color: rgba(201, 101, 101, .5);
+}
+
+.journey-slot.is-blocked {
+  opacity: .58;
+}
+
+.journey-slot-topline,
+.journey-slot-foot,
+.journey-slot-actions,
+.journey-drawer-header,
+.journey-debug-group-head,
+.journey-debug-inline,
+.journey-debug-toolbar,
+.journey-overlay-actions,
+.journey-board-tools,
+.journey-hand-limit-actions,
+.journey-dialog-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.journey-slot-topline,
+.journey-drawer-header,
+.journey-debug-group-head {
+  justify-content: space-between;
+}
+
+.journey-slot-title {
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.journey-slot-surface {
+  width: 100%;
+  min-height: 196px;
+  display: grid;
+  place-items: center;
+  padding: 12px;
+  border: 1px dashed rgba(255, 255, 255, .14);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, .03);
+  cursor: pointer;
+}
+
+.journey-slot-cards {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.journey-slot-foot {
+  justify-content: space-between;
+  color: #d7dcca;
+  font-size: 12px;
+}
+
+.journey-ready-panel {
+  padding: 14px;
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+
+.journey-ready-button {
+  min-height: 110px;
+  width: 100%;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 245, 197, .86);
+  display: grid;
+  place-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: transform .18s ease, filter .18s ease;
+}
+
+.journey-ready-button strong {
+  font-size: 30px;
+  letter-spacing: .06em;
+}
+
+.journey-ready-button small {
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.journey-ready-button:hover {
+  transform: translateY(-2px);
+  filter: saturate(1.08);
+}
+
+.journey-aux-row {
+  display: grid;
+  gap: 10px;
+}
+
+.journey-aux-label {
+  color: #edf0e6;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.journey-aux-actions,
+.journey-option-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.journey-card-fan {
+  display: flex;
+  align-items: flex-end;
+  min-height: 248px;
+  overflow-x: auto;
+  padding: 10px 6px 2px;
+}
+
+.journey-hand-card,
+.journey-selection-card,
+.journey-inline-card-button {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+}
+
+.journey-hand-card {
+  position: relative;
+  flex: 0 0 auto;
+  margin-left: calc(min(-44px, -2vw));
+  transition: transform .18s ease;
+  touch-action: none;
+}
+
+.journey-hand-card:first-child {
+  margin-left: 0;
+}
+
+.journey-hand-card:hover,
+.journey-hand-card.is-selected {
+  transform: translateY(-18px);
+  z-index: 3;
+}
+
+.journey-selection-card.is-disabled,
+.journey-inline-card-button.is-disabled,
+.journey-discard-card.is-disabled {
+  opacity: .42;
+}
+
+.journey-inline-card-button {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+}
+
+.journey-inline-card-button span {
+  color: #e4e8df;
+  font-size: 12px;
+  text-align: left;
+}
+
+.journey-supporter-layout {
+  grid-template-columns: 300px minmax(0, 1fr) 220px;
+  align-items: start;
+}
+
+.journey-supporter-slot,
+.journey-ready-compact {
+  padding: 12px;
+}
+
+.journey-discard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.journey-discard-card {
+  display: grid;
+  gap: 10px;
+}
+
+.journey-discard-card input {
+  width: 18px;
+  height: 18px;
+}
+
+.journey-status-panel {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 6;
+  width: min(360px, calc(100% - 28px));
+  padding: 16px;
+  display: grid;
+  gap: 12px;
+}
+
+.journey-status-panel.is-wide {
+  width: min(640px, calc(100% - 28px));
+}
+
+.journey-reveal-list {
+  display: grid;
+  gap: 8px;
+}
+
+.journey-reveal-list div {
+  display: grid;
+  gap: 2px;
+  padding: 10px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, .04);
+}
+
+.journey-ranking {
+  margin: 0;
+  padding-left: 20px;
+  display: grid;
+  gap: 6px;
+}
+
+.journey-board-tools {
+  position: absolute;
+  left: 14px;
+  top: 14px;
+  z-index: 6;
+  flex-wrap: wrap;
+}
+
+.journey-drawer {
+  padding: 16px;
+}
+
+.journey-debug-drawer,
+.journey-log-drawer {
+  display: grid;
+  gap: 12px;
+}
+
+.journey-log-entries {
+  max-height: 360px;
+  overflow: auto;
+  display: grid;
+  gap: 10px;
+}
+
+.journey-log-entries p {
+  margin: 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, .06);
+  color: #ebeee6;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.journey-log-entries small {
+  display: block;
+  margin-bottom: 4px;
+  color: #97a08f;
+}
+
+.journey-debug-toolbar,
+.journey-debug-inline {
+  flex-wrap: wrap;
+}
+
+.journey-debug-toolbar {
+  align-items: flex-start;
+}
+
+.journey-debug-note {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.journey-debug-note input,
+.journey-start-card input,
+.journey-start-card select,
+.journey-dialog textarea {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid rgba(255, 255, 255, .13);
+  border-radius: 12px;
+  background: #111812;
+  color: #fff;
+  padding: 0 12px;
+}
+
+.journey-dialog textarea {
+  min-height: 200px;
+  padding: 12px;
+}
+
+.journey-debug-groups {
+  display: grid;
+  gap: 12px;
+}
+
+.journey-debug-group,
+.journey-debug-pokemon {
+  display: grid;
+  gap: 8px;
+}
+
+.journey-debug-group {
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, .08);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, .03);
+}
+
+.journey-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(5, 8, 6, .58);
+  backdrop-filter: blur(6px);
+}
+
+.journey-overlay-card {
+  width: min(560px, 100%);
+  padding: 24px;
+  display: grid;
+  gap: 12px;
+  text-align: center;
+}
+
+.journey-overlay-actions {
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.journey-dialog {
+  border: 1px solid rgba(255, 255, 255, .14);
+  border-radius: 20px;
+  background: #131a14;
+  color: #fff;
+  padding: 0;
+  width: min(720px, calc(100vw - 32px));
+}
+
+.journey-dialog::backdrop {
+  background: rgba(0, 0, 0, .6);
+  backdrop-filter: blur(4px);
+}
+
+.journey-dialog-inner {
+  padding: 18px;
+}
+
+.journey-zoom-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 22px;
+  background: rgba(3, 4, 4, .84);
+  backdrop-filter: blur(10px);
+}
+
+.journey-zoom-card-shell {
+  position: relative;
+  padding: 20px;
+  border-radius: 26px;
+  border: 1px solid rgba(255, 255, 255, .12);
+  background: rgba(12, 16, 12, .94);
+}
+
+.journey-zoom-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(255, 255, 255, .12);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .06);
+  color: #fff;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.journey-zoom-stage {
+  display: grid;
+  place-items: center;
+}
+
+.journey-zoom-caption {
+  margin-top: 12px;
+}
+
+.journey-card-wrap {
+  position: relative;
+  width: calc(630px * var(--journey-card-scale));
+  height: calc(880px * var(--journey-card-scale));
+}
+
+.journey-card-hitbox {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.journey-card-tilt {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform .14s ease, filter .14s ease;
+}
+
+.journey-card-tilt > .game-card {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(var(--journey-card-scale));
+  transform-origin: center;
+}
+
+.journey-card-glare {
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at var(--journey-glare-x, 50%) var(--journey-glare-y, 50%), rgba(255, 255, 255, .34), transparent 28%),
+    linear-gradient(135deg, rgba(255, 255, 255, .08), transparent 42%);
+  opacity: .32;
+  mix-blend-mode: screen;
+}
+
+.journey-card-hitbox:hover .journey-card-tilt {
+  transform: translateY(-4px) scale(1.02);
+  filter: brightness(1.02);
+}
+
+.journey-drag-ghost {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 80;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, -50%);
+}
+
+.journey-drag-ghost.is-visible {
+  opacity: .95;
+}
 
 .journey-menu {
-  width: min(1180px, calc(100% - 36px));
+  width: min(1200px, calc(100% - 32px));
   min-height: 100vh;
   margin: 0 auto;
   display: grid;
@@ -47,88 +1098,62 @@
   align-items: center;
   padding: 52px 0;
 }
-.journey-eyebrow {
-  display: block;
-  color: #b6c3b3;
-  font-size: 10px;
-  font-weight: 900;
-  letter-spacing: .18em;
-  margin-bottom: 10px;
-}
+
 .journey-menu h1,
 .journey-neutral h1 {
   margin: 0 0 18px;
-  font-size: clamp(48px, 9vw, 104px);
-  line-height: .88;
+  font-size: clamp(48px, 8vw, 102px);
+  line-height: .9;
 }
-.journey-menu p,
-.journey-neutral p {
-  max-width: 660px;
-  color: #aeb7ad;
-  line-height: 1.6;
-}
+
 .journey-menu-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  margin-top: 26px;
+  margin-top: 24px;
 }
+
 .journey-start-card,
 .journey-neutral {
-  border: 1px solid rgba(255,255,255,.12);
-  border-radius: 18px;
-  background: linear-gradient(155deg, rgba(255,255,255,.09), rgba(255,255,255,.035));
-  box-shadow: 0 26px 80px rgba(0,0,0,.32);
   padding: 24px;
 }
-.journey-neutral {
-  width: min(680px, calc(100% - 32px));
-  margin: 18vh auto;
-}
+
 .journey-start-card label {
   display: grid;
   gap: 7px;
   margin-bottom: 14px;
 }
+
 .journey-start-card label span {
-  color: #c3cbc0;
+  color: #d7dccf;
   font-size: 12px;
   font-weight: 800;
 }
-.journey-start-card input,
-.journey-start-card select,
-.journey-dialog textarea {
-  width: 100%;
-  min-height: 42px;
-  border: 1px solid rgba(255,255,255,.13);
-  border-radius: 8px;
-  background: #121713;
-  color: #fff;
-  padding: 0 11px;
-}
-.journey-dialog textarea { padding: 12px; }
+
 .journey-player-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
 }
+
+.journey-formation-note,
+.journey-line-picker label {
+  border: 1px solid rgba(255, 255, 255, .08);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, .03);
+}
+
 .journey-formation-note {
-  border: 1px solid rgba(255,255,255,.1);
-  border-radius: 12px;
-  background: rgba(0,0,0,.18);
   padding: 14px;
   margin: 14px 0;
 }
+
 .journey-formation-note p,
-.journey-formation-note small { margin: 5px 0 0; color: #a5afa4; }
-.journey-line-picker {
-  margin: 12px 0;
+.journey-formation-note small {
+  margin: 5px 0 0;
+  color: #c1c9bd;
 }
-.journey-line-picker summary {
-  cursor: pointer;
-  color: #dfe6da;
-  font-weight: 850;
-}
+
 .journey-line-picker div {
   max-height: 240px;
   overflow: auto;
@@ -136,370 +1161,98 @@
   gap: 8px;
   margin-top: 10px;
 }
+
 .journey-line-picker label {
   display: grid;
   grid-template-columns: auto 1fr;
   gap: 4px 8px;
-  border: 1px solid rgba(255,255,255,.1);
-  border-radius: 8px;
   padding: 8px;
 }
+
 .journey-line-picker small {
   grid-column: 2;
-  color: #9fa99d;
+  color: #a7b0a2;
 }
 
-.journey-shell { min-height: 100vh; }
-.journey-topbar {
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  min-height: 68px;
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  justify-content: space-between;
-  padding: 12px clamp(14px, 2.8vw, 34px);
-  border-bottom: 1px solid rgba(255,255,255,.1);
-  background: rgba(16,19,17,.92);
-  backdrop-filter: blur(16px);
-}
-.journey-brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  text-decoration: none;
-}
-.journey-brand span {
-  width: 32px;
-  aspect-ratio: 1;
-  display: grid;
-  place-items: center;
-  border: 1px solid rgba(255,255,255,.22);
-  border-radius: 50%;
-}
-.journey-top-stats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: center;
-}
-.journey-top-stats span {
-  border: 1px solid rgba(255,255,255,.1);
-  border-radius: 8px;
-  padding: 7px 10px;
-  color: #aeb7ad;
-  font-size: 12px;
-}
-.journey-top-stats strong { color: #fff; }
-.journey-dev { position: relative; }
-.journey-dev summary {
-  cursor: pointer;
-  color: #dbe2d7;
-  font-weight: 800;
-}
-.journey-dev-panel {
-  position: absolute;
-  right: 0;
-  top: 34px;
-  width: 260px;
-  display: grid;
-  gap: 8px;
-  padding: 12px;
-  border: 1px solid rgba(255,255,255,.12);
-  border-radius: 12px;
-  background: #151a16;
-  box-shadow: 0 24px 70px rgba(0,0,0,.45);
-}
+@media (max-width: 1366px) {
+  .journey-board {
+    grid-template-columns: minmax(220px, 260px) minmax(0, 1fr) minmax(220px, 260px);
+  }
 
-.journey-table {
-  width: min(1760px, calc(100% - 24px));
-  margin: 0 auto;
-  padding: 18px 0 30px;
-  display: grid;
-  grid-template-columns: minmax(270px, 320px) minmax(520px, 1fr) minmax(310px, 410px);
-  grid-template-areas:
-    "players center phase"
-    "players center log";
-  gap: 14px;
-}
-.journey-players {
-  grid-area: players;
-  display: grid;
-  gap: 12px;
-}
-.journey-player,
-.journey-center,
-.journey-phase,
-.journey-log {
-  border: 1px solid rgba(255,255,255,.1);
-  border-radius: 14px;
-  background: rgba(10,13,11,.56);
-  box-shadow: inset 0 1px rgba(255,255,255,.045);
-}
-.journey-player {
-  padding: 12px;
-}
-.journey-player.is-inactive { opacity: .55; }
-.journey-player-head,
-.journey-player-foot {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  color: #c7d0c4;
-}
-.journey-player-foot {
-  flex-wrap: wrap;
-  margin-top: 8px;
-  font-size: 11px;
-}
-.journey-player-foot button,
-.journey-mini-tools button {
-  min-height: 24px;
-  border: 1px solid rgba(255,255,255,.12);
-  border-radius: 6px;
-  background: rgba(255,255,255,.06);
-  color: #dfe6da;
-  font-size: 10px;
-  font-weight: 800;
-  cursor: pointer;
-}
-.journey-champion {
-  margin: 5px 0 10px;
-  color: #a1aa9f;
-  font-size: 12px;
-}
-.journey-bench {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 7px;
-  margin-top: 8px;
-}
-.journey-pokemon {
-  min-width: 0;
-  display: grid;
-  gap: 5px;
-  border: 1px solid rgba(255,255,255,.11);
-  border-radius: 10px;
-  background: linear-gradient(155deg, rgba(255,255,255,.08), rgba(255,255,255,.025));
-  padding: 9px;
-}
-.journey-pokemon.is-active {
-  border-color: rgba(223,232,211,.32);
-  background: linear-gradient(155deg, rgba(236,240,228,.14), rgba(255,255,255,.035));
-}
-.journey-pokemon.is-ko { border-color: rgba(255,130,120,.42); }
-.journey-pokemon strong,
-.journey-pokemon span,
-.journey-pokemon small {
-  display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.journey-pokemon span,
-.journey-pokemon small {
-  color: #a9b2a7;
-  font-size: 10px;
-}
-.journey-pokemon meter {
-  width: 100%;
-  height: 7px;
-}
-.journey-mini-tools {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 4px;
-}
-.journey-mini-tools button {
-  padding: 0 4px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+  .journey-local-layout {
+    grid-template-columns: minmax(0, 1fr) 270px;
+  }
 
-.journey-center {
-  grid-area: center;
-  min-height: 760px;
-  padding: 16px;
-  background:
-    radial-gradient(ellipse at center, rgba(240,235,210,.08), transparent 60%),
-    linear-gradient(145deg, rgba(43,65,43,.58), rgba(17,24,18,.84));
-}
-.journey-piles {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-}
-.journey-pile,
-.journey-stadium,
-.journey-climate,
-.journey-zone {
-  border: 1px solid rgba(255,255,255,.11);
-  border-radius: 10px;
-  background: rgba(0,0,0,.2);
-  padding: 12px;
-  color: #eef2e9;
-}
-.journey-pile {
-  min-height: 94px;
-  text-align: left;
-}
-.journey-pile span,
-.journey-pile small,
-.journey-stadium small {
-  display: block;
-  color: #aeb8aa;
-  margin-top: 5px;
-}
-.journey-zone {
-  margin: 18px 0;
-}
-.journey-zone h2,
-.journey-log h2,
-.journey-phase h2 {
-  margin: 0 0 12px;
-}
-.journey-zone-card {
-  display: inline-flex;
-  min-height: 38px;
-  align-items: center;
-  border: 1px solid rgba(255,255,255,.12);
-  border-radius: 8px;
-  background: rgba(255,255,255,.06);
-  padding: 0 10px;
-  margin: 0 7px 7px 0;
-  font-size: 12px;
-}
-.journey-stadiums {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
-}
-.journey-climate { margin-top: 10px; }
+  .journey-local-field {
+    grid-template-columns: minmax(0, 1fr) 220px;
+  }
 
-.journey-phase {
-  grid-area: phase;
-  padding: 18px;
-}
-.journey-phase.private {
-  border-color: rgba(228,235,216,.22);
-  background: linear-gradient(155deg, rgba(255,255,255,.1), rgba(20,26,20,.82));
-}
-.journey-phase.wide {
-  grid-column: 2 / 4;
-}
-.journey-private-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
-  gap: 14px;
-}
-.journey-hand {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(122px, 1fr));
-  gap: 8px;
-}
-.journey-hand-card {
-  min-height: 78px;
-  border: 1px solid rgba(255,255,255,.13);
-  border-radius: 9px;
-  background: rgba(255,255,255,.055);
-  color: #f4f6f0;
-  padding: 9px;
-  text-align: left;
-}
-.journey-hand-card:disabled { opacity: .35; cursor: not-allowed; }
-.journey-hand-card strong,
-.journey-hand-card small {
-  display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.journey-hand-card small {
-  margin-top: 6px;
-  color: #adb7ab;
-}
-.journey-action-box {
-  border: 1px solid rgba(255,255,255,.1);
-  border-radius: 12px;
-  padding: 12px;
-  margin-bottom: 10px;
-}
-.journey-action-list {
-  max-height: 360px;
-  overflow: auto;
-  display: grid;
-  gap: 7px;
-}
-.journey-action-list button {
-  text-align: left;
-  min-height: 36px;
-}
-.journey-reveal-grid {
-  display: grid;
-  gap: 8px;
-  margin-bottom: 14px;
-}
-.journey-reveal-grid div {
-  border: 1px solid rgba(255,255,255,.1);
-  border-radius: 10px;
-  padding: 10px;
-}
-.journey-reveal-grid span { display: block; color: #b8c0b4; }
+  .journey-slot-row {
+    grid-template-columns: 1fr 1fr 190px;
+  }
 
-.journey-log {
-  grid-area: log;
-  max-height: 540px;
-  overflow: auto;
-  padding: 14px;
-}
-.journey-log p {
-  margin: 0 0 10px;
-  border-bottom: 1px solid rgba(255,255,255,.07);
-  padding-bottom: 9px;
-  color: #dce2d8;
-  font-size: 12px;
-  line-height: 1.45;
-}
-.journey-log small {
-  display: block;
-  color: #879181;
-  margin-bottom: 2px;
-}
-.journey-dialog {
-  border: 1px solid rgba(255,255,255,.13);
-  border-radius: 14px;
-  background: #161b17;
-  color: #fff;
-  padding: 0;
-  width: min(680px, calc(100vw - 32px));
-}
-.journey-dialog::backdrop {
-  background: rgba(0,0,0,.62);
-  backdrop-filter: blur(5px);
-}
-.journey-dialog-inner { padding: 18px; }
-.journey-dialog-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  margin-top: 12px;
+  .journey-supporter-layout {
+    grid-template-columns: 260px minmax(0, 1fr) 190px;
+  }
 }
 
 @media (max-width: 1180px) {
-  .journey-menu,
   .journey-table {
-    grid-template-columns: 1fr;
-    grid-template-areas: "phase" "center" "players" "log";
+    width: min(100%, calc(100% - 20px));
   }
-  .journey-phase.wide { grid-column: auto; }
-  .journey-center { min-height: auto; }
+
+  .journey-board {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    grid-template-areas:
+      "top"
+      "left"
+      "center"
+      "right"
+      "bottom";
+  }
+
+  .journey-local-layout,
+  .journey-local-field,
+  .journey-slot-row,
+  .journey-supporter-layout,
+  .journey-center-lane,
+  .journey-stadium-ring {
+    grid-template-columns: 1fr;
+  }
+
+  .journey-status-panel {
+    position: static;
+    width: auto;
+    margin-top: 12px;
+  }
+
+  .journey-board-tools {
+    position: static;
+    margin-top: 12px;
+  }
 }
+
 @media (max-width: 720px) {
-  .journey-topbar { align-items: flex-start; flex-direction: column; }
-  .journey-piles,
-  .journey-stadiums,
+  .journey-topbar,
+  .journey-menu {
+    grid-template-columns: 1fr;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .journey-card-fan {
+    min-height: 0;
+    padding-bottom: 10px;
+  }
+
+  .journey-hand-card {
+    margin-left: -28px;
+  }
+
+  .journey-center-piles,
   .journey-player-grid,
-  .journey-private-layout {
+  .journey-discard-grid {
     grid-template-columns: 1fr;
   }
 }

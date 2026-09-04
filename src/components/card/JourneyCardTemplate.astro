@@ -1,0 +1,23 @@
+---
+import type { StoredCard, UtilityCardData } from '../../types/card';
+import AttackCard from './AttackCard.astro';
+import ChampionCard from './ChampionCard.astro';
+import ClimateCard from './ClimateCard.astro';
+import PokemonCard from './PokemonCard.astro';
+import UtilityCard from './UtilityCard.astro';
+
+interface Props {
+  collectionId: string;
+  card: StoredCard;
+}
+
+const { collectionId, card } = Astro.props;
+const isUtilityCard = ['item', 'supporter', 'stadium', 'tool', 'rareItem'].includes(card.data.cardType);
+---
+<template data-card-template-collection={collectionId} data-card-template-id={card.id} data-card-type={card.data.cardType}>
+  {card.data.cardType === 'pokemon' && <PokemonCard card={card.data} />}
+  {card.data.cardType === 'attack' && <AttackCard card={card.data} />}
+  {isUtilityCard && <UtilityCard card={card.data as UtilityCardData} />}
+  {card.data.cardType === 'climate' && <ClimateCard card={card.data} />}
+  {card.data.cardType === 'champion' && <ChampionCard card={card.data} />}
+</template>

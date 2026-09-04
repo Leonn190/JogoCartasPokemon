@@ -12,6 +12,17 @@ const number = String(card.cardNumber).padStart(3, '0');
 const kindLabel = meta.label;
 const typeIcon = `${import.meta.env.BASE_URL}${typeMeta.icon}`;
 const attackTypeIcon = `${import.meta.env.BASE_URL}${attackTypeMeta.icon}`;
+const compatibilityMarkup = card.compatibilityMode === 'type'
+  ? null
+  : (card.compatiblePokemon.length
+    ? card.compatiblePokemon
+      .map((pokemon) => `
+        <div class="compatible-pokemon" title="${pokemon.name}">
+          <span><img src="${pokemon.sprite}" alt="${pokemon.name}" crossorigin="anonymous" /></span>
+          <small>${pokemon.name}</small>
+        </div>`)
+      .join('')
+    : '<div class="compatibility-empty">Selecione Pokémon no editor</div>');
 ---
 <article
   class="game-card attack-card trainer-card"
@@ -38,8 +49,14 @@ const attackTypeIcon = `${import.meta.env.BASE_URL}${attackTypeMeta.icon}`;
     <section class="tcg-rules-panel attack-module">
       <div class="compatibility-zone">
         <span class="compatibility-label">COMPATIBILIDADE</span>
-        <div class="compatible-pokemon-grid" data-role="compatible-pokemon-grid"></div>
-        <div class="compatible-type-display" data-role="compatible-type-display" hidden>
+        <div
+          class="compatible-pokemon-grid"
+          data-role="compatible-pokemon-grid"
+          data-count={String(card.compatiblePokemon.length)}
+          hidden={card.compatibilityMode === 'type'}
+          set:html={compatibilityMarkup ?? ''}
+        ></div>
+        <div class="compatible-type-display" data-role="compatible-type-display" hidden={card.compatibilityMode !== 'type'}>
           <span class="compatible-type-symbol">
             <img data-role="compatible-type-icon" src={typeIcon} alt="" onerror="this.style.display='none'" />
           </span>

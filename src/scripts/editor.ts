@@ -2,6 +2,7 @@ import { ATTACK_KIND_META, CARD_CATEGORY_META } from '../data/cardCategories';
 import { DEFAULT_ATTACK_CARD, DEFAULT_POKEMON_CARD, createChampionCard, createClimateCard, createEmptyCard, createUtilityCard } from '../data/defaultCard';
 import { exportCardAsPng } from '../lib/exportCard';
 import { exportContentZip } from '../lib/contentZip';
+import { ensureAdminAccess } from '../lib/adminGate';
 import { cardDisplayName, createCollection, createEmptyWorkspace, deleteCard, isFullArtCard, prepareCardForCollection, renumberCollection, upsertCard } from '../lib/collections';
 import { COLLECTION_CATEGORY_ORDER, categoryCount } from '../data/gameConfig';
 import { getPokemonIndex, loadAbilityDescription, loadPokemonEditorData, loadPokemonSummary } from '../lib/pokeapi';
@@ -1910,6 +1911,7 @@ function bindEvents() {
   });
 
   qa<HTMLButtonElement>('[data-action="create-collection"]').forEach((button) => button.addEventListener('click', () => {
+    if (!ensureAdminAccess()) { toast('Chave do editor incorreta.', 'error'); return; }
     const createDialog = q<HTMLDialogElement>('[data-role="create-collection-dialog"]');
     const name = q<HTMLInputElement>('[data-role="new-collection-name"]');
     if (name) name.value = '';
@@ -1919,6 +1921,7 @@ function bindEvents() {
 
   q<HTMLButtonElement>('[data-action="confirm-create-collection"]')?.addEventListener('click', async (event) => {
     event.preventDefault();
+    if (!ensureAdminAccess()) { toast('Chave do editor incorreta.', 'error'); return; }
     const createDialog = q<HTMLDialogElement>('[data-role="create-collection-dialog"]');
     const name = q<HTMLInputElement>('[data-role="new-collection-name"]')?.value.trim() ?? '';
     if (!name) { toast('Digite o nome da coleção.', 'error'); return; }
@@ -1942,6 +1945,7 @@ function bindEvents() {
   }));
 
   qa<HTMLButtonElement>('[data-action="new-collection-card"]').forEach((button) => button.addEventListener('click', () => {
+    if (!ensureAdminAccess()) { toast('Chave do editor incorreta.', 'error'); return; }
     const collection = currentCollection();
     if (!collection) return;
     renderNewCardChoices(collection);
@@ -1951,6 +1955,7 @@ function bindEvents() {
   q<HTMLElement>('[data-role="new-card-category-grid"]')?.addEventListener('click', (event) => {
     const button = (event.target as Element).closest<HTMLButtonElement>('[data-create-card-type]');
     if (!button || button.disabled) return;
+    if (!ensureAdminAccess()) { toast('Chave do editor incorreta.', 'error'); return; }
     void createAndOpenCard(button.dataset.createCardType as CardType);
   });
 
@@ -1962,6 +1967,7 @@ function bindEvents() {
   q<HTMLElement>('[data-role="collection-card-grid"]')?.addEventListener('click', (event) => {
     const deleteButton = (event.target as Element).closest<HTMLButtonElement>('[data-delete-card]');
     if (deleteButton?.dataset.deleteCard) {
+      if (!ensureAdminAccess()) { toast('Chave do editor incorreta.', 'error'); return; }
       pendingDeleteCardId = deleteButton.dataset.deleteCard;
       q<HTMLDialogElement>('[data-role="delete-card-dialog"]')?.showModal();
       return;
@@ -1972,14 +1978,20 @@ function bindEvents() {
       return;
     }
     const open = (event.target as Element).closest<HTMLElement>('[data-open-card]');
-    if (open?.dataset.openCard) openStoredCard(open.dataset.openCard);
+    if (open?.dataset.openCard) {
+      if (!ensureAdminAccess()) { toast('Chave do editor incorreta.', 'error'); return; }
+      openStoredCard(open.dataset.openCard);
+    }
   });
 
   q<HTMLButtonElement>('[data-action="close-card-zoom"]')?.addEventListener('click', closeCardZoom);
   q<HTMLButtonElement>('[data-action="edit-zoom-card"]')?.addEventListener('click', () => {
     const id = activeZoomCardId;
     closeCardZoom();
-    if (id) openStoredCard(id);
+    if (id) {
+      if (!ensureAdminAccess()) { toast('Chave do editor incorreta.', 'error'); return; }
+      openStoredCard(id);
+    }
   });
   q<HTMLDialogElement>('[data-role="card-zoom-dialog"]')?.addEventListener('click', (event) => {
     if (event.target === event.currentTarget) closeCardZoom();
@@ -1993,6 +2005,7 @@ function bindEvents() {
   q<HTMLButtonElement>('[data-action="confirm-delete-card"]')?.addEventListener('click', async () => {
     const collection = currentCollection();
     if (!collection || !pendingDeleteCardId) return;
+    if (!ensureAdminAccess()) { toast('Chave do editor incorreta.', 'error'); return; }
     deleteCard(collection, pendingDeleteCardId);
     pendingDeleteCardId = null;
     touchWorkspace(workspace);
@@ -2006,8 +2019,14 @@ function bindEvents() {
     renderCollectionView();
     setAppView('collection');
   }));
-  q<HTMLButtonElement>('[data-action="save-card"]')?.addEventListener('click', async () => { await persistActiveCard(true).catch(() => undefined); });
-  q<HTMLButtonElement>('[data-action="export-content"]')?.addEventListener('click', exportCollectionFiles);
+  q<HTMLButtonElement>('[data-action="save-card"]')?.addEventListener('click', async () => {
+    if (!ensureAdminAccess()) { toast('Chave do editor incorreta.', 'error'); return; }
+    await persistActiveCard(true).catch(() => undefined);
+  });
+  q<HTMLButtonElement>('[data-action="export-content"]')?.addEventListener('click', () => {
+    if (!ensureAdminAccess()) { toast('Chave do editor incorreta.', 'error'); return; }
+    void exportCollectionFiles();
+  });
 
   bindArtworkDragging();
   const resizeObserver = new ResizeObserver(fitPreview);

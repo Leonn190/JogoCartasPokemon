@@ -1,0 +1,23 @@
+{
+  "id": "card-pjo-092",
+  "collectionId": "collection-primeira-jornada",
+  "createdAt": "2026-09-04T03:00:00.000Z",
+  "updatedAt": "2026-09-04T03:00:00.000Z",
+  "data": {
+    "cardType": "item",
+    "name": "Scanner de Rotas",
+    "effectText": "Olhe as 3 cartas do topo de uma pilha central à sua escolha. Coloque 1 delas no topo e devolva as outras 2 abaixo dela na ordem que quiser.",
+    "usageText": "Use como uma ação. Uma única ação de Item pode empilhar até 2 Itens normais. Depois do uso, descarte-os salvo efeito em contrário.",
+    "artwork": "",
+    "artworkSource": "none",
+    "artworkTransform": {
+      "scale": 1,
+      "x": 0,
+      "y": 0
+    },
+    "expandedArtwork": false,
+    "cardNumber": 92,
+    "setTotal": 96,
+    "setCode": "PCO"
+  }
+}

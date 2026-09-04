@@ -36,7 +36,7 @@
     "abilityDescription": "Na primeira vez em que este Pokémon for atacado na rodada, jogue um dado. Se o resultado for 4, 5 ou 6, ele não sofrerá dano desse ataque.",
     "flavorText": "Cria estrelas de arremesso fora da água comprimida. Quando as gira e as arremessa em alta velocidade, essas estrelas podem dividir o metal em dois.",
     "cardNumber": 3,
-    "setTotal": 79,
+    "setTotal": 96,
     "setCode": "PCO",
     "typeCandidates": [
       "Água",

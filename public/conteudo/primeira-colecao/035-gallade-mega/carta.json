@@ -36,7 +36,7 @@
     "abilityDescription": "Toda vez que esse pokemon nocauteia algum pokemon, ganhe +30 de qualquer atributo (Ofensividade, Resistencia e Velocidade)",
     "flavorText": "Um mestre da cortesia e da esgrima, ele luta usando espadas estendidas em seus cotovelos.",
     "cardNumber": 35,
-    "setTotal": 79,
+    "setTotal": 96,
     "setCode": "PCO",
     "typeCandidates": [
       "Psíquico",

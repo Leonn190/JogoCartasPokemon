@@ -36,7 +36,7 @@
     "abilityDescription": "Na primeira vez em cada Rodada que este Pokémon sofrer dano de um Ataque, reduza esse dano em 20, porém se fizer isso, esse pokemon não poderá atacar mais durante essa rodada",
     "flavorText": "Esfrega o focinho no chão para encontrar e desenterrar comida. Às vezes, descobre fontes termais.",
     "cardNumber": 5,
-    "setTotal": 79,
+    "setTotal": 96,
     "setCode": "PCO",
     "typeCandidates": [
       "Gelo",

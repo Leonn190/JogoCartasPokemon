@@ -36,7 +36,7 @@
     "abilityDescription": "Toda vez que esse pokemon atacar, descarte quantas cartas quiser, seu ataque causará mais 20 de dano para cada carta descartada dessa forma",
     "flavorText": "Tem olhos que podem ver através de qualquer coisa. Ele avista e captura presas escondidas atrás de objetos.",
     "cardNumber": 19,
-    "setTotal": 79,
+    "setTotal": 96,
     "setCode": "PCO",
     "typeCandidates": [
       "Elétrico"

@@ -36,7 +36,7 @@
     "abilityDescription": "Toda rodada, se esse pokemon estiver no banco, ele ganha +10 de algum atributo a sua escolha (Ofensividade, Resistencia ou Velocidade)",
     "flavorText": "Tem a capacidade de sentir as auras de todas as coisas. Ele entende a fala humana.",
     "cardNumber": 29,
-    "setTotal": 79,
+    "setTotal": 96,
     "setCode": "PCO",
     "typeCandidates": [
       "Lutador",

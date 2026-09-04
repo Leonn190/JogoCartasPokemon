@@ -36,7 +36,7 @@
     "abilityDescription": "Toda vez que esse pokemon for atacado, ele pode descartar um de seus ataques e usar no pokemon que atacou ele",
     "flavorText": "Um mestre da cortesia e da esgrima, ele luta usando espadas estendidas em seus cotovelos.",
     "cardNumber": 33,
-    "setTotal": 79,
+    "setTotal": 96,
     "setCode": "PCO",
     "typeCandidates": [
       "Psíquico",

@@ -36,7 +36,7 @@
     "abilityDescription": "Esse pokemon reduz 10 de resistência dos seus alvos, os ataques desse pokemon causam mais 10 de dano para cada 10 de redução de resistência aplicado em seus alvos",
     "flavorText": "Uma criatura violenta que derruba árvores imponentes com seus machados brutos e se protege com pedras duras. Se alguém encontrar este Pokémon na selva, o único recurso é fugir.",
     "cardNumber": 38,
-    "setTotal": 79,
+    "setTotal": 96,
     "setCode": "PCO",
     "typeCandidates": [
       "Terra"

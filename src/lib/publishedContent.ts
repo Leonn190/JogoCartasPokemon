@@ -62,6 +62,7 @@ function loadCollection(contentDirectory: string, directoryName: string, baseUrl
       return stored;
     })
     .filter((stored): stored is StoredCard => Boolean(stored))
+    .filter((stored, index, all) => all.findIndex((candidate) => candidate.id === stored.id) === index)
     .sort((a, b) => a.data.cardNumber - b.data.cardNumber || a.id.localeCompare(b.id));
 
   const { formatVersion: _formatVersion, ...collection } = metadata;

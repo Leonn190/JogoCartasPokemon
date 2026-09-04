@@ -36,7 +36,7 @@
     "abilityDescription": "Na primeira vez na rodada em que um dos seus Pokémon do banco receberia dano, reduza esse dano em 10",
     "flavorText": "A energia que queima dentro dele permite que ele se mova, mas ninguém ainda foi capaz de identificar essa energia.",
     "cardNumber": 20,
-    "setTotal": 79,
+    "setTotal": 96,
     "setCode": "PCO",
     "typeCandidates": [
       "Terra",

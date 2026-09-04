@@ -36,7 +36,7 @@
     "abilityDescription": "Se este Pokémon sofrer dano antes de agir, o próximo Ataque que ele usar nessa Rodada causa +20 de dano.",
     "flavorText": "Como o cabelo comprido em todo o corpo obscurece a visão, ele continua carregando repetidamente.",
     "cardNumber": 6,
-    "setTotal": 79,
+    "setTotal": 96,
     "setCode": "PCO",
     "typeCandidates": [
       "Gelo",

@@ -36,7 +36,7 @@
     "abilityDescription": "Toda rodada, se esse pokemon estiver ativo, ele ganha +10 de ofensividade",
     "flavorText": "Tem a capacidade de sentir as auras de todas as coisas. Ele entende a fala humana.",
     "cardNumber": 28,
-    "setTotal": 79,
+    "setTotal": 96,
     "setCode": "PCO",
     "typeCandidates": [
       "Lutador",

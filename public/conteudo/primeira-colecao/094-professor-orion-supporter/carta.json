@@ -1,0 +1,23 @@
+{
+  "id": "card-pjo-094",
+  "collectionId": "collection-primeira-jornada",
+  "createdAt": "2026-09-04T03:00:00.000Z",
+  "updatedAt": "2026-09-04T03:00:00.000Z",
+  "data": {
+    "cardType": "supporter",
+    "name": "Professor Órion",
+    "effectText": "Escolha 2 pilhas centrais diferentes e compre 1 carta de cada uma. Depois, descarte 1 carta da sua mão.",
+    "usageText": "Use somente na Janela de Apoiadores/Confronto, depois da Revelação e antes da resolução por VEL. Máximo de 1 Apoiador por jogador por Rodada.",
+    "artwork": "",
+    "artworkSource": "none",
+    "artworkTransform": {
+      "scale": 1,
+      "x": 0,
+      "y": 0
+    },
+    "expandedArtwork": false,
+    "cardNumber": 94,
+    "setTotal": 96,
+    "setCode": "PCO"
+  }
+}

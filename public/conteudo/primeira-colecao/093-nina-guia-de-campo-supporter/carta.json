@@ -1,0 +1,23 @@
+{
+  "id": "card-pjo-093",
+  "collectionId": "collection-primeira-jornada",
+  "createdAt": "2026-09-04T03:00:00.000Z",
+  "updatedAt": "2026-09-04T03:00:00.000Z",
+  "data": {
+    "cardType": "supporter",
+    "name": "Nina, Guia de Campo",
+    "effectText": "Escolha 1 Pokémon aliado. Até o fim desta Rodada, ele recebe +20 de VEL e ignora a primeira redução de VEL que sofreria.",
+    "usageText": "Use somente na Janela de Apoiadores/Confronto, depois da Revelação e antes da resolução por VEL. Máximo de 1 Apoiador por jogador por Rodada.",
+    "artwork": "",
+    "artworkSource": "none",
+    "artworkTransform": {
+      "scale": 1,
+      "x": 0,
+      "y": 0
+    },
+    "expandedArtwork": false,
+    "cardNumber": 93,
+    "setTotal": 96,
+    "setCode": "PCO"
+  }
+}

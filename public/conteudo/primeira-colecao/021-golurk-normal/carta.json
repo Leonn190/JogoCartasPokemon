@@ -36,7 +36,7 @@
     "abilityDescription": "Enquanto esse pokemon for o seu ativo, se um dos seus Pokémon aliados for atingido, o dano pode ir para esse pokemon e ter 10 de dano reduzido",
     "flavorText": "Ele voa pelo céu a velocidades Mach. Remover a vedação em seu peito faz com que sua energia interna saia do controle.",
     "cardNumber": 21,
-    "setTotal": 79,
+    "setTotal": 96,
     "setCode": "PCO",
     "typeCandidates": [
       "Terra",

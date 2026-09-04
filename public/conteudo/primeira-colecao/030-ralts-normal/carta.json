@@ -36,7 +36,7 @@
     "abilityDescription": "Esse pokemon não pode ser morto por uma instancia de dano caso não tenha nenhum contador de dano",
     "flavorText": "RALTS sente as emoções das pessoas usando os chifres em sua cabeça. Este POKéMON raramente aparece diante das pessoas. Mas quando isso acontece, ele se aproxima se sentir que a pessoa tem uma disposição positiva.",
     "cardNumber": 30,
-    "setTotal": 79,
+    "setTotal": 96,
     "setCode": "PCO",
     "typeCandidates": [
       "Psíquico",

@@ -1,0 +1,28 @@
+{
+  "id": "card-pjo-082",
+  "collectionId": "collection-primeira-jornada",
+  "createdAt": "2026-09-04T03:00:00.000Z",
+  "updatedAt": "2026-09-04T03:00:00.000Z",
+  "data": {
+    "cardType": "attack",
+    "attackKind": "normal",
+    "attackName": "Golpe de Convicção",
+    "attackDescription": "Ataque básico de Lutador. Causa dano com 100% de potência e não possui efeito adicional.",
+    "power": 100,
+    "type": "Lutador",
+    "compatibilityMode": "type",
+    "compatiblePokemon": [],
+    "compatibleType": "Lutador",
+    "artwork": "",
+    "artworkSource": "none",
+    "artworkTransform": {
+      "scale": 1,
+      "x": 0,
+      "y": 0
+    },
+    "expandedArtwork": false,
+    "cardNumber": 82,
+    "setTotal": 96,
+    "setCode": "PCO"
+  }
+}

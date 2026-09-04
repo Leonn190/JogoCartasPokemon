@@ -1,0 +1,23 @@
+{
+  "id": "card-pjo-096",
+  "collectionId": "collection-primeira-jornada",
+  "createdAt": "2026-09-04T03:00:00.000Z",
+  "updatedAt": "2026-09-04T03:00:00.000Z",
+  "data": {
+    "cardType": "stadium",
+    "name": "Ruínas Ressonantes",
+    "effectText": "Uma vez por Rodada para cada jogador conectado, o primeiro Ataque usado por seu Pokémon Ativo recebe +10 de poder.",
+    "usageText": "Posicione em uma das quatro áreas entre dois jogadores. Afeta apenas os dois jogadores conectados. Pode ser combinado com 1 Ferramenta na mesma ação, mas nunca com outro Estádio.",
+    "artwork": "",
+    "artworkSource": "none",
+    "artworkTransform": {
+      "scale": 1,
+      "x": 0,
+      "y": 0
+    },
+    "expandedArtwork": false,
+    "cardNumber": 96,
+    "setTotal": 96,
+    "setCode": "PCO"
+  }
+}

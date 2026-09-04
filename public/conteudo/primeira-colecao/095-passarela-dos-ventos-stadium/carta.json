@@ -1,0 +1,23 @@
+{
+  "id": "card-pjo-095",
+  "collectionId": "collection-primeira-jornada",
+  "createdAt": "2026-09-04T03:00:00.000Z",
+  "updatedAt": "2026-09-04T03:00:00.000Z",
+  "data": {
+    "cardType": "stadium",
+    "name": "Passarela dos Ventos",
+    "effectText": "Os Pokémon Ativos dos dois jogadores conectados recebem +20 de VEL. Sempre que um desses jogadores trocar seu Pokémon Ativo, o Pokémon que entrar cura 10 de Vida.",
+    "usageText": "Posicione em uma das quatro áreas entre dois jogadores. Afeta apenas os dois jogadores conectados. Pode ser combinado com 1 Ferramenta na mesma ação, mas nunca com outro Estádio.",
+    "artwork": "",
+    "artworkSource": "none",
+    "artworkTransform": {
+      "scale": 1,
+      "x": 0,
+      "y": 0
+    },
+    "expandedArtwork": false,
+    "cardNumber": 95,
+    "setTotal": 96,
+    "setCode": "PCO"
+  }
+}

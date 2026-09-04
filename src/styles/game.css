@@ -121,6 +121,33 @@
 }
 .journey-formation-note p,
 .journey-formation-note small { margin: 5px 0 0; color: #a5afa4; }
+.journey-line-picker {
+  margin: 12px 0;
+}
+.journey-line-picker summary {
+  cursor: pointer;
+  color: #dfe6da;
+  font-weight: 850;
+}
+.journey-line-picker div {
+  max-height: 240px;
+  overflow: auto;
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+.journey-line-picker label {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 8px;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 8px;
+  padding: 8px;
+}
+.journey-line-picker small {
+  grid-column: 2;
+  color: #9fa99d;
+}
 
 .journey-shell { min-height: 100vh; }
 .journey-topbar {
@@ -226,6 +253,17 @@
   margin-top: 8px;
   font-size: 11px;
 }
+.journey-player-foot button,
+.journey-mini-tools button {
+  min-height: 24px;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 6px;
+  background: rgba(255,255,255,.06);
+  color: #dfe6da;
+  font-size: 10px;
+  font-weight: 800;
+  cursor: pointer;
+}
 .journey-champion {
   margin: 5px 0 10px;
   color: #a1aa9f;
@@ -267,6 +305,16 @@
 .journey-pokemon meter {
   width: 100%;
   height: 7px;
+}
+.journey-mini-tools {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+}
+.journey-mini-tools button {
+  padding: 0 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .journey-center {

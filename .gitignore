@@ -1,6 +1,7 @@
 node_modules/
 dist/
 .astro/
+.journey-tests/
 .DS_Store
 .env
 .env.*

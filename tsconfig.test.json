@@ -1,0 +1,24 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "outDir": ".journey-tests",
+    "rootDir": ".",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "verbatimModuleSyntax": false,
+    "allowImportingTsExtensions": false,
+    "ignoreDeprecations": "6.0"
+  },
+  "include": [
+    "src/game/**/*.ts",
+    "src/types/**/*.ts",
+    "src/data/**/*.ts",
+    "tests/**/*.ts"
+  ],
+  "exclude": [
+    "dist",
+    ".journey-tests",
+    "node_modules"
+  ]
+}

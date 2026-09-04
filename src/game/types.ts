@@ -92,6 +92,8 @@ export interface PlayerRoundFlags {
   supporterUsed: boolean;
   firstAttackUsed: boolean;
   drawBlocked: boolean;
+  recoveryActionOnly: boolean;
+  beforeActingDone: boolean;
 }
 
 export interface PlayerState {
@@ -172,15 +174,16 @@ export interface ResolutionState {
 export interface AcquisitionState {
   playerIndex: number;
   visible: boolean;
+  order?: PlayerId[];
 }
 
 export interface PendingChoice {
   id: string;
-  kind: 'manual' | 'target' | 'discard' | 'orderPile' | 'attribute' | 'replacement';
+  kind: 'manual' | 'target' | 'discard' | 'orderPile' | 'attribute' | 'replacement' | 'confirm';
   playerId?: PlayerId;
   prompt: string;
   options: Array<{ id: string; label: string; disabled?: boolean }>;
-  data?: Record<string, string | number | boolean>;
+  data?: Record<string, string | number | boolean | string[] | null | undefined>;
 }
 
 export type ProgrammedAction =
@@ -189,7 +192,10 @@ export type ProgrammedAction =
   | { kind: 'reuseAttack'; level: 1 | 2 | 3; targetPokemonId: string }
   | { kind: 'playPokemon'; cardInstanceId: string; targetPokemonId?: string }
   | { kind: 'useItems'; itemInstanceIds: string[]; targets: Record<string, string> }
+  | { kind: 'attachTools'; toolInstanceIds: string[]; targets: Record<string, string> }
+  | { kind: 'useRareItem'; rareItemInstanceId: string; targetPokemonId?: string }
   | { kind: 'placeStadium'; stadiumInstanceId: string; slotId: StadiumSlotId }
+  | { kind: 'placeClimate'; climateInstanceId: string }
   | { kind: 'buyWildcard'; pileId: PhysicalPileId | 'zone'; zoneInstanceId?: string }
   | { kind: 'switchWildcard'; benchPokemonId: string }
   | { kind: 'manual'; note: string };

@@ -155,7 +155,7 @@ function createPlayers(names: string[]): PlayerState[] {
     bench: [],
     wildcards: { attack: true, draw: true, switch: true },
     programmed: { locked: false },
-    roundFlags: { supporterUsed: false, firstAttackUsed: false, drawBlocked: false },
+    roundFlags: { supporterUsed: false, firstAttackUsed: false, drawBlocked: false, recoveryActionOnly: false, beforeActingDone: false },
   }));
 }
 
@@ -243,10 +243,11 @@ export function createJourneyGame(
     }
   }
   for (const attack of lookup.collection.cards.filter((card) => card.data.cardType === 'attack')) addCopies(attackInstances, attack.id, 2, 'ataque de teste');
-  for (const trainer of lookup.collection.cards.filter((card) => ['item', 'supporter'].includes(card.data.cardType))) {
+  for (const trainer of lookup.collection.cards.filter((card) => ['item', 'supporter', 'tool', 'rareItem'].includes(card.data.cardType))) {
     addCopies(trainerInstances, trainer.id, trainer.data.cardType === 'item' ? 4 : 3, `${trainer.data.cardType} de teste`);
   }
   for (const stadium of lookup.collection.cards.filter((card) => card.data.cardType === 'stadium')) addCopies(trainerInstances, stadium.id, 2, 'estádio de teste');
+  for (const climate of lookup.collection.cards.filter((card) => card.data.cardType === 'climate')) addCopies(trainerInstances, climate.id, 2, 'clima de teste');
 
   for (const instance of [...pokemonInstances, ...attackInstances, ...trainerInstances]) state.instances[instance.instanceId] = instance;
 
